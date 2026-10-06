@@ -1,0 +1,78 @@
+{% extends "layouts/admin_base.html" %}
+
+{% block title %}Produtos - Shopee Hub{% endblock %}
+{% block header_title %}Catálogo de Produtos{% endblock %}
+
+{% block content %}
+<div class="content-box">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+            <h2>Meus Produtos</h2>
+            <p>Gerencie preços, SKUs e saldo disponível para venda.</p>
+        </div>
+        <a href="{{ url_for('product.create_product') }}" class="btn-primary" style="text-decoration: none; width: auto; padding: 0.6rem 1.2rem; font-size: 0.875rem;">
+            + Registar Produto
+        </a>
+    </div>
+
+    {% if products %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome do Produto</th>
+                <th>SKU</th>
+                <th>Preço</th>
+                <th>Stock</th>
+                <th>Ajuste Rápido</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prod in products %}
+            <tr>
+                <td>#{{ prod.id }}</td>
+                <td><strong>{{ prod.name }}</strong></td>
+                <td><code>{{ prod.sku }}</code></td>
+                <td>R$ {{ "%.2f"|format(prod.price) }}</td>
+                <td>
+                    {% if prod.stock_quantity == 0 %}
+                        <span class="badge badge-danger">Sem Stock</span>
+                    {% elif prod.stock_quantity < 5 %}
+                        <span class="badge badge-warning">{{ prod.stock_quantity }} un (Baixo)</span>
+                    {% else %}
+                        <span class="badge badge-success">{{ prod.stock_quantity }} un</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="POST" action="{{ url_for('product.update_stock', product_id=prod.id) }}" style="display: flex; gap: 0.4rem; align-items: center;">
+                        <input type="number" name="stock_quantity" value="{{ prod.stock_quantity }}" min="0" class="form-control" style="width: 70px; padding: 0.25rem 0.4rem;">
+                        <button type="submit" class="btn-small">Atualizar</button>
+                    </form>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <a href="{{ url_for('product.edit_product', product_id=prod.id) }}" class="btn-action btn-edit" title="Editar Produto">
+                            Editar
+                        </a>
+                        <form method="POST" action="{{ url_for('product.delete_product', product_id=prod.id) }}" onsubmit="return confirm('Tem a certeza que deseja eliminar o produto \'{{ prod.name }}\'?');">
+                            <button type="submit" class="btn-action btn-delete" title="Eliminar Produto">
+                                Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="text-align: center; padding: 3rem 1rem;">
+        <p style="color: var(--text-muted); margin-bottom: 1rem;">Nenhum produto registado até ao momento.</p>
+        <a href="{{ url_for('product.create_product') }}" class="btn-primary" style="text-decoration: none; display: inline-block; width: auto;">
+            Registe o seu primeiro produto
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

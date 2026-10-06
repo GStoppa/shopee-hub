@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Shopee Hub{% endblock %}</title>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="auth-theme-container">
+        <button type="button" class="btn-theme-toggle" onclick="toggleTheme()" title="Mudar Tema">
+            <span class="theme-toggle-icon">🌙</span>
+        </button>
+    </div>
+
+    {% include "partials/_alerts.html" %}
+
+    <div class="auth-wrapper">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

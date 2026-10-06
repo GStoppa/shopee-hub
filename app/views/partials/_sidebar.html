@@ -1,0 +1,33 @@
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <span class="brand-dot"></span>
+        <span class="brand-title">Shopee Hub</span>
+    </div>
+
+    <nav class="sidebar-nav">
+        <p class="nav-section-title">Principal</p>
+        <a href="{{ url_for('main.welcome') }}" class="nav-link">
+            <span>📊</span> Dashboard
+        </a>
+
+        <p class="nav-section-title">Catálogo & Vendas</p>
+        <a href="{{ url_for('product.list_products') }}" class="nav-link">
+            <span>📦</span> Produtos
+        </a>
+        <a href="#" class="nav-link">
+            <span>📈</span> Estoque
+        </a>
+        <a href="#" class="nav-link">
+            <span>📋</span> Pedidos
+        </a>
+        <a href="#" class="nav-link">
+            <span>↩️</span> Devoluções
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="{{ url_for('auth.logout') }}" class="btn-logout">
+            <span>🚪</span> Encerrar Sessão
+        </a>
+    </div>
+</aside>

@@ -1,0 +1,32 @@
+{% extends "layouts/admin_base.html" %}
+
+{% block title %}Dashboard - Shopee Hub{% endblock %}
+{% block header_title %}Visão Geral da Loja{% endblock %}
+
+{% block content %}
+<div class="stat-grid">
+    <div class="stat-card">
+        <p class="stat-card-label">Total de Produtos</p>
+        <p class="stat-card-value">0</p>
+    </div>
+    <div class="stat-card">
+        <p class="stat-card-label">Pedidos a Enviar</p>
+        <p class="stat-card-value orange">0</p>
+    </div>
+    <div class="stat-card">
+        <p class="stat-card-label">Itens sem Estoque</p>
+        <p class="stat-card-value red">0</p>
+    </div>
+    <div class="stat-card">
+        <p class="stat-card-label">Faturamento Estimado</p>
+        <p class="stat-card-value green">R$ 0,00</p>
+    </div>
+</div>
+
+<div class="content-box">
+    <h2>Módulos Prontos para Construção</h2>
+    <p>
+        Toda a estilização agora está centralizada em <code>app/static/css/style.css</code> sem dependência de scripts externos ou CDN. O próximo passo será a modelagem e controle de <strong>Produtos e Gestão de Estoque</strong>.
+    </p>
+</div>
+{% endblock %}

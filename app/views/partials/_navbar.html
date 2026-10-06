@@ -1,0 +1,20 @@
+<header class="navbar">
+    <h1 class="navbar-title">{% block header_title %}Painel de Controle{% endblock %}</h1>
+
+    <div class="navbar-actions">
+        <button type="button" class="btn-theme-toggle" onclick="toggleTheme()" title="Alternar Modo Escuro / Claro">
+            <span class="theme-toggle-icon">🌙</span>
+            <span style="font-size: 0.8rem; font-weight: 500;">Tema</span>
+        </button>
+
+        <div class="user-profile">
+            <div class="user-info">
+                <p class="user-name">{{ session.get('user_name', 'Vendedor') }}</p>
+                <p class="user-email">{{ session.get('user_email', '') }}</p>
+            </div>
+            <div class="user-avatar">
+                {{ session.get('user_name', 'V')[0] | upper }}
+            </div>
+        </div>
+    </div>
+</header>

@@ -1,0 +1,40 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Cadastro - Shopee Gestor{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <div class="auth-header">
+        <h1>Criar Conta</h1>
+        <p>Cadastre sua loja para começar</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('auth.register') }}">
+        <div class="form-group">
+            <label for="name">Nome Completo</label>
+            <input type="text" id="name" name="name" class="form-control" placeholder="Nome ou Loja" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="loja@exemplo.com" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6" required>
+        </div>
+
+        <div class="form-group">
+            <label for="confirm_password">Confirmar Senha</label>
+            <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Repita a senha" minlength="6" required>
+        </div>
+
+        <button type="submit" class="btn-primary">Cadastrar</button>
+    </form>
+
+    <div class="auth-footer">
+        Já possui conta? <a href="{{ url_for('auth.login') }}">Entrar</a>
+    </div>
+</div>
+{% endblock %}
