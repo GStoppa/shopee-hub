@@ -1,0 +1,67 @@
+{% extends "layouts/admin_base.html" %}
+
+{% block title %}Meu Perfil - Shopee Hub{% endblock %}
+{% block header_title %}Definições da Conta{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+    <div class="content-box">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <h2>Dados Pessoais</h2>
+            {% if user.role == 'owner' %}
+                <span class="badge" style="background-color: #ffedd5; color: var(--primary);">Dono da Loja</span>
+            {% elif user.role == 'manager' %}
+                <span class="badge" style="background-color: #dbeafe; color: var(--info);">Gerente</span>
+            {% else %}
+                <span class="badge badge-warning">Operador</span>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 1.5rem; padding: 0.85rem; background-color: var(--table-hover); border-radius: 8px; font-size: 0.85rem;">
+            <p><strong>Loja Vinculada:</strong> {{ store.name if store else 'Sem Loja' }}</p>
+            <p style="margin-top: 0.25rem; color: var(--text-muted);"><strong>Membro desde:</strong> {{ user.created_at[:10] }}</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('profile.update_info') }}">
+            <div class="form-group">
+                <label for="name">Nome Completo</label>
+                <input type="text" id="name" name="name" class="form-control" value="{{ user.name }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" class="form-control" value="{{ user.email }}" required>
+            </div>
+
+            <button type="submit" class="btn-primary" style="margin-top: 1rem;">
+                Atualizar Dados
+            </button>
+        </form>
+    </div>
+
+    <div class="content-box">
+        <h2 style="margin-bottom: 1.5rem;">Segurança & Palavra-passe</h2>
+
+        <form method="POST" action="{{ url_for('profile.update_password') }}">
+            <div class="form-group">
+                <label for="current_password">Palavra-passe Atual</label>
+                <input type="password" id="current_password" name="current_password" class="form-control" placeholder="••••••••" required>
+            </div>
+
+            <div class="form-group">
+                <label for="new_password">Nova Palavra-passe</label>
+                <input type="password" id="new_password" name="new_password" class="form-control" placeholder="Mínimo 6 carateres" minlength="6" required>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirmar Nova Palavra-passe</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Repita a nova palavra-passe" minlength="6" required>
+            </div>
+
+            <button type="submit" class="btn-primary" style="margin-top: 1rem;">
+                Alterar Palavra-passe
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

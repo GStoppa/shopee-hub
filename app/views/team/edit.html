@@ -1,0 +1,52 @@
+{% extends "layouts/admin_base.html" %}
+
+{% block title %}Editar Membro - Shopee Hub{% endblock %}
+{% block header_title %}Editar Colaborador{% endblock %}
+
+{% block content %}
+<div class="content-box" style="max-width: 600px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2>Alterar Dados de Acesso</h2>
+        <span class="badge" style="background-color: var(--table-hover); color: var(--text-muted);">
+            ID #{{ member.id }}
+        </span>
+    </div>
+
+    <form method="POST" action="{{ url_for('team.edit_member', member_id=member.id) }}">
+        <div class="form-group">
+            <label for="name">Nome Completo</label>
+            <input type="text" id="name" name="name" class="form-control" value="{{ member.name }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">E-mail Corporativo</label>
+            <input type="email" id="email" name="email" class="form-control" value="{{ member.email }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Nova Palavra-passe <span style="font-weight: normal; color: var(--text-muted);">(deixe em branco para manter a atual)</span></label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Mínimo 6 carateres (opcional)" minlength="6">
+        </div>
+
+        <div class="form-group">
+            <label for="role">Cargo / Nível de Permissão</label>
+            {% if session.get('user_role') == 'owner' %}
+                <select id="role" name="role" class="form-control" style="background-color: var(--bg-input);">
+                    <option value="operator" {% if member.role == 'operator' %}selected{% endif %}>Operador (Visualização e gestão de stock)</option>
+                    <option value="manager" {% if member.role == 'manager' %}selected{% endif %}>Gerente (Gere catálogo e colaboradores)</option>
+                    <option value="owner" {% if member.role == 'owner' %}selected{% endif %}>Dono (Acesso total)</option>
+                </select>
+            {% else %}
+                <!-- Gerentes não alteram cargos -->
+                <input type="text" class="form-control" value="Operador" disabled style="opacity: 0.7;">
+                <input type="hidden" name="role" value="{{ member.role }}">
+            {% endif %}
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <button type="submit" class="btn-primary">Guardar Alterações</button>
+            <a href="{{ url_for('team.list_members') }}" class="btn-secondary" style="text-decoration: none; text-align: center;">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

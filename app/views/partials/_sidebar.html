@@ -5,6 +5,12 @@
     </div>
 
     <nav class="sidebar-nav">
+        {% if session.get('user_role') in ['owner', 'manager'] %}
+            <p class="nav-section-title">Administração</p>
+            <a href="{{ url_for('team.list_members') }}" class="nav-link">
+                <span>👥</span> Equipe
+            </a>
+        {% endif %}
         <p class="nav-section-title">Principal</p>
         <a href="{{ url_for('main.welcome') }}" class="nav-link">
             <span>📊</span> Dashboard
@@ -26,6 +32,9 @@
     </nav>
 
     <div class="sidebar-footer">
+        <a href="{{ url_for('profile.index') }}" class="nav-link">
+            <span>👤</span> Meu Perfil
+        </a>
         <a href="{{ url_for('auth.logout') }}" class="btn-logout">
             <span>🚪</span> Encerrar Sessão
         </a>

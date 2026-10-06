@@ -1,0 +1,42 @@
+{% extends "layouts/admin_base.html" %}
+
+{% block title %}Novo Membro - Shopee Hub{% endblock %}
+{% block header_title %}Adicionar Colaborador{% endblock %}
+
+{% block content %}
+<div class="content-box" style="max-width: 600px; margin: 0 auto;">
+    <h2 style="margin-bottom: 1.5rem;">Dados de Acesso do Colaborador</h2>
+
+    <form method="POST" action="{{ url_for('team.create_member') }}">
+        <div class="form-group">
+            <label for="name">Nome Completo</label>
+            <input type="text" id="name" name="name" class="form-control" placeholder="Ex: Carlos Silva" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">E-mail Corporativo</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="carlos@exemplo.com" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Palavra-passe Inicial</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Mínimo 6 carateres" minlength="6" required>
+        </div>
+
+        <div class="form-group">
+            <label for="role">Cargo / Nível de Permissão</label>
+            <select id="role" name="role" class="form-control" style="background-color: var(--bg-input);">
+                <option value="operator">Operador (Apenas visualiza e altera stock)</option>
+                {% if session.get('user_role') == 'owner' %}
+                    <option value="manager">Gerente (Gere catálogo e adiciona operadores)</option>
+                {% endif %}
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <button type="submit" class="btn-primary">Criar Conta</button>
+            <a href="{{ url_for('team.list_members') }}" class="btn-secondary" style="text-decoration: none; text-align: center;">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

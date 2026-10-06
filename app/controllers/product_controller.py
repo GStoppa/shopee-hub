@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from app.middlewares.auth_middleware import login_required
+from app.middlewares.auth_middleware import login_required, role_required
 from app.models.product_model import Product
 
 product_bp = Blueprint("product", __name__, url_prefix="/products")
@@ -7,15 +7,16 @@ product_bp = Blueprint("product", __name__, url_prefix="/products")
 @product_bp.route("/")
 @login_required
 def list_products():
-    user_id = session.get("user_id")
-    products = Product.listar_por_usuario(user_id)
+    store_id = session.get("store_id")
+    products = Product.listar_por_loja(store_id)
     return render_template("products/list.html", products=products)
 
 @product_bp.route("/novo", methods=["GET", "POST"])
 @login_required
+@role_required(["owner", "manager"])
 def create_product():
     if request.method == "POST":
-        user_id = session.get("user_id")
+        store_id = session.get("store_id")
         name = request.form.get("name", "").strip()
         sku = request.form.get("sku", "").strip()
         price = request.form.get("price", "0").replace(",", ".")
@@ -33,7 +34,7 @@ def create_product():
             return render_template("products/form.html", product=None)
 
         novo_produto = Product(
-            user_id=user_id,
+            store_id=store_id,
             name=name,
             sku=sku,
             price=price_val,
@@ -48,9 +49,10 @@ def create_product():
 
 @product_bp.route("/<int:product_id>/editar", methods=["GET", "POST"])
 @login_required
+@role_required(["owner", "manager"])
 def edit_product(product_id):
-    user_id = session.get("user_id")
-    product = Product.buscar_por_id(product_id, user_id)
+    store_id = session.get("store_id")
+    product = Product.buscar_por_id(product_id, store_id)
 
     if not product:
         flash("Produto não encontrado.", "danger")
@@ -82,12 +84,13 @@ def edit_product(product_id):
 
 @product_bp.route("/<int:product_id>/excluir", methods=["POST"])
 @login_required
+@role_required(["owner"])
 def delete_product(product_id):
-    user_id = session.get("user_id")
-    product = Product.buscar_por_id(product_id, user_id)
+    store_id = session.get("store_id")
+    product = Product.buscar_por_id(product_id, store_id)
 
     if product:
-        Product.excluir(product_id, user_id)
+        Product.excluir(product_id, store_id)
         flash(f"Produto '{product.name}' removido com sucesso.", "info")
     else:
         flash("Produto não encontrado.", "danger")
@@ -97,14 +100,14 @@ def delete_product(product_id):
 @product_bp.route("/<int:product_id>/estoque", methods=["POST"])
 @login_required
 def update_stock(product_id):
-    user_id = session.get("user_id")
+    store_id = session.get("store_id")
     novo_estoque = request.form.get("stock_quantity")
 
     try:
         qtd = int(novo_estoque)
         if qtd < 0:
             raise ValueError
-        Product.atualizar_estoque(product_id, user_id, qtd)
+        Product.atualizar_estoque(product_id, store_id, qtd)
         flash("Stock atualizado com sucesso!", "success")
     except (ValueError, TypeError):
         flash("Quantidade de stock inválida.", "danger")
