@@ -21,6 +21,7 @@ def create_app():
     from app.controllers.profile_controller import profile_bp
     from app.controllers.team_controller import team_bp
     from app.controllers.store_controller import store_bp
+    from app.controllers.category_controller import category_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
@@ -28,6 +29,7 @@ def create_app():
     app.register_blueprint(profile_bp)
     app.register_blueprint(team_bp)
     app.register_blueprint(store_bp)
+    app.register_blueprint(category_bp)
 
     @app.errorhandler(403)
     def forbidden(error):

@@ -883,3 +883,104 @@ select.form-control option {
     border-color: var(--primary);
     outline: none;
 }
+
+/* ==========================================================================
+   11. CATÁLOGO: FILTROS E TABELA EM ACORDEÃO
+   ========================================================================== */
+.catalog-filters {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: var(--table-hover);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+.filter-input {
+    flex: 2;
+    min-width: 220px;
+}
+
+.filter-select {
+    flex: 1;
+    min-width: 160px;
+}
+
+.accordion-row {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.accordion-row:hover {
+    background-color: var(--table-hover);
+}
+
+.chevron-icon {
+    display: inline-block;
+    transition: transform 0.2s ease;
+    font-size: 0.75rem;
+    margin-right: 0.5rem;
+    color: var(--text-muted);
+}
+
+.chevron-icon.expanded {
+    transform: rotate(90deg);
+    color: var(--primary);
+}
+
+.variant-subrow {
+    background-color: var(--bg-main);
+}
+
+.variant-subrow > td {
+    padding: 0.75rem 1.25rem 1.25rem 2.5rem !important;
+}
+
+.variant-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    font-size: 0.82rem;
+}
+
+.variant-table th {
+    background-color: var(--table-header);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.variant-table td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.variant-table tr:last-child td {
+    border-bottom: none;
+}
+
+.variant-thumb {
+    width: 28px;
+    height: 28px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.kpi-card.kpi-primary::before { background-color: var(--primary); }
+.kpi-card.kpi-info::before    { background-color: var(--info); }
+.kpi-card.kpi-success::before { background-color: var(--success); }
+.kpi-card.kpi-warning::before { background-color: var(--warning); }
+.kpi-card.kpi-danger::before  { background-color: var(--danger); }

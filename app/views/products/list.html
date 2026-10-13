@@ -1,81 +1,196 @@
 {% extends "layouts/admin_base.html" %}
 
+{% set header_title = "Catálogo de Produtos" %}
 {% block title %}Produtos - Shopee Hub{% endblock %}
-{% block header_title %}Catálogo de Produtos{% endblock %}
 
 {% block content %}
 <div class="content-box">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
         <div>
             <h2>Meus Produtos</h2>
-            <p>Faça a gestão de preços, SKUs e saldo disponível para venda.</p>
+            <p>Gerencie anúncios, categorias e o stock de cada variação cadastrada.</p>
         </div>
 
-        {% if session.get('user_role') in ['owner', 'manager'] %}
-            <a href="{{ url_for('product.create_product') }}" class="btn-primary">
-                + Registar Produto
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <a href="{{ url_for('product.stock_movements') }}" class="btn-secondary">
+                📋 Auditoria de Stock
+            </a>
+            {% if session.get('user_role') in ['owner', 'manager'] %}
+                <a href="{{ url_for('product.create_product') }}" class="btn-primary">
+                    + Registar Produto
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Barra de Pesquisa e Filtros -->
+    <form method="GET" action="{{ url_for('product.list_products') }}" class="catalog-filters">
+        <input type="text" name="q" value="{{ request.args.get('q', '') }}" class="form-control filter-input" placeholder="Pesquisar por Nome, SKU ou Código de Barras...">
+        
+        <select name="category_id" class="form-control filter-select">
+            <option value="">Todas as Categorias</option>
+            {% for cat in categories %}
+                <option value="{{ cat.id }}" {{ 'selected' if request.args.get('category_id') == cat.id|string else '' }}>
+                    {{ cat.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="status" class="form-control filter-select">
+            <option value="">Todos os Estados</option>
+            <option value="ativo" {{ 'selected' if request.args.get('status') == 'ativo' else '' }}>Apenas Ativos</option>
+            <option value="inativo" {{ 'selected' if request.args.get('status') == 'inativo' else '' }}>Apenas Inativos</option>
+            <option value="baixo" {{ 'selected' if request.args.get('status') == 'baixo' else '' }}>Em Alerta de Stock</option>
+            <option value="esgotado" {{ 'selected' if request.args.get('status') == 'esgotado' else '' }}>Esgotados</option>
+        </select>
+
+        <button type="submit" class="btn-primary" style="padding: 0.65rem 1rem;">Filtrar</button>
+
+        {% if request.args.get('q') or request.args.get('category_id') or request.args.get('status') %}
+            <a href="{{ url_for('product.list_products') }}" class="btn-secondary" style="padding: 0.65rem 0.85rem;" title="Limpar Filtros">
+                ✕ Limpar
             </a>
         {% endif %}
-    </div>
+    </form>
 
     {% if products %}
     <div class="table-responsive">
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Nome do Produto</th>
-                    <th>SKU</th>
-                    <th>Preço</th>
-                    <th>Stock</th>
-                    <th>Ajuste Rápido</th>
-                    <th>Ações</th>
+                    <th style="width: 40px;"></th>
+                    <th>Produto / Anúncio</th>
+                    <th>Categoria</th>
+                    <th>Faixa de Preço</th>
+                    <th>Variações</th>
+                    <th>Stock Total</th>
+                    <th>Estado</th>
+                    <th style="text-align: right;">Ações</th>
                 </tr>
             </thead>
             <tbody>
                 {% for prod in products %}
-                <tr>
-                    <td>#{{ prod.id }}</td>
-                    <td><strong>{{ prod.name }}</strong></td>
-                    <td><code>{{ prod.sku }}</code></td>
-                    <td><strong>{{ prod.price | currency }}</strong></td>
+                <tr class="accordion-row" data-id="{{ prod.id }}" onclick="toggleAccordion(this.dataset.id)">
+                    <td style="text-align: center;">
+                        <span id="chevron-{{ prod.id }}" class="chevron-icon">▶</span>
+                    </td>
                     <td>
-                        {% if prod.stock_quantity == 0 %}
-                            <span class="badge badge-danger">Sem Stock</span>
-                        {% elif prod.stock_quantity < 5 %}
-                            <span class="badge badge-warning">{{ prod.stock_quantity }} un (Baixo)</span>
+                        <strong>{{ prod.name }}</strong>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">
+                            {{ prod.weight_g }}g | {{ prod.length_cm }}x{{ prod.width_cm }}x{{ prod.height_cm }} cm
+                        </div>
+                    </td>
+                    <td>
+                        {% if prod.category_name %}
+                            <span class="badge" style="background-color: var(--table-hover); color: var(--text-main);">
+                                {{ prod.category_name }}
+                            </span>
                         {% else %}
-                            <span class="badge badge-success">{{ prod.stock_quantity }} un</span>
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">—</span>
                         {% endif %}
                     </td>
                     <td>
-                        <form method="POST" action="{{ url_for('product.update_stock', product_id=prod.id) }}" style="display: flex; gap: 0.4rem; align-items: center;">
-                            <input type="number" name="stock_quantity" value="{{ prod.stock_quantity }}" min="0" class="form-control" style="width: 75px; padding: 0.3rem 0.5rem;">
-                            <button type="submit" class="btn-small">Gravar</button>
-                        </form>
+                        <strong>{{ prod.price_range }}</strong>
                     </td>
                     <td>
-                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span class="badge badge-info">{{ prod.variants|length }} mod.</span>
+                    </td>
+                    <td>
+                        {% set total = prod.total_stock %}
+                        {% if total == 0 %}
+                            <span class="badge badge-danger">Esgotado</span>
+                        {% elif total < 5 %}
+                            <span class="badge badge-warning">{{ total }} un (Crítico)</span>
+                        {% else %}
+                            <span class="badge badge-success">{{ total }} un</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if prod.is_active == 1 %}
+                            <span class="badge badge-success">Ativo</span>
+                        {% else %}
+                            <span class="badge badge-danger">Inativo</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;" onclick="event.stopPropagation()">
+                        <div style="display: inline-flex; gap: 0.4rem; align-items: center;">
                             {% if session.get('user_role') in ['owner', 'manager'] %}
-                                <a href="{{ url_for('product.edit_product', product_id=prod.id) }}" class="btn-action btn-edit" title="Editar Produto">
+                                <a href="{{ url_for('product.edit_product', product_id=prod.id) }}" class="btn-action btn-edit">
                                     Editar
                                 </a>
                             {% endif %}
 
                             {% if session.get('user_role') == 'owner' %}
-                                <form method="POST" action="{{ url_for('product.delete_product', product_id=prod.id) }}" onsubmit="return confirm('Tem a certeza que deseja eliminar o produto \'{{ prod.name }}\'?');" style="margin: 0;">
-                                    <button type="submit" class="btn-action btn-delete" title="Eliminar Produto">
+                                <form method="POST" action="{{ url_for('product.delete_product', product_id=prod.id) }}" data-name="{{ prod.name }}" onsubmit="return confirmDeleteProduct(this.dataset.name);" style="margin: 0;">
+                                    <button type="submit" class="btn-action btn-delete">
                                         Eliminar
                                     </button>
                                 </form>
                             {% endif %}
-
-                            {% if session.get('user_role') == 'operator' %}
-                                <span style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">
-                                    Apenas Stock
-                                </span>
-                            {% endif %}
                         </div>
+                    </td>
+                </tr>
+
+                <!-- Linha Expansível com as Variações Filhas -->
+                <tr id="variants-{{ prod.id }}" class="variant-subrow" style="display: none;">
+                    <td colspan="8">
+                        <table class="variant-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 36px;">Foto</th>
+                                    <th>Variação</th>
+                                    <th>SKU</th>
+                                    <th>Cód. Barras</th>
+                                    <th>Custo</th>
+                                    <th>Venda</th>
+                                    <th>Margem</th>
+                                    <th>Stock</th>
+                                    <th style="text-align: right;">Ajuste de Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for v in prod.variants %}
+                                <tr>
+                                    <td>
+                                        {% if v.image_url %}
+                                            <img src="{{ url_for('static', filename=v.image_url) }}" class="variant-thumb" alt="Foto">
+                                        {% else %}
+                                            <span style="font-size: 1.1rem; vertical-align: middle;">📦</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><strong>{{ v.variant_name }}</strong></td>
+                                    <td><code>{{ v.sku }}</code></td>
+                                    <td>{{ v.barcode or '—' }}</td>
+                                    <td>{{ v.cost_price | currency }}</td>
+                                    <td><strong>{{ v.price | currency }}</strong></td>
+                                    <td>
+                                        <span class="badge badge-info">{{ v.margin_percent }}%</span>
+                                    </td>
+                                    <td>
+                                        {% if v.stock_quantity == 0 %}
+                                            <span class="badge badge-danger">0 un</span>
+                                        {% elif v.stock_quantity <= v.min_stock %}
+                                            <span class="badge badge-warning">{{ v.stock_quantity }} un (Mín: {{ v.min_stock }})</span>
+                                        {% else %}
+                                            <span class="badge badge-success">{{ v.stock_quantity }} un</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <div style="display: inline-flex; gap: 0.4rem; align-items: center; justify-content: flex-end;">
+                                            <a href="{{ url_for('product.variant_history', variant_id=v.id) }}" class="btn-small" title="Ver histórico de auditoria">
+                                                📋
+                                            </a>
+                                            <form method="POST" action="{{ url_for('product.update_stock', variant_id=v.id) }}" class="quick-stock-form">
+                                                <input type="number" name="stock_quantity" value="{{ v.stock_quantity }}" min="0" class="quick-stock-input">
+                                                <input type="hidden" name="reason" value="Ajuste rápido pelo catálogo">
+                                                <button type="submit" class="btn-small">Gravar</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </td>
                 </tr>
                 {% endfor %}
@@ -83,14 +198,31 @@
         </table>
     </div>
     {% else %}
-    <div style="text-align: center; padding: 3rem 1rem;">
-        <p style="color: var(--text-muted); margin-bottom: 1rem;">Nenhum produto registado até ao momento.</p>
-        {% if session.get('user_role') in ['owner', 'manager'] %}
-            <a href="{{ url_for('product.create_product') }}" class="btn-primary">
-                Registe o seu primeiro produto
-            </a>
-        {% endif %}
+    <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+        <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🔍</div>
+        <p><strong>Nenhum produto encontrado.</strong></p>
+        <p style="font-size: 0.85rem; margin-top: 0.25rem;">Tente ajustar os termos de pesquisa ou os filtros selecionados.</p>
     </div>
     {% endif %}
 </div>
+
+<script>
+function toggleAccordion(prodId) {
+    const row = document.getElementById('variants-' + prodId);
+    const chevron = document.getElementById('chevron-' + prodId);
+    if (!row || !chevron) return;
+
+    if (row.style.display === 'none' || row.style.display === '') {
+        row.style.display = 'table-row';
+        chevron.classList.add('expanded');
+    } else {
+        row.style.display = 'none';
+        chevron.classList.remove('expanded');
+    }
+}
+
+function confirmDeleteProduct(name) {
+    return confirm('Tem a certeza que deseja eliminar o produto "' + name + '"? Todas as variações e saldos associados serão removidos.');
+}
+</script>
 {% endblock %}

@@ -14,14 +14,16 @@
         <a href="{{ url_for('product.list_products') }}" class="nav-link">
             <span>📦</span> Produtos
         </a>
+        <a href="{{ url_for('category.list_categories') }}" class="nav-link">
+            <span>🏷️</span> Categorias
+        </a>
         <a href="#" class="nav-link" style="opacity: 0.6; cursor: not-allowed;" title="Em breve">
-            <span>📋</span> Pedidos
+            <span>📑</span> Pedidos
         </a>
         <a href="#" class="nav-link" style="opacity: 0.6; cursor: not-allowed;" title="Em breve">
             <span>↩️</span> Devoluções
         </a>
 
-        {# Secção exclusiva para cargos de liderança #}
         {% if session.get('user_role') in ['owner', 'manager'] %}
             <div style="display: flex; align-items: center; justify-content: space-between; padding-right: 0.75rem;">
                 <p class="nav-section-title">Administração</p>

@@ -1,0 +1,130 @@
+{% extends "layouts/admin_base.html" %}
+
+{% set header_title = "Histórico de Stock" if variant else "Auditoria de Movimentações" %}
+{% block title %}{{ header_title }} - Shopee Hub{% endblock %}
+
+{% block content %}
+<div class="content-box">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            {% if variant %}
+                <h2>Histórico: {{ variant.display_name }}</h2>
+                <p>SKU: <code>{{ variant.sku }}</code> | Saldo em Armazém: <strong>{{ variant.stock_quantity }} un</strong></p>
+            {% else %}
+                <h2>Auditoria Global de Movimentações</h2>
+                <p>Registo cronológico de todas as alterações manuais e ajustes no inventário da loja.</p>
+            {% endif %}
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            {% if variant %}
+                <button type="button" class="btn-primary" onclick="abrirModalMovimento()">
+                    + Nova Movimentação
+                </button>
+            {% endif %}
+            <a href="{{ url_for('product.list_products') }}" class="btn-secondary">
+                ← Voltar ao Catálogo
+            </a>
+        </div>
+    </div>
+
+    {% if movements %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Data & Hora</th>
+                    {% if not variant %}
+                        <th>Produto / Variação</th>
+                        <th>SKU</th>
+                    {% endif %}
+                    <th>Tipo</th>
+                    <th>Quantidade</th>
+                    <th>Motivo Declarado</th>
+                    <th>Responsável</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mov in movements %}
+                <tr>
+                    <td>{{ mov.created_at }}</td>
+                    {% if not variant %}
+                        <td><strong>{{ mov.product_name }}</strong> - {{ mov.variant_name }}</td>
+                        <td><code>{{ mov.variant_sku }}</code></td>
+                    {% endif %}
+                    <td>
+                        {% if mov.movement_type == 'entrada' %}
+                            <span class="badge badge-success">Entrada</span>
+                        {% elif mov.movement_type == 'saida' %}
+                            <span class="badge badge-danger">Saída</span>
+                        {% else %}
+                            <span class="badge badge-info">Ajuste</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>
+                            {% if mov.movement_type == 'entrada' %}+{% elif mov.movement_type == 'saida' %}-{% endif %}{{ mov.quantity }} un
+                        </strong>
+                    </td>
+                    <td>{{ mov.reason or '—' }}</td>
+                    <td>{{ mov.user_name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+        <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📋</div>
+        <p><strong>Nenhuma movimentação registada até ao momento.</strong></p>
+        <p style="font-size: 0.85rem;">As alterações manuais de saldo e vendas serão registadas nesta tabela.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% if variant %}
+<div id="modal-movimento" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 1rem;">
+    <div class="content-box" style="width: 100%; max-width: 480px; margin: 0; box-shadow: var(--shadow-lg);">
+        <h2>Registar Movimentação</h2>
+        <p style="margin-bottom: 1.25rem;">{{ variant.display_name }} (<code>{{ variant.sku }}</code>)</p>
+
+        <form method="POST" action="{{ url_for('product.create_movement', variant_id=variant.id) }}">
+            <div class="form-group">
+                <label for="movement_type">Tipo de Operação</label>
+                <select id="movement_type" name="movement_type" class="form-control" required>
+                    <option value="entrada">Entrada (+ Adicionar unidades)</option>
+                    <option value="saida">Saída (- Subtrair unidades)</option>
+                    <option value="ajuste">Ajuste / Balanço (Definir novo total)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="quantity">Quantidade</label>
+                <input type="number" id="quantity" name="quantity" class="form-control" min="1" placeholder="Ex: 10" required>
+            </div>
+
+            <div class="form-group">
+                <label for="reason">Motivo / Justificação</label>
+                <input type="text" id="reason" name="reason" class="form-control" placeholder="Ex: Recebimento de fornecedor, perda, quebra" required>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+                <button type="button" class="btn-secondary" onclick="fecharModalMovimento()">Cancelar</button>
+                <button type="submit" class="btn-primary">Registar Operação</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function abrirModalMovimento() {
+    const modal = document.getElementById('modal-movimento');
+    if (modal) modal.style.display = 'flex';
+}
+
+function fecharModalMovimento() {
+    const modal = document.getElementById('modal-movimento');
+    if (modal) modal.style.display = 'none';
+}
+</script>
+{% endif %}
+{% endblock %}
