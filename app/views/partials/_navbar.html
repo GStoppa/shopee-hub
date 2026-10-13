@@ -1,6 +1,6 @@
 <header class="navbar">
     <div style="display: flex; align-items: center; gap: 1rem;">
-        <h1 class="navbar-title">{% block header_title %}Painel de Controlo{% endblock %}</h1>
+        <h1 class="navbar-title">{{ header_title or 'Painel de Controlo' }}</h1>
         
         {% if session.get('user_role') in ['owner', 'manager'] %}
         <a href="{{ url_for('store.settings') }}" style="text-decoration: none;" title="Gerir Definições da Loja">

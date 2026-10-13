@@ -97,19 +97,19 @@ def delete_product(product_id):
 
     return redirect(url_for("product.list_products"))
 
-@product_bp.route("/<int:product_id>/estoque", methods=["POST"])
+@product_bp.route("/<int:product_id>/stock", methods=["POST"])
 @login_required
 def update_stock(product_id):
     store_id = session.get("store_id")
-    novo_estoque = request.form.get("stock_quantity")
-
     try:
-        qtd = int(novo_estoque)
-        if qtd < 0:
-            raise ValueError
-        Product.atualizar_estoque(product_id, store_id, qtd)
-        flash("Stock atualizado com sucesso!", "success")
-    except (ValueError, TypeError):
-        flash("Quantidade de stock inválida.", "danger")
+        new_stock = int(request.form.get("stock_quantity", 0))
+        if new_stock < 0:
+            flash("A quantidade em stock não pode ser negativa.", "danger")
+            return redirect(url_for("product.list_products"))
+    except ValueError:
+        flash("Valor numérico inválido.", "danger")
+        return redirect(url_for("product.list_products"))
 
+    Product.atualizar_stock(product_id, store_id, new_stock)
+    flash("Stock atualizado com sucesso.", "success")
     return redirect(url_for("product.list_products"))

@@ -2,20 +2,20 @@ import sqlite3
 from config import Config
 
 class DatabaseConnection:
-    def __init__(self, db_path: str = None):
+    def __init__(self, db_path=None):
         self.db_path = db_path or Config.DB_PATH
-        self.connection = None
+        self.conn = None
 
     def __enter__(self):
-        self.connection = sqlite3.connect(self.db_path)
-        self.connection.execute("PRAGMA foreign_keys = ON;")
-        self.connection.row_factory = sqlite3.Row
-        return self.connection
+        self.conn = sqlite3.connect(self.db_path)
+        self.conn.execute("PRAGMA foreign_keys = ON;")
+        self.conn.row_factory = sqlite3.Row
+        return self.conn
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.connection:
+        if self.conn:
             if exc_type is None:
-                self.connection.commit()
+                self.conn.commit()
             else:
-                self.connection.rollback()
-            self.connection.close()
+                self.conn.rollback()
+            self.conn.close()

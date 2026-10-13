@@ -73,10 +73,14 @@ class Product:
         return None
 
     @classmethod
-    def atualizar_estoque(cls, product_id: int, store_id: int, nova_quantidade: int):
+    def atualizar_stock(cls, product_id: int, store_id: int, nova_quantidade: int):
         with DatabaseConnection() as conn:
             cursor = conn.cursor()
-            query = "UPDATE products SET stock_quantity = ? WHERE id = ? AND store_id = ?"
+            query = """
+                UPDATE products 
+                SET stock_quantity = ? 
+                WHERE id = ? AND store_id = ?
+            """
             cursor.execute(query, (nova_quantidade, product_id, store_id))
 
     @classmethod
