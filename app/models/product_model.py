@@ -4,7 +4,8 @@ from app.database import DatabaseConnection
 class StockMovement:
     def __init__(self, variant_id: int, quantity: int, movement_type: str, 
                  reason: str = None, user_id: int = None, id: int = None, 
-                 created_at: str = None, user_name: str = None, variant_sku: str = None):
+                 created_at: str = None, user_name: str = None, 
+                 variant_sku: str = None, variant_name: str = None, product_name: str = None):
         self.id = id
         self.variant_id = variant_id
         self.user_id = user_id
@@ -12,8 +13,10 @@ class StockMovement:
         self.quantity = int(quantity)
         self.reason = reason.strip() if reason else ""
         self.created_at = created_at or datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-        self.user_name = user_name
-        self.variant_sku = variant_sku
+        self.user_name = user_name or "Sistema"
+        self.variant_sku = variant_sku or ""
+        self.variant_name = variant_name or ""
+        self.product_name = product_name or ""
 
     def salvar(self, cursor=None):
         query = """
@@ -36,7 +39,7 @@ class StockMovement:
         with DatabaseConnection() as conn:
             cursor = conn.cursor()
             query = """
-                SELECT sm.*, u.name AS user_name, pv.sku AS variant_sku
+                SELECT sm.*, u.name AS user_name, pv.sku AS variant_sku, pv.variant_name, p.name AS product_name
                 FROM stock_movements sm
                 JOIN product_variants pv ON sm.variant_id = pv.id
                 JOIN products p ON pv.product_id = p.id
@@ -56,12 +59,15 @@ class StockMovement:
                     reason=row["reason"],
                     created_at=row["created_at"],
                     user_name=row["user_name"],
-                    variant_sku=row["variant_sku"]
+                    variant_sku=row["variant_sku"],
+                    variant_name=row["variant_name"],
+                    product_name=row["product_name"]
                 )
                 for row in rows
             ]
+
     @classmethod
-    def listar_por_loja(cls, store_id: int, limite: int = 50):
+    def listar_por_loja(cls, store_id: int, limite: int = 100):
         with DatabaseConnection() as conn:
             cursor = conn.cursor()
             query = """
@@ -77,19 +83,19 @@ class StockMovement:
             cursor.execute(query, (store_id, limite))
             rows = cursor.fetchall()
             return [
-                {
-                    "id": row["id"],
-                    "variant_id": row["variant_id"],
-                    "user_id": row["user_id"],
-                    "user_name": row["user_name"] or "Sistema",
-                    "movement_type": row["movement_type"],
-                    "quantity": row["quantity"],
-                    "reason": row["reason"],
-                    "created_at": row["created_at"],
-                    "variant_sku": row["variant_sku"],
-                    "variant_name": row["variant_name"],
-                    "product_name": row["product_name"]
-                }
+                cls(
+                    id=row["id"],
+                    variant_id=row["variant_id"],
+                    user_id=row["user_id"],
+                    movement_type=row["movement_type"],
+                    quantity=row["quantity"],
+                    reason=row["reason"],
+                    created_at=row["created_at"],
+                    user_name=row["user_name"],
+                    variant_sku=row["variant_sku"],
+                    variant_name=row["variant_name"],
+                    product_name=row["product_name"]
+                )
                 for row in rows
             ]
 
@@ -102,13 +108,13 @@ class ProductVariant:
                  product_name: str = None):
         self.id = id
         self.product_id = product_id
-        self.sku = sku.strip().upper()
+        self.sku = sku.strip().upper() if sku else ""
         self.barcode = barcode.strip() if barcode else None
         self.variant_name = variant_name.strip() if variant_name else "Padrão"
-        self.cost_price = float(cost_price)
-        self.price = float(price)
-        self.stock_quantity = int(stock_quantity)
-        self.min_stock = int(min_stock)
+        self.cost_price = float(cost_price or 0.0)
+        self.price = float(price or 0.0)
+        self.stock_quantity = int(stock_quantity or 0)
+        self.min_stock = int(min_stock or 5)
         self.image_url = image_url.strip() if image_url else None
         self.created_at = created_at or datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
         self.product_name = product_name
@@ -276,7 +282,7 @@ class Product:
         self.id = id
         self.store_id = store_id
         self.category_id = category_id
-        self.name = name.strip()
+        self.name = name.strip() if name else ""
         self.description = description.strip() if description else ""
         self.weight_g = float(weight_g or 0.0)
         self.length_cm = float(length_cm or 0.0)
@@ -519,7 +525,7 @@ class Product:
         }
 
     @classmethod
-    def listar_produtos_criticos(cls, store_id: int, limite: int = 6):
+    def listar_produtos_criticos(cls, store_id: int, limite: int = 8):
         with DatabaseConnection() as conn:
             cursor = conn.cursor()
             query = """

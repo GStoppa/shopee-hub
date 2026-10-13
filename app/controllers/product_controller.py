@@ -6,8 +6,8 @@ from app.utils.upload import salvar_imagem_produto
 
 product_bp = Blueprint("product", __name__, url_prefix="/products")
 
-def converter_moeda(valor_str: str) -> float:
-    if not valor_str:
+def converter_moeda(valor_str) -> float:
+    if valor_str is None:
         return 0.0
     limpo = str(valor_str).strip().replace("R$", "").replace(" ", "").replace(",", ".")
     try:
@@ -28,62 +28,6 @@ def list_products():
     categories = Category.listar_por_loja(store_id)
     return render_template("products/list.html", products=products, categories=categories)
 
-@product_bp.route("/movements")
-@login_required
-def stock_movements():
-    store_id = session.get("store_id")
-    movements = StockMovement.listar_por_loja(store_id, limite=100)
-    return render_template("products/movements.html", movements=movements, variant=None)
-
-@product_bp.route("/variant/<int:variant_id>/history")
-@login_required
-def variant_history(variant_id):
-    store_id = session.get("store_id")
-    variant = ProductVariant.buscar_por_id(variant_id, store_id)
-    if not variant:
-        flash("Variação não encontrada.", "danger")
-        return redirect(url_for("product.list_products"))
-
-    movements = StockMovement.listar_por_variante(variant_id, store_id)
-    return render_template("products/movements.html", movements=movements, variant=variant)
-
-@product_bp.route("/variant/<int:variant_id>/movement", methods=["POST"])
-@login_required
-def create_movement(variant_id):
-    store_id = session.get("store_id")
-    user_id = session.get("user_id")
-
-    tipo = request.form.get("movement_type", "entrada").strip()
-    motivo = request.form.get("reason", "Entrada manual").strip()
-
-    try:
-        quantidade = int(request.form.get("quantity", 0))
-        if quantidade <= 0 and tipo != "ajuste":
-            flash("A quantidade deve ser superior a zero.", "danger")
-            return redirect(request.referrer or url_for("product.list_products"))
-        if quantidade < 0 and tipo == "ajuste":
-            flash("O saldo do ajuste não pode ser negativo.", "danger")
-            return redirect(request.referrer or url_for("product.list_products"))
-    except ValueError:
-        flash("Introduza uma quantidade numérica válida.", "danger")
-        return redirect(request.referrer or url_for("product.list_products"))
-
-    sucesso = ProductVariant.registrar_movimento(
-        variant_id=variant_id,
-        store_id=store_id,
-        user_id=user_id,
-        tipo=tipo,
-        quantidade=quantidade,
-        motivo=motivo
-    )
-
-    if sucesso:
-        flash("Movimentação de stock registada com sucesso!", "success")
-    else:
-        flash("Erro ao processar a movimentação.", "danger")
-
-    return redirect(request.referrer or url_for("product.list_products"))
-
 @product_bp.route("/novo", methods=["GET", "POST"])
 @login_required
 @role_required(["owner", "manager"])
@@ -94,11 +38,12 @@ def create_product():
         name = request.form.get("name", "").strip()
         category_id = request.form.get("category_id") or None
         description = request.form.get("description", "").strip()
+        
         weight_g = float(request.form.get("weight_g") or 0.0)
         length_cm = float(request.form.get("length_cm") or 0.0)
         width_cm = float(request.form.get("width_cm") or 0.0)
         height_cm = float(request.form.get("height_cm") or 0.0)
-        is_active = int(request.form.get("is_active", 1))
+        is_active = int(request.form.get("is_active") or 1)
 
         has_variants = request.form.get("has_variants") == "1"
 
@@ -114,8 +59,8 @@ def create_product():
             barcode = request.form.get("simple_barcode", "").strip()
             price = converter_moeda(request.form.get("simple_price", "0"))
             cost_price = converter_moeda(request.form.get("simple_cost_price", "0"))
-            stock_quantity = int(request.form.get("simple_stock", 0))
-            min_stock = int(request.form.get("simple_min_stock", 5))
+            stock_quantity = int(request.form.get("simple_stock") or 0)
+            min_stock = int(request.form.get("simple_min_stock") or 5)
 
             if not sku:
                 flash("O SKU é obrigatório para o produto simples.", "danger")
@@ -170,8 +115,8 @@ def create_product():
                 v_barcode = v_barcodes[i].strip() if i < len(v_barcodes) else ""
                 v_cost = converter_moeda(v_costs[i]) if i < len(v_costs) else 0.0
                 v_price = converter_moeda(v_prices[i]) if i < len(v_prices) else 0.0
-                v_stock = int(v_stocks[i]) if i < len(v_stocks) and v_stocks[i] else 0
-                v_min = int(v_min_stocks[i]) if i < len(v_min_stocks) and v_min_stocks[i] else 5
+                v_stock = int(v_stocks[i]) if (i < len(v_stocks) and v_stocks[i]) else 0
+                v_min = int(v_min_stocks[i]) if (i < len(v_min_stocks) and v_min_stocks[i]) else 5
 
                 img_url = None
                 if i < len(v_images) and v_images[i] and v_images[i].filename != "":
@@ -205,6 +150,19 @@ def create_product():
                 variants=variantes
             )
             produto.salvar()
+
+            user_id = session.get("user_id")
+            for v in produto.variants:
+                if v.stock_quantity > 0:
+                    mov = StockMovement(
+                        variant_id=v.id,
+                        user_id=user_id,
+                        movement_type="entrada",
+                        quantity=v.stock_quantity,
+                        reason="Saldo inicial no cadastro"
+                    )
+                    mov.salvar()
+
             flash(f"Produto '{name}' registado com sucesso!", "success")
             return redirect(url_for("product.list_products"))
         except Exception as e:
@@ -232,7 +190,7 @@ def edit_product(product_id):
         produto.length_cm = float(request.form.get("length_cm") or 0.0)
         produto.width_cm = float(request.form.get("width_cm") or 0.0)
         produto.height_cm = float(request.form.get("height_cm") or 0.0)
-        produto.is_active = int(request.form.get("is_active", 1))
+        produto.is_active = int(request.form.get("is_active") or 1)
 
         for v in produto.variants:
             v_id = str(v.id)
@@ -241,7 +199,7 @@ def edit_product(product_id):
             v.barcode = request.form.get(f"v_barcode_{v_id}", "").strip() or None
             v.cost_price = converter_moeda(request.form.get(f"v_cost_{v_id}", str(v.cost_price)))
             v.price = converter_moeda(request.form.get(f"v_price_{v_id}", str(v.price)))
-            v.min_stock = int(request.form.get(f"v_min_{v_id}", v.min_stock))
+            v.min_stock = int(request.form.get(f"v_min_{v_id}") or v.min_stock)
 
             img_file = request.files.get(f"v_image_{v_id}")
             if img_file and img_file.filename != "":
@@ -281,8 +239,8 @@ def update_stock(variant_id=None, product_id=None):
     store_id = session.get("store_id")
     user_id = session.get("user_id")
     try:
-        new_stock = int(request.form.get("stock_quantity", 0))
-        motivo = request.form.get("reason", "Ajuste manual").strip()
+        new_stock = int(request.form.get("stock_quantity") or 0)
+        motivo = request.form.get("reason", "Ajuste rápido").strip()
         if new_stock < 0:
             flash("A quantidade em stock não pode ser negativa.", "danger")
             return redirect(request.referrer or url_for("product.list_products"))
@@ -295,4 +253,60 @@ def update_stock(variant_id=None, product_id=None):
         flash("Stock atualizado com sucesso.", "success")
     else:
         flash("Variação não encontrada nesta loja.", "danger")
+    return redirect(request.referrer or url_for("product.list_products"))
+
+@product_bp.route("/movements")
+@login_required
+def stock_movements():
+    store_id = session.get("store_id")
+    movements = StockMovement.listar_por_loja(store_id, limite=100)
+    return render_template("products/movements.html", movements=movements, variant=None)
+
+@product_bp.route("/variant/<int:variant_id>/history")
+@login_required
+def variant_history(variant_id):
+    store_id = session.get("store_id")
+    variant = ProductVariant.buscar_por_id(variant_id, store_id)
+    if not variant:
+        flash("Variação não encontrada.", "danger")
+        return redirect(url_for("product.list_products"))
+
+    movements = StockMovement.listar_por_variante(variant_id, store_id)
+    return render_template("products/movements.html", movements=movements, variant=variant)
+
+@product_bp.route("/variant/<int:variant_id>/movement", methods=["POST"])
+@login_required
+def create_movement(variant_id):
+    store_id = session.get("store_id")
+    user_id = session.get("user_id")
+
+    tipo = request.form.get("movement_type", "entrada").strip()
+    motivo = request.form.get("reason", "Entrada manual").strip()
+
+    try:
+        quantidade = int(request.form.get("quantity") or 0)
+        if quantidade <= 0 and tipo != "ajuste":
+            flash("A quantidade deve ser superior a zero para entradas ou saídas.", "danger")
+            return redirect(request.referrer or url_for("product.list_products"))
+        if quantidade < 0 and tipo == "ajuste":
+            flash("O saldo do ajuste não pode ser negativo.", "danger")
+            return redirect(request.referrer or url_for("product.list_products"))
+    except ValueError:
+        flash("Introduza uma quantidade numérica válida.", "danger")
+        return redirect(request.referrer or url_for("product.list_products"))
+
+    sucesso = ProductVariant.registrar_movimento(
+        variant_id=variant_id,
+        store_id=store_id,
+        user_id=user_id,
+        tipo=tipo,
+        quantidade=quantidade,
+        motivo=motivo
+    )
+
+    if sucesso:
+        flash("Movimentação de stock registada com sucesso!", "success")
+    else:
+        flash("Erro ao processar a movimentação.", "danger")
+
     return redirect(request.referrer or url_for("product.list_products"))
