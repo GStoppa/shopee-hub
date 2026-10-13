@@ -727,3 +727,159 @@ select.form-control option {
         padding: 1.75rem 1.25rem;
     }
 }
+
+/* ==========================================================================
+   10. DASHBOARD: CARTÕES KPI & ESTRUTURA OPERACIONAL
+   ========================================================================== */
+
+/* Grelha dos 4 Cartões de Topo */
+.dashboard-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+/* Estrutura do Cartão KPI */
+.kpi-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.35rem 1.25rem;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Faixa lateral indicadora de estado */
+.kpi-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: var(--border-color);
+}
+
+.kpi-card.kpi-primary::before { background-color: var(--primary); }
+.kpi-card.kpi-success::before { background-color: var(--success); }
+.kpi-card.kpi-warning::before { background-color: var(--warning); }
+.kpi-card.kpi-danger::before  { background-color: var(--danger); }
+
+/* Conteúdo Interno do Cartão */
+.kpi-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.kpi-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+.kpi-icon-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background-color: var(--table-hover);
+    border: 1px solid var(--border-color);
+}
+
+.kpi-value {
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+}
+
+.kpi-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+/* Layout Dividido Inferior (Tabela à Esquerda + Atalhos à Direita) */
+.dashboard-split-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-split-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Lista de Ações e Atalhos do Vendedor */
+.quick-action-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.quick-action-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1rem;
+    background-color: var(--table-hover);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-main);
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
+}
+
+.quick-action-item:hover {
+    border-color: var(--primary);
+    background-color: var(--bg-card);
+    transform: translateX(3px);
+}
+
+/* Micro-formulário de Atualização de Estoque */
+.quick-stock-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.quick-stock-input {
+    width: 65px;
+    padding: 0.3rem 0.45rem;
+    font-size: 0.82rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-input);
+    color: var(--text-main);
+    text-align: center;
+}
+
+.quick-stock-input:focus {
+    border-color: var(--primary);
+    outline: none;
+}

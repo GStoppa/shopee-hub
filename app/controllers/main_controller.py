@@ -1,19 +1,20 @@
-from flask import Blueprint, render_template, session, redirect, url_for
+from flask import Blueprint, render_template, session
 from app.middlewares.auth_middleware import login_required
+from app.models.product_model import Product
 
 main_bp = Blueprint("main", __name__)
 
 @main_bp.route("/")
-def index():
-    if "user_id" in session:
-        return redirect(url_for("main.welcome"))
-    return redirect(url_for("auth.login"))
-
 @main_bp.route("/welcome")
 @login_required
 def welcome():
-    user_data = {
-        "name": session.get("user_name"),
-        "email": session.get("user_email")
-    }
-    return render_template("main/welcome.html", user=user_data)
+    store_id = session.get("store_id")
+
+    metricas = Product.obter_metricas_dashboard(store_id)
+    produtos_criticos = Product.listar_produtos_criticos(store_id, limite=6)
+
+    return render_template(
+        "main/welcome.html",
+        metricas=metricas,
+        produtos_criticos=produtos_criticos
+    )

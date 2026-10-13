@@ -89,3 +89,58 @@ class Product:
             cursor = conn.cursor()
             query = "DELETE FROM products WHERE id = ? AND store_id = ?"
             cursor.execute(query, (product_id, store_id))
+
+    @classmethod
+    def obter_metricas_dashboard(cls, store_id: int) -> dict:
+        """Calcula totais consolidados, contagem de risco e valor monetário em armazém."""
+        with DatabaseConnection() as conn:
+            cursor = conn.cursor()
+            
+            # Total de itens cadastrados no catálogo desta loja
+            cursor.execute("SELECT COUNT(*) AS total FROM products WHERE store_id = ?", (store_id,))
+            total_produtos = cursor.fetchone()["total"]
+
+            # Quantidade de produtos esgotados (estoque zero)
+            cursor.execute("SELECT COUNT(*) AS esgotados FROM products WHERE store_id = ? AND stock_quantity = 0", (store_id,))
+            esgotados = cursor.fetchone()["esgotados"]
+
+            # Quantidade de produtos em nível baixo (entre 1 e 4 unidades)
+            cursor.execute("SELECT COUNT(*) AS baixo FROM products WHERE store_id = ? AND stock_quantity > 0 AND stock_quantity < 5", (store_id,))
+            baixo_estoque = cursor.fetchone()["baixo"]
+
+            # Valor bruto total do estoque (preço unitário * quantidade em saldo)
+            cursor.execute("SELECT COALESCE(SUM(price * stock_quantity), 0.0) AS total_valor FROM products WHERE store_id = ?", (store_id,))
+            valor_estoque = cursor.fetchone()["total_valor"]
+
+        return {
+            "total_produtos": total_produtos,
+            "esgotados": esgotados,
+            "baixo_estoque": baixo_estoque,
+            "valor_estoque": float(valor_estoque)
+        }
+
+    @classmethod
+    def listar_produtos_criticos(cls, store_id: int, limite: int = 6):
+        """Retorna os produtos que precisam de reposição imediata (estoque < 5)."""
+        with DatabaseConnection() as conn:
+            cursor = conn.cursor()
+            query = """
+                SELECT * FROM products 
+                WHERE store_id = ? AND stock_quantity < 5
+                ORDER BY stock_quantity ASC, id DESC
+                LIMIT ?
+            """
+            cursor.execute(query, (store_id, limite))
+            rows = cursor.fetchall()
+            return [
+                cls(
+                    id=row["id"],
+                    store_id=row["store_id"],
+                    name=row["name"],
+                    sku=row["sku"],
+                    price=row["price"],
+                    stock_quantity=row["stock_quantity"],
+                    created_at=row["created_at"]
+                )
+                for row in rows
+            ]
