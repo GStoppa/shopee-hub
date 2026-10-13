@@ -4,3 +4,5 @@ __pycache__/
 instance/
 *.db
 .env
+app/static/uploads/logos/*
+!app/static/uploads/logos/.gitkeep

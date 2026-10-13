@@ -1,0 +1,112 @@
+{% extends "layouts/admin_base.html" %}
+
+{% block title %}Definições da Loja - Shopee Hub{% endblock %}
+{% block header_title %}Definições da Loja{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <form method="POST" action="{{ url_for('store.settings') }}" enctype="multipart/form-data">
+        
+        <!-- Bloco 1: Identidade Visual e Marca -->
+        <div class="content-box" style="margin-bottom: 1.5rem;">
+            <h2>Identidade Visual</h2>
+            <p style="margin-bottom: 1.5rem;">Personalize a identidade da sua loja exibida na barra de navegação e nos relatórios.</p>
+
+            <div style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;">
+                <!-- Caixa de Pré-visualização do Logótipo -->
+                <div style="text-align: center;">
+                    <div id="logo-preview-container" style="width: 110px; height: 110px; border-radius: 50%; border: 2px dashed var(--border-color); display: flex; align-items: center; justify-content: center; overflow: hidden; background-color: var(--bg-main); margin-bottom: 0.5rem; position: relative;">
+                        {% if store.logo_url %}
+                            <img id="logo-preview" src="{{ url_for('static', filename=store.logo_url) }}" alt="Logótipo da Loja" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <img id="logo-preview" src="" alt="Pré-visualização" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                            <span id="logo-placeholder" style="font-size: 2.2rem;">🏬</span>
+                        {% endif %}
+                    </div>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Dimensão recomendada: 200x200</span>
+                </div>
+
+                <!-- Campo de Upload -->
+                <div style="flex: 1; min-width: 260px;">
+                    <div class="form-group">
+                        <label for="logo">Selecionar Novo Logótipo</label>
+                        <input type="file" id="logo" name="logo" class="form-control" accept=".png, .jpg, .jpeg, .webp" onchange="previewImage(event)">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem;">
+                            Formatos suportados: PNG, JPG, JPEG ou WEBP (Máx. 2MB).
+                        </p>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="name">Nome Comercial da Loja *</label>
+                        <input type="text" id="name" name="name" class="form-control" value="{{ store.name }}" required placeholder="Ex: Minha Loja Oficial">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bloco 2: Dados Comerciais & Expedição -->
+        <div class="content-box" style="margin-bottom: 1.5rem;">
+            <h2>Dados Operacionais & Faturação</h2>
+            <p style="margin-bottom: 1.5rem;">Informações utilizadas para emissão de etiquetas, conferência e declarações de conteúdo.</p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
+                <div class="form-group">
+                    <label for="document">CNPJ ou CPF do Vendedor</label>
+                    <input type="text" id="document" name="document" class="form-control" value="{{ store.document or '' }}" placeholder="00.000.000/0001-00">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Telefone / SAC Comercial</label>
+                    <input type="text" id="phone" name="phone" class="form-control" value="{{ store.phone or '' }}" placeholder="(11) 98765-4321">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="address">Endereço de Recolha & Expedição</label>
+                <input type="text" id="address" name="address" class="form-control" value="{{ store.address or '' }}" placeholder="Rua, Número, Bairro, Cidade - UF, CEP">
+            </div>
+        </div>
+
+        <!-- Bloco 3: Integração com a Plataforma Shopee -->
+        <div class="content-box" style="margin-bottom: 1.5rem;">
+            <h2>Integração Shopee</h2>
+            <p style="margin-bottom: 1.5rem;">Identificadores para vinculação aos canais de venda e cálculo de pedidos.</p>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="shopee_shop_id">Shopee Shop ID (Identificador da Loja)</label>
+                <input type="text" id="shopee_shop_id" name="shopee_shop_id" class="form-control" value="{{ store.shopee_shop_id or '' }}" placeholder="Ex: 102938475">
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem;">
+                    Encontrado no painel do vendedor Shopee (Central do Vendedor &gt; Perfil da Loja).
+                </p>
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+            <a href="{{ url_for('main.welcome') }}" class="btn-secondary" style="text-decoration: none;">Cancelar</a>
+            <button type="submit" class="btn-primary" style="width: auto; padding: 0.75rem 2rem;">Guardar Alterações</button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+function previewImage(event) {
+    const input = event.target;
+    const preview = document.getElementById('logo-preview');
+    const placeholder = document.getElementById('logo-placeholder');
+
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %}

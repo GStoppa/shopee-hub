@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import session, redirect, url_for, flash, request
+from flask import session, redirect, url_for, flash, request, abort
 
 def login_required(f):
     @wraps(f)
@@ -11,6 +11,7 @@ def login_required(f):
     return decorated_function
 
 def role_required(allowed_roles):
+    """Interrompe a requisição com código HTTP 403 caso o cargo não tenha autorização."""
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
@@ -19,8 +20,7 @@ def role_required(allowed_roles):
             
             user_role = session.get("user_role")
             if user_role not in allowed_roles:
-                flash("Não tem permissão para realizar esta operação.", "danger")
-                return redirect(url_for("main.welcome"))
+                abort(403)
             
             return f(*args, **kwargs)
         return decorated_function

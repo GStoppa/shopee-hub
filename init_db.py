@@ -6,16 +6,21 @@ def inicializar_banco():
     with DatabaseConnection() as conn:
         cursor = conn.cursor()
         
-        # 1. Tabela de Lojas
+        # 1. Tabela de Lojas com dados comerciais e visuais
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS stores (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
+                document TEXT,
+                phone TEXT,
+                address TEXT,
+                shopee_shop_id TEXT,
+                logo_url TEXT,
                 created_at TEXT NOT NULL
             );
         """)
 
-        # 2. Tabela de Usuários (com store_id e role)
+        # 2. Tabela de Utilizadores
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,7 +34,7 @@ def inicializar_banco():
             );
         """)
         
-        # 3. Tabela de Produtos (vinculada à loja)
+        # 3. Tabela de Produtos
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS products (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,17 +47,21 @@ def inicializar_banco():
                 FOREIGN KEY (store_id) REFERENCES stores (id) ON DELETE CASCADE
             );
         """)
-    print("Tabelas 'stores', 'users' e 'products' prontas.")
+    print("Tabelas 'stores', 'users' e 'products' atualizadas com sucesso.")
 
-    # Inserção da Loja Inicial e Usuário Dono (Owner)
     with DatabaseConnection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT id FROM stores LIMIT 1")
         store_row = cursor.fetchone()
 
     if not store_row:
-        loja_padrao = Store(name="Shopee Matriz").salvar()
-        print(f"Loja inicial criada com ID: {loja_padrao.id}")
+        loja_padrao = Store(
+            name="Shopee Matriz",
+            document="00.000.000/0001-00",
+            phone="(11) 99999-9999",
+            address="São Paulo, SP"
+        ).salvar()
+        print(f"Loja padrão criada com ID: {loja_padrao.id}")
         store_id = loja_padrao.id
     else:
         store_id = store_row["id"]
@@ -67,9 +76,9 @@ def inicializar_banco():
         )
         admin.set_password("123456")
         admin.salvar()
-        print("Usuário 'admin@shopee.com' cadastrado como Dono (owner) da loja!")
+        print("Utilizador 'admin@shopee.com' associado como Dono (owner).")
     else:
-        print("Usuário administrador já existente.")
+        print("Utilizador administrador já existente.")
 
 if __name__ == "__main__":
     inicializar_banco()

@@ -1,23 +1,28 @@
-(function () {
-    const savedTheme = localStorage.getItem("theme") || 
-        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    document.documentElement.setAttribute("data-theme", savedTheme);
-})();
+/**
+ * Gestão de Tema (Modo Claro / Modo Escuro)
+ */
 
-function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
-    const nextTheme = currentTheme === "dark" ? "light" : "dark";
-    
-    document.documentElement.setAttribute("data-theme", nextTheme);
-    localStorage.setItem("theme", nextTheme);
-    atualizarIconesTema();
-}
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('shopee_hub_theme', theme);
 
-function atualizarIconesTema() {
-    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-    document.querySelectorAll(".theme-toggle-icon").forEach(el => {
-        el.textContent = isDark ? "☀️" : "🌙";
+    // Atualiza todos os botões de tema presentes na página
+    const icons = document.querySelectorAll('.theme-toggle-icon');
+    icons.forEach(icon => {
+        icon.textContent = theme === 'dark' ? '☀️' : '🌙';
     });
 }
 
-document.addEventListener("DOMContentLoaded", atualizarIconesTema);
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    applyTheme(newTheme);
+}
+
+// Inicializa e sincroniza os ícones assim que o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('shopee_hub_theme') || 
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    
+    applyTheme(savedTheme);
+});

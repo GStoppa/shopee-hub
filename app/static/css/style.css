@@ -525,3 +525,125 @@ body {
     color: var(--danger);
     border: 1px solid var(--danger);
 }
+
+/* ==========================================================================
+   7. BADGES DE CARGO E IDENTIFICAÇÃO DE LOJA
+   ========================================================================== */
+.store-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    background-color: var(--table-hover);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: 1px solid transparent;
+}
+
+.role-owner {
+    background-color: rgba(238, 77, 45, 0.12);
+    color: var(--primary);
+    border-color: rgba(238, 77, 45, 0.25);
+}
+
+.role-manager {
+    background-color: rgba(37, 99, 235, 0.12);
+    color: var(--info);
+    border-color: rgba(37, 99, 235, 0.25);
+}
+
+.role-operator {
+    background-color: rgba(100, 116, 139, 0.12);
+    color: var(--text-muted);
+    border-color: rgba(100, 116, 139, 0.25);
+}
+
+.user-avatar.avatar-owner {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(238, 77, 45, 0.2);
+}
+
+.user-avatar.avatar-manager {
+    border-color: var(--info);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.user-avatar.avatar-operator {
+    border-color: var(--border-color);
+}
+
+.store-logo-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* ==========================================================================
+   8. ESTILOS DE REGISTO AMPLIADO & SECÇÕES
+   ========================================================================== */
+.auth-card-wide {
+    max-width: 680px;
+}
+
+.auth-section {
+    margin-bottom: 1.75rem;
+}
+
+.auth-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.auth-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+@media (max-width: 640px) {
+    .auth-card {
+        padding: 1.75rem 1.25rem;
+    }
+
+    .form-grid-2 {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}
+
+.auth-theme-toggle {
+    position: fixed;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 1000;
+}

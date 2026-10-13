@@ -5,34 +5,39 @@
     </div>
 
     <nav class="sidebar-nav">
-        {% if session.get('user_role') in ['owner', 'manager'] %}
-            <p class="nav-section-title">Administração</p>
-            <a href="{{ url_for('team.list_members') }}" class="nav-link">
-                <span>👥</span> Equipe
-            </a>
-        {% endif %}
         <p class="nav-section-title">Principal</p>
         <a href="{{ url_for('main.welcome') }}" class="nav-link">
             <span>📊</span> Dashboard
         </a>
 
-        <p class="nav-section-title">Catálogo & Vendas</p>
+        <p class="nav-section-title">Catálogo & Operação</p>
         <a href="{{ url_for('product.list_products') }}" class="nav-link">
             <span>📦</span> Produtos
         </a>
-        <a href="#" class="nav-link">
-            <span>📈</span> Estoque
-        </a>
-        <a href="#" class="nav-link">
+        <a href="#" class="nav-link" style="opacity: 0.6; cursor: not-allowed;" title="Em breve">
             <span>📋</span> Pedidos
         </a>
-        <a href="#" class="nav-link">
+        <a href="#" class="nav-link" style="opacity: 0.6; cursor: not-allowed;" title="Em breve">
             <span>↩️</span> Devoluções
         </a>
+
+        {# Secção exclusiva para cargos de liderança #}
+        {% if session.get('user_role') in ['owner', 'manager'] %}
+            <div style="display: flex; align-items: center; justify-content: space-between; padding-right: 0.75rem;">
+                <p class="nav-section-title">Administração</p>
+                <span class="role-badge role-manager" style="font-size: 0.6rem; padding: 0.1rem 0.4rem;">Gestão</span>
+            </div>
+            <a href="{{ url_for('team.list_members') }}" class="nav-link">
+                <span>👥</span> Equipa
+            </a>
+            <a href="{{ url_for('store.settings') }}" class="nav-link">
+                <span>⚙️</span> Definições da Loja
+            </a>
+        {% endif %}
     </nav>
 
     <div class="sidebar-footer">
-        <a href="{{ url_for('profile.index') }}" class="nav-link">
+        <a href="{{ url_for('profile.index') }}" class="nav-link" style="margin-bottom: 0.5rem;">
             <span>👤</span> Meu Perfil
         </a>
         <a href="{{ url_for('auth.logout') }}" class="btn-logout">

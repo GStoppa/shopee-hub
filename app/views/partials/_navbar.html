@@ -1,9 +1,21 @@
 <header class="navbar">
     <div style="display: flex; align-items: center; gap: 1rem;">
-        <h1 class="navbar-title">{% block header_title %}Painel de Controle{% endblock %}</h1>
-        <span class="badge" style="background-color: var(--table-hover); color: var(--text-muted); font-size: 0.75rem;">
-            🏬 {{ session.get('store_name', 'Minha Loja') }}
-        </span>
+        <h1 class="navbar-title">{% block header_title %}Painel de Controlo{% endblock %}</h1>
+        
+        {% if session.get('user_role') in ['owner', 'manager'] %}
+        <a href="{{ url_for('store.settings') }}" style="text-decoration: none;" title="Gerir Definições da Loja">
+        {% endif %}
+            <span class="store-badge">
+                {% if session.get('store_logo') %}
+                    <img src="{{ url_for('static', filename=session.get('store_logo')) }}" alt="Logótipo" class="store-logo-thumb">
+                {% else %}
+                    <span>🏬</span>
+                {% endif %}
+                <strong>{{ session.get('store_name', 'Minha Loja') }}</strong>
+            </span>
+        {% if session.get('user_role') in ['owner', 'manager'] %}
+        </a>
+        {% endif %}
     </div>
 
     <div class="navbar-actions">
@@ -12,23 +24,24 @@
             <span style="font-size: 0.8rem; font-weight: 500;">Tema</span>
         </button>
 
-
         <a href="{{ url_for('profile.index') }}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.75rem;">
             <div class="user-info">
-                <p class="user-name">{{ session.get('user_name', 'Utilizador') }}</p>
-                <p class="user-email">
+                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem;">
+                    <p class="user-name">{{ session.get('user_name', 'Utilizador') }}</p>
+                    
                     {% if session.get('user_role') == 'owner' %}
-                        <span style="color: var(--primary); font-weight: 600;">Dono</span>
+                        <span class="role-badge role-owner">👑 Dono</span>
                     {% elif session.get('user_role') == 'manager' %}
-                        <span style="color: var(--info); font-weight: 600;">Gerente</span>
+                        <span class="role-badge role-manager">🛡️ Gerente</span>
                     {% else %}
-                        <span style="color: var(--text-muted); font-weight: 500;">Operador</span>
+                        <span class="role-badge role-operator">⚙️ Operador</span>
                     {% endif %}
-                    • {{ session.get('user_email', '') }}
-                </p>
+                </div>
+                <p class="user-email">{{ session.get('user_email', '') }}</p>
             </div>
-            <div class="user-avatar">
-                    {{ session.get('user_name', 'U')[0] | upper }}
+
+            <div class="user-avatar avatar-{{ session.get('user_role', 'operator') }}">
+                {{ session.get('user_name', 'U')[0] | upper }}
             </div>
         </a>
     </div>

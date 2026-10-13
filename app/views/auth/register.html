@@ -1,40 +1,92 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Cadastro - Shopee Gestor{% endblock %}
+{% block title %}Criar Conta - Shopee Hub{% endblock %}
 
 {% block content %}
-<div class="auth-card">
+<div class="auth-card auth-card-wide">
     <div class="auth-header">
-        <h1>Criar Conta</h1>
-        <p>Cadastre sua loja para começar</p>
+        <h1>Shopee Hub</h1>
+        <p>Registe a sua loja e configure o perfil do responsável</p>
     </div>
 
     <form method="POST" action="{{ url_for('auth.register') }}">
-        <div class="form-group">
-            <label for="name">Nome Completo</label>
-            <input type="text" id="name" name="name" class="form-control" placeholder="Nome ou Loja" required>
+        
+        <!-- SECÇÃO 1: DADOS DA LOJA -->
+        <div class="auth-section">
+            <div class="auth-section-header">
+                <span class="role-badge role-owner">1</span>
+                <h2 class="auth-section-title">Dados da Loja</h2>
+            </div>
+
+            <div class="form-group">
+                <label for="store_name">Nome Comercial da Loja *</label>
+                <input type="text" id="store_name" name="store_name" class="form-control" 
+                       placeholder="Ex: Armazém Digital Oficial" 
+                       value="{{ form_data.get('store_name', '') }}" required>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="document">CNPJ ou CPF (Opcional)</label>
+                    <input type="text" id="document" name="document" class="form-control" 
+                           placeholder="00.000.000/0001-00" 
+                           value="{{ form_data.get('document', '') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Telefone / WhatsApp Comercial (Opcional)</label>
+                    <input type="text" id="phone" name="phone" class="form-control" 
+                           placeholder="(11) 98765-4321" 
+                           value="{{ form_data.get('phone', '') }}">
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="email">E-mail</label>
-            <input type="email" id="email" name="email" class="form-control" placeholder="loja@exemplo.com" required>
+        <!-- SECÇÃO 2: DADOS DO RESPONSÁVEL (DONO) -->
+        <div class="auth-section">
+            <div class="auth-section-header">
+                <span class="role-badge role-owner">2</span>
+                <h2 class="auth-section-title">Perfil do Responsável (Dono)</h2>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="name">Seu Nome Completo *</label>
+                    <input type="text" id="name" name="name" class="form-control" 
+                           placeholder="Ex: Gustavo Silva" 
+                           value="{{ form_data.get('name', '') }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">E-mail Corporativo *</label>
+                    <input type="email" id="email" name="email" class="form-control" 
+                           placeholder="seuemail@exemplo.com" 
+                           value="{{ form_data.get('email', '') }}" required>
+                </div>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="password">Palavra-passe *</label>
+                    <input type="password" id="password" name="password" class="form-control" 
+                           placeholder="Mínimo 6 carateres" minlength="6" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirmar Palavra-passe *</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" 
+                           placeholder="Repita a palavra-passe" minlength="6" required>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="password">Senha</label>
-            <input type="password" id="password" name="password" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6" required>
-        </div>
-
-        <div class="form-group">
-            <label for="confirm_password">Confirmar Senha</label>
-            <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Repita a senha" minlength="6" required>
-        </div>
-
-        <button type="submit" class="btn-primary">Cadastrar</button>
+        <button type="submit" class="btn-primary" style="padding: 0.85rem; font-size: 1rem;">
+            Concluir Registo da Loja
+        </button>
     </form>
 
     <div class="auth-footer">
-        Já possui conta? <a href="{{ url_for('auth.login') }}">Entrar</a>
+        Já tem uma conta registada? <a href="{{ url_for('auth.login') }}">Iniciar sessão</a>
     </div>
 </div>
 {% endblock %}

@@ -1,0 +1,38 @@
+{% extends "layouts/admin_base.html" %}
+
+{% block title %}Acesso Negado - Shopee Hub{% endblock %}
+{% block header_title %}Permissão Insuficiente{% endblock %}
+
+{% block content %}
+<div class="content-box" style="max-width: 580px; margin: 3rem auto; text-align: center; padding: 3rem 2rem;">
+    <div style="font-size: 3.5rem; margin-bottom: 1rem;">🚫</div>
+    
+    <span class="role-badge role-owner" style="font-size: 0.75rem; padding: 0.25rem 0.75rem; margin-bottom: 1rem;">
+        Erro 403 • Acesso Proibido
+    </span>
+    
+    <h2 style="font-size: 1.4rem; margin: 1.25rem 0 0.5rem 0;">Acesso Não Autorizado</h2>
+    <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">
+        A sua conta atual está registada como 
+        <strong>
+            {% if session.get('user_role') == 'operator' %}
+                Operador
+            {% elif session.get('user_role') == 'manager' %}
+                Gerente
+            {% else %}
+                {{ session.get('user_role', 'Utilizador') }}
+            {% endif %}
+        </strong>, 
+        que não possui autorização para aceder a este recurso ou efetuar esta operação.
+    </p>
+
+    <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        <a href="{{ url_for('main.welcome') }}" class="btn-primary" style="width: auto; text-decoration: none; padding: 0.65rem 1.4rem; font-size: 0.9rem;">
+            Voltar ao Dashboard
+        </a>
+        <a href="{{ url_for('product.list_products') }}" class="btn-secondary" style="text-decoration: none; padding: 0.65rem 1.4rem; font-size: 0.9rem;">
+            Ver Catálogo
+        </a>
+    </div>
+</div>
+{% endblock %}
