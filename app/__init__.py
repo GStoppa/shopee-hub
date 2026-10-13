@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, flash, redirect, request
 from config import Config
 
 def format_currency(value):
@@ -32,5 +32,10 @@ def create_app():
     @app.errorhandler(403)
     def forbidden(error):
         return render_template("errors/403.html"), 403
+
+    @app.errorhandler(413)
+    def file_too_large(error):
+        flash("O ficheiro enviado excede o limite máximo permitido de 2MB.", "danger")
+        return redirect(request.url)
 
     return app

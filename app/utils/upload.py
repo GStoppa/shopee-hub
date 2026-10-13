@@ -12,11 +12,11 @@ def salvar_logo_loja(file, store_id: int, logo_antigo: str = None) -> str:
         return None
 
     if not allowed_file(file.filename):
-        raise ValueError("Formato não suportado. Envie ficheiros nos formatos PNG, JPG, JPEG ou WEBP.")
+        raise ValueError("Formato não suportado. Utilize ficheiros PNG, JPG, JPEG ou WEBP.")
 
     os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
 
-    ext = secure_filename(file.filename).rsplit(".", 1)[1].lower()
+    ext = file.filename.rsplit(".", 1)[1].lower()
     timestamp = int(time.time())
     novo_nome = f"store_{store_id}_{timestamp}.{ext}"
     caminho_absoluto = os.path.join(Config.UPLOAD_FOLDER, novo_nome)
@@ -24,7 +24,8 @@ def salvar_logo_loja(file, store_id: int, logo_antigo: str = None) -> str:
     file.save(caminho_absoluto)
 
     if logo_antigo:
-        caminho_antigo = os.path.join(Config.BASE_DIR, "app", "static", logo_antigo)
+        caminho_limpo = logo_antigo.replace("\\", "/").lstrip("/")
+        caminho_antigo = os.path.join(Config.BASE_DIR, "app", "static", caminho_limpo)
         if os.path.exists(caminho_antigo):
             try:
                 os.remove(caminho_antigo)
