@@ -1,28 +1,43 @@
-/**
- * Gestão de Tema (Modo Claro / Modo Escuro)
- */
+(function () {
+    // 1. Aplica o tema imediatamente na abertura da página para evitar cintilação inicial
+    const temaGuardado = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", temaGuardado);
 
-function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('shopee_hub_theme', theme);
+    function atualizarIcone(tema) {
+        const icone = document.getElementById("theme-icon");
+        if (icone) {
+            icone.textContent = tema === "light" ? "🌙" : "☀️";
+        }
+    }
 
-    // Atualiza todos os botões de tema presentes na página
-    const icons = document.querySelectorAll('.theme-toggle-icon');
-    icons.forEach(icon => {
-        icon.textContent = theme === 'dark' ? '☀️' : '🌙';
-    });
-}
+    function inicializarAlternadorTema() {
+        const botao = document.getElementById("theme-toggle");
+        const temaAtual = document.documentElement.getAttribute("data-theme") || "dark";
+        atualizarIcone(temaAtual);
 
-function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    applyTheme(newTheme);
-}
+        if (!botao) return;
 
-// Inicializa e sincroniza os ícones assim que o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('shopee_hub_theme') || 
-        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    
-    applyTheme(savedTheme);
-});
+        botao.addEventListener("click", () => {
+            const temaAtivo = document.documentElement.getAttribute("data-theme") || "dark";
+            const novoTema = temaAtivo === "dark" ? "light" : "dark";
+
+            // Injeta a classe que ativa a interpolação suave
+            document.documentElement.classList.add("theme-transition");
+
+            document.documentElement.setAttribute("data-theme", novoTema);
+            localStorage.setItem("theme", novoTema);
+            atualizarIcone(novoTema);
+
+            // Remove a classe após a conclusão do efeito
+            setTimeout(() => {
+                document.documentElement.classList.remove("theme-transition");
+            }, 380);
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", inicializarAlternadorTema);
+    } else {
+        inicializarAlternadorTema();
+    }
+})();

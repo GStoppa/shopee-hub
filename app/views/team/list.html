@@ -1,46 +1,49 @@
 {% extends "layouts/admin_base.html" %}
 
-{% block title %}Equipa - Shopee Hub{% endblock %}
-{% block header_title %}Membros da Equipa{% endblock %}
+{% set header_title = "Equipe" %}
+{% block title %}Equipe - Shopee Hub{% endblock %}
 
 {% block content %}
 <div class="content-box">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div class="page-header-actions">
         <div>
-            <h2>Colaboradores da Loja</h2>
-            <p>Faça a gestão dos acessos e permissões atribuídas a cada funcionário.</p>
+            <h2>Membros da Equipe</h2>
+            <p>Gerencie os operadores e administradores com acesso à loja.</p>
         </div>
-        <a href="{{ url_for('team.create_member') }}" class="btn-primary">
-            + Adicionar Colaborador
-        </a>
+        <div class="action-buttons-group">
+            <a href="{{ url_for('team.create_member') }}" class="btn-primary">
+                + Novo Membro
+            </a>
+        </div>
     </div>
 
+    {% if members %}
     <div class="table-responsive">
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Nome</th>
                     <th>E-mail</th>
-                    <th>Perfil / Cargo</th>
-                    <th>Data de Registo</th>
-                    <th>Ações</th>
+                    <th>Função / Permissão</th>
+                    <th>Data de Cadastro</th>
+                    <th class="text-right">Ações</th>
                 </tr>
             </thead>
             <tbody>
                 {% for member in members %}
                 <tr>
-                    <td>#{{ member.id }}</td>
                     <td>
-                        <strong>{{ member.name }}</strong>
-                        {% if member.id == session.get('user_id') %}
-                            <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 0.25rem;">(Você)</span>
-                        {% endif %}
+                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                            <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                {{ member.name[0] | upper }}
+                            </div>
+                            <strong>{{ member.name }}</strong>
+                        </div>
                     </td>
                     <td>{{ member.email }}</td>
                     <td>
                         {% if member.role == 'owner' %}
-                            <span class="role-badge role-owner">Dono da Loja</span>
+                            <span class="role-badge role-owner">Proprietário</span>
                         {% elif member.role == 'manager' %}
                             <span class="role-badge role-manager">Gerente</span>
                         {% else %}
@@ -48,24 +51,18 @@
                         {% endif %}
                     </td>
                     <td>{{ member.created_at[:10] }}</td>
-                    <td>
-                        <div style="display: flex; gap: 0.5rem; align-items: center;">
-                            {% if session.get('user_role') == 'owner' or (session.get('user_role') == 'manager' and member.role == 'operator') %}
-                                <a href="{{ url_for('team.edit_member', member_id=member.id) }}" class="btn-action btn-edit" title="Editar Colaborador">
-                                    Editar
-                                </a>
-                            {% endif %}
+                    <td class="text-right">
+                        <div class="inline-actions">
+                            <a href="{{ url_for('team.edit_member', member_id=member.id) }}" class="btn-action btn-edit" title="Editar Colaborador">
+                                Editar
+                            </a>
 
-                            {% if member.id != session.get('user_id') %}
-                                {% if session.get('user_role') == 'owner' or (session.get('user_role') == 'manager' and member.role == 'operator') %}
-                                    <form method="POST" action="{{ url_for('team.delete_member', member_id=member.id) }}" onsubmit="return confirm('Tem a certeza que deseja remover o colaborador \'{{ member.name }}\' da equipa?');" style="margin: 0;">
-                                        <button type="submit" class="btn-action btn-delete" title="Remover Colaborador">
-                                            Eliminar
-                                        </button>
-                                    </form>
-                                {% endif %}
-                            {% else %}
-                                <span style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">Conta em uso</span>
+                            {% if session.get('user_role') == 'owner' and member.id != session.get('user_id') %}
+                                <form method="POST" action="{{ url_for('team.delete_member', member_id=member.id) }}" data-name="{{ member.name }}" class="form-delete-member m-0">
+                                    <button type="submit" class="btn-action btn-delete" title="Excluir Colaborador">
+                                        Excluir
+                                    </button>
+                                </form>
                             {% endif %}
                         </div>
                     </td>
@@ -74,5 +71,11 @@
             </tbody>
         </table>
     </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">👥</div>
+        <p><strong>Nenhum membro cadastrado até o momento.</strong></p>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

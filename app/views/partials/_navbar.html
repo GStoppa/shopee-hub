@@ -1,48 +1,32 @@
-<header class="navbar">
-    <div style="display: flex; align-items: center; gap: 1rem;">
-        <h1 class="navbar-title">{{ header_title or 'Painel de Controle' }}</h1>
-        
-        {% if session.get('user_role') in ['owner', 'manager'] %}
-        <a href="{{ url_for('store.settings') }}" style="text-decoration: none;" title="Gerir Definições da Loja">
-        {% endif %}
-            <span class="store-badge">
-                {% if session.get('store_logo') %}
-                    <img src="{{ url_for('static', filename=session.get('store_logo')) }}" alt="Logótipo" class="store-logo-thumb">
-                {% else %}
-                    <span>🏬</span>
-                {% endif %}
-                <strong>{{ session.get('store_name', 'Minha Loja') }}</strong>
-            </span>
-        {% if session.get('user_role') in ['owner', 'manager'] %}
-        </a>
-        {% endif %}
+<header class="top-navbar">
+    <div class="navbar-left">
+        <button type="button" id="mobile-menu-btn" class="mobile-menu-btn" title="Abrir Menu">
+            ☰
+        </button>
+        <div class="page-title">
+            {{ header_title | default('Dashboard') }}
+        </div>
     </div>
 
-    <div class="navbar-actions">
-        <button type="button" class="btn-theme-toggle" onclick="toggleTheme()" title="Alternar Modo Escuro / Claro">
-            <span class="theme-toggle-icon">🌙</span>
-            <span style="font-size: 0.8rem; font-weight: 500;">Tema</span>
+    <div class="navbar-user-actions">
+        <button type="button" id="theme-toggle" class="theme-toggle-btn" title="Alternar Tema">
+            <span id="theme-icon">☀️</span>
         </button>
 
-        <a href="{{ url_for('profile.index') }}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.75rem;">
-            <div class="user-info">
-                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem;">
-                    <p class="user-name">{{ session.get('user_name', 'Utilizador') }}</p>
-                    
-                    {% if session.get('user_role') == 'owner' %}
-                        <span class="role-badge role-owner">👑 Dono</span>
-                    {% elif session.get('user_role') == 'manager' %}
-                        <span class="role-badge role-manager">🛡️ Gerente</span>
-                    {% else %}
-                        <span class="role-badge role-operator">⚙️ Operador</span>
-                    {% endif %}
+        {% if session.get('user_id') %}
+            <div class="user-profile-badge">
+                <div class="user-avatar">
+                    {{ session.get('user_name', 'U')[0] | upper }}
                 </div>
-                <p class="user-email">{{ session.get('user_email', '') }}</p>
+                <div class="user-meta">
+                    <div class="user-meta-name">{{ session.get('user_name') }}</div>
+                    <div>
+                        <span class="role-badge role-{{ session.get('user_role', 'operator') }}">
+                            {{ session.get('user_role', 'operator') }}
+                        </span>
+                    </div>
+                </div>
             </div>
-
-            <div class="user-avatar avatar-{{ session.get('user_role', 'operator') }}">
-                {{ session.get('user_name', 'U')[0] | upper }}
-            </div>
-        </a>
+        {% endif %}
     </div>
 </header>

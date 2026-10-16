@@ -11,12 +11,14 @@
 
     <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/masks.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/products.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/categories.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/movements.js') }}" defer></script>
 </head>
 <body>
     <div class="admin-layout">
+        <div id="sidebar-overlay" class="sidebar-overlay"></div>
         {% include "partials/_sidebar.html" %}
 
         <div class="main-content">

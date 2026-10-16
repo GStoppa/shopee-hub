@@ -1,3 +1,4 @@
+import math
 from datetime import datetime, timezone
 from app.database import DatabaseConnection
 
@@ -78,7 +79,22 @@ class StockMovement:
             ]
 
     @classmethod
-    def listar_por_loja(cls, store_id: int, limite: int = 100):
+    def contar_por_loja(cls, store_id: int) -> int:
+        with DatabaseConnection() as conn:
+            cursor = conn.cursor()
+            query = """
+                SELECT COUNT(*) AS total
+                FROM stock_movements sm
+                JOIN product_variants pv ON sm.variant_id = pv.id
+                JOIN products p ON pv.product_id = p.id
+                WHERE p.store_id = ?
+            """
+            cursor.execute(query, (store_id,))
+            row = cursor.fetchone()
+            return row["total"] if row else 0
+
+    @classmethod
+    def listar_por_loja(cls, store_id: int, limite: int = 20, offset: int = 0):
         with DatabaseConnection() as conn:
             cursor = conn.cursor()
             query = """
@@ -89,9 +105,9 @@ class StockMovement:
                 LEFT JOIN users u ON sm.user_id = u.id
                 WHERE p.store_id = ?
                 ORDER BY sm.id DESC
-                LIMIT ?
+                LIMIT ? OFFSET ?
             """
-            cursor.execute(query, (store_id, limite))
+            cursor.execute(query, (store_id, limite, offset))
             rows = cursor.fetchall()
             return [
                 cls(
@@ -465,37 +481,64 @@ class Product:
             )
 
     @classmethod
-    def listar_por_loja(cls, store_id: int, busca: str = None, category_id: int = None, status: str = None):
+    def _construir_filtros(cls, store_id: int, busca: str = None, category_id: int = None, status: str = None):
+        sql_where = " WHERE p.store_id = ?"
+        params = [store_id]
+
+        if busca:
+            sql_where += " AND (p.name LIKE ? OR pv.sku LIKE ? OR pv.barcode LIKE ?)"
+            t = f"%{busca}%"
+            params.extend([t, t, t])
+
+        if category_id:
+            sql_where += " AND p.category_id = ?"
+            params.append(category_id)
+
+        if status == "ativo":
+            sql_where += " AND p.is_active = 1"
+        elif status == "inativo":
+            sql_where += " AND p.is_active = 0"
+        elif status == "baixo":
+            sql_where += " AND pv.stock_quantity > 0 AND pv.stock_quantity <= pv.min_stock"
+        elif status == "esgotado":
+            sql_where += " AND pv.stock_quantity = 0"
+
+        return sql_where, params
+
+    @classmethod
+    def contar_por_loja(cls, store_id: int, busca: str = None, category_id: int = None, status: str = None) -> int:
         with DatabaseConnection() as conn:
             cursor = conn.cursor()
-            sql = """
+            sql_where, params = cls._construir_filtros(store_id, busca, category_id, status)
+            sql = f"""
+                SELECT COUNT(DISTINCT p.id) AS total
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                LEFT JOIN product_variants pv ON p.id = pv.product_id
+                {sql_where}
+            """
+            cursor.execute(sql, tuple(params))
+            row = cursor.fetchone()
+            return row["total"] if row else 0
+
+    @classmethod
+    def listar_por_loja(cls, store_id: int, busca: str = None, category_id: int = None, 
+                        status: str = None, limite: int = None, offset: int = 0):
+        with DatabaseConnection() as conn:
+            cursor = conn.cursor()
+            sql_where, params = cls._construir_filtros(store_id, busca, category_id, status)
+            sql = f"""
                 SELECT DISTINCT p.*, c.name AS category_name
                 FROM products p
                 LEFT JOIN categories c ON p.category_id = c.id
                 LEFT JOIN product_variants pv ON p.id = pv.product_id
-                WHERE p.store_id = ?
+                {sql_where}
+                ORDER BY p.id DESC
             """
-            params = [store_id]
+            if limite is not None:
+                sql += " LIMIT ? OFFSET ?"
+                params.extend([limite, offset])
 
-            if busca:
-                sql += " AND (p.name LIKE ? OR pv.sku LIKE ? OR pv.barcode LIKE ?)"
-                t = f"%{busca}%"
-                params.extend([t, t, t])
-
-            if category_id:
-                sql += " AND p.category_id = ?"
-                params.append(category_id)
-
-            if status == "ativo":
-                sql += " AND p.is_active = 1"
-            elif status == "inativo":
-                sql += " AND p.is_active = 0"
-            elif status == "baixo":
-                sql += " AND pv.stock_quantity > 0 AND pv.stock_quantity <= pv.min_stock"
-            elif status == "esgotado":
-                sql += " AND pv.stock_quantity = 0"
-
-            sql += " ORDER BY p.id DESC"
             cursor.execute(sql, tuple(params))
             rows = cursor.fetchall()
 

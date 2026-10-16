@@ -1,3 +1,4 @@
+import math
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from app.database import DatabaseConnection
 from app.middlewares.auth_middleware import login_required, role_required
@@ -13,10 +14,10 @@ def converter_numero(valor, tipo=float, padrao=0.0):
     limpo = str(valor).strip().replace("R$", "").replace(" ", "")
     if "," in limpo and "." in limpo:
         limpo = limpo.replace(".", "").replace(",", ".")
-    else:
+    elif "," in limpo:
         limpo = limpo.replace(",", ".")
     try:
-        return tipo(limpo)
+        return max(tipo(limpo), tipo(0))
     except (ValueError, TypeError):
         return padrao
 
@@ -27,12 +28,29 @@ def list_products():
     busca = request.args.get("q", "").strip()
     cat_id = request.args.get("category_id", type=int)
     status = request.args.get("status", "").strip()
-    page = request.args.get("page", 1, type=int)
+    pagina = max(1, request.args.get("page", 1, type=int))
+    por_pagina = 10
 
-    pagination = Product.listar_por_loja(store_id, busca=busca, category_id=cat_id, status=status, page=page, per_page=12)
-    products = pagination["items"]
+    total_itens = Product.contar_por_loja(store_id, busca=busca, category_id=cat_id, status=status)
+    total_paginas = max(1, math.ceil(total_itens / por_pagina))
+    if pagina > total_paginas:
+        pagina = total_paginas
+
+    offset = (pagina - 1) * por_pagina
+    products = Product.listar_por_loja(
+        store_id, busca=busca, category_id=cat_id, status=status,
+        limite=por_pagina, offset=offset
+    )
     categories = Category.listar_por_loja(store_id)
-    return render_template("products/list.html", products=products, pagination=pagination, categories=categories)
+
+    return render_template(
+        "products/list.html",
+        products=products,
+        categories=categories,
+        pagina=pagina,
+        total_paginas=total_paginas,
+        total_itens=total_itens
+    )
 
 @product_bp.route("/novo", methods=["GET", "POST"])
 @login_required
@@ -157,7 +175,6 @@ def create_product():
 
         try:
             user_id = session.get("user_id")
-
             with DatabaseConnection() as conn:
                 cursor = conn.cursor()
                 produto = Product(
@@ -409,10 +426,25 @@ def update_stock(variant_id=None, product_id=None):
 @login_required
 def stock_movements():
     store_id = session.get("store_id")
-    page = request.args.get("page", 1, type=int)
-    pagination = StockMovement.listar_por_loja(store_id, page=page, per_page=20)
-    movements = pagination["items"]
-    return render_template("products/movements.html", movements=movements, pagination=pagination, variant=None)
+    pagina = max(1, request.args.get("page", 1, type=int))
+    por_pagina = 20
+
+    total_itens = StockMovement.contar_por_loja(store_id)
+    total_paginas = max(1, math.ceil(total_itens / por_pagina))
+    if pagina > total_paginas:
+        pagina = total_paginas
+
+    offset = (pagina - 1) * por_pagina
+    movements = StockMovement.listar_por_loja(store_id, limite=por_pagina, offset=offset)
+
+    return render_template(
+        "products/movements.html",
+        movements=movements,
+        variant=None,
+        pagina=pagina,
+        total_paginas=total_paginas,
+        total_itens=total_itens
+    )
 
 @product_bp.route("/variant/<int:variant_id>/history")
 @login_required
@@ -424,7 +456,14 @@ def variant_history(variant_id):
         return redirect(url_for("product.list_products"))
 
     movements = StockMovement.listar_por_variante(variant_id, store_id)
-    return render_template("products/movements.html", movements=movements, pagination=None, variant=variant)
+    return render_template(
+        "products/movements.html",
+        movements=movements,
+        variant=variant,
+        pagina=1,
+        total_paginas=1,
+        total_itens=len(movements)
+    )
 
 @product_bp.route("/variant/<int:variant_id>/movement", methods=["POST"])
 @login_required

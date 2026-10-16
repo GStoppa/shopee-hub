@@ -29,7 +29,7 @@ def create_member():
             return render_template("team/form.html", member=None)
 
         if User.buscar_por_email(email):
-            flash("Este e-mail já está em uso por outro utilizador.", "danger")
+            flash("Este e-mail já está em uso por outro usuário.", "danger")
             return render_template("team/form.html", member=None)
 
         if role not in ["owner", "manager", "operator"]:
@@ -44,15 +44,17 @@ def create_member():
 
     return render_template("team/form.html", member=None)
 
+@team_bp.route("/<int:member_id>/editar", methods=["GET", "POST"])
 @team_bp.route("/<int:user_id>/editar", methods=["GET", "POST"])
 @login_required
 @role_required(["owner", "manager"])
-def edit_member(user_id):
+def edit_member(member_id=None, user_id=None):
+    uid = member_id or user_id
     store_id = session.get("store_id")
-    member = User.buscar_por_id(user_id)
+    member = User.buscar_por_id(uid)
 
     if not member or member.store_id != store_id:
-        flash("Utilizador não encontrado.", "danger")
+        flash("Usuário não encontrado.", "danger")
         return redirect(url_for("team.list_members"))
 
     if request.method == "POST":
@@ -66,7 +68,7 @@ def edit_member(user_id):
 
         existente = User.buscar_por_email(email)
         if existente and existente.id != member.id:
-            flash("Este e-mail já está em uso por outro utilizador.", "danger")
+            flash("Este e-mail já está em uso por outro usuário.", "danger")
             return render_template("team/edit.html", member=member)
 
         if role not in ["owner", "manager", "operator"]:
@@ -82,21 +84,23 @@ def edit_member(user_id):
 
     return render_template("team/edit.html", member=member)
 
+@team_bp.route("/<int:member_id>/excluir", methods=["POST"])
 @team_bp.route("/<int:user_id>/excluir", methods=["POST"])
 @login_required
 @role_required(["owner"])
-def delete_member(user_id):
+def delete_member(member_id=None, user_id=None):
+    uid = member_id or user_id
     store_id = session.get("store_id")
-    member = User.buscar_por_id(user_id)
+    member = User.buscar_por_id(uid)
 
     if not member or member.store_id != store_id:
-        flash("Utilizador não encontrado.", "danger")
+        flash("Usuário não encontrado.", "danger")
         return redirect(url_for("team.list_members"))
 
     if member.id == session.get("user_id"):
-        flash("Não pode excluir a sua própria conta de acesso.", "warning")
+        flash("Você não pode excluir sua própria conta de acesso.", "warning")
         return redirect(url_for("team.list_members"))
 
-    User.excluir(user_id, store_id)
+    User.excluir(uid, store_id)
     flash(f"Membro '{member.name}' excluído com sucesso.", "info")
     return redirect(url_for("team.list_members"))

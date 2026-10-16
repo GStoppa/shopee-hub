@@ -197,6 +197,33 @@
             </tbody>
         </table>
     </div>
+
+    {% if total_paginas > 1 %}
+    <div class="pagination-bar">
+        <div class="pagination-info">
+            Exibindo página <strong>{{ pagina }}</strong> de <strong>{{ total_paginas }}</strong> ({{ total_itens }} produtos no total)
+        </div>
+        <div class="pagination-controls">
+            <a href="{{ url_for('product.list_products', page=pagina-1, q=request.args.get('q', ''), category_id=request.args.get('category_id', ''), status=request.args.get('status', '')) }}" 
+               class="page-link {{ 'is-disabled' if pagina <= 1 else '' }}">
+                ← Anterior
+            </a>
+
+            {% for p in range(1, total_paginas + 1) %}
+                <a href="{{ url_for('product.list_products', page=p, q=request.args.get('q', ''), category_id=request.args.get('category_id', ''), status=request.args.get('status', '')) }}" 
+                   class="page-link {{ 'is-active' if p == pagina else '' }}">
+                    {{ p }}
+                </a>
+            {% endfor %}
+
+            <a href="{{ url_for('product.list_products', page=pagina+1, q=request.args.get('q', ''), category_id=request.args.get('category_id', ''), status=request.args.get('status', '')) }}" 
+               class="page-link {{ 'is-disabled' if pagina >= total_paginas else '' }}">
+                Próxima →
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
     {% else %}
     <div class="empty-state">
         <div class="empty-state-icon">🔍</div>
