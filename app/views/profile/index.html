@@ -26,11 +26,11 @@
                 <label>Cargo / Perfil na Loja</label>
                 <div style="margin-top: 0.25rem;">
                     {% if user.role == 'owner' %}
-                        <span class="role-badge role-owner">👑 Dono da Loja</span>
+                        <span class="role-badge role-owner">Dono da Loja</span>
                     {% elif user.role == 'manager' %}
-                        <span class="role-badge role-manager">🛡️ Gerente</span>
+                        <span class="role-badge role-manager">Gerente</span>
                     {% else %}
-                        <span class="role-badge role-operator">⚙️ Operador</span>
+                        <span class="role-badge role-operator">Operador</span>
                     {% endif %}
                 </div>
             </div>
