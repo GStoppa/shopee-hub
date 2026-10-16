@@ -4,32 +4,32 @@
 {% block title %}Categorias - Shopee Hub{% endblock %}
 
 {% block content %}
-<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; align-items: start;">
+<div class="categories-grid">
 
-    <div class="content-box" style="margin-bottom: 0;">
+    <div class="content-box mb-0">
         <h2>Nova Categoria</h2>
-        <p style="margin-bottom: 1.25rem;">Crie secções para organizar o seu catálogo de produtos.</p>
+        <p class="mb-2">Crie seções para organizar o seu catálogo de produtos.</p>
 
         {% if session.get('user_role') in ['owner', 'manager'] %}
         <form method="POST" action="{{ url_for('category.create_category') }}">
             <div class="form-group">
                 <label for="name">Nome da Categoria</label>
-                <input type="text" id="name" name="name" class="form-control" placeholder="Ex: Vestuário, Eletrónicos" required>
+                <input type="text" id="name" name="name" class="form-control" placeholder="Ex: Vestuário, Eletrônicos" required>
             </div>
-            <button type="submit" class="btn-primary" style="width: 100%;">
+            <button type="submit" class="btn-primary w-100">
                 + Adicionar Categoria
             </button>
         </form>
         {% else %}
-        <p style="font-size: 0.85rem; color: var(--text-muted); font-style: italic;">
-            Apenas donos e gerentes podem adicionar novas categorias.
+        <p class="text-muted" style="font-size: 0.85rem; font-style: italic;">
+            Apenas proprietários e gerentes podem adicionar novas categorias.
         </p>
         {% endif %}
     </div>
 
-    <div class="content-box" style="margin-bottom: 0;">
-        <h2>Categorias Registadas</h2>
-        <p style="margin-bottom: 1.25rem;">Faça a gestão dos nomes e organização da loja.</p>
+    <div class="content-box mb-0">
+        <h2>Categorias Cadastradas</h2>
+        <p class="mb-2">Gerencie os nomes e a organização da loja.</p>
 
         {% if categories %}
         <div class="table-responsive">
@@ -38,8 +38,8 @@
                     <tr>
                         <th>ID</th>
                         <th>Nome</th>
-                        <th>Data de Criação</th>
-                        <th style="text-align: right;">Ações</th>
+                        <th>Data de Cadastro</th>
+                        <th class="text-right">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -49,28 +49,28 @@
                         <td>
                             <strong id="cat-name-display-{{ cat.id }}">{{ cat.name }}</strong>
                             {% if session.get('user_role') in ['owner', 'manager'] %}
-                            <form id="cat-edit-form-{{ cat.id }}" method="POST" action="{{ url_for('category.edit_category', category_id=cat.id) }}" style="display: none; gap: 0.4rem; align-items: center; margin-top: 0.35rem;">
+                            <form id="cat-edit-form-{{ cat.id }}" method="POST" action="{{ url_for('category.edit_category', category_id=cat.id) }}" class="inline-actions" style="display: none; margin-top: 0.35rem;">
                                 <input type="text" name="name" value="{{ cat.name }}" class="form-control" style="padding: 0.3rem 0.5rem; font-size: 0.85rem;" required>
-                                <button type="submit" class="btn-small">Gravar</button>
-                                <button type="button" class="btn-small" data-id="{{ cat.id }}" onclick="toggleEdit(this.dataset.id)">Cancelar</button>
+                                <button type="submit" class="btn-small">Salvar</button>
+                                <button type="button" class="btn-small" data-action="toggle-cat-edit" data-id="{{ cat.id }}">Cancelar</button>
                             </form>
                             {% endif %}
                         </td>
                         <td>{{ cat.created_at[:10] }}</td>
-                        <td style="text-align: right;">
+                        <td class="text-right">
                             {% if session.get('user_role') in ['owner', 'manager'] %}
-                            <div style="display: inline-flex; gap: 0.4rem; align-items: center;">
-                                <button type="button" class="btn-action btn-edit" data-id="{{ cat.id }}" onclick="toggleEdit(this.dataset.id)" title="Editar nome">
+                            <div class="inline-actions">
+                                <button type="button" class="btn-action btn-edit" data-action="toggle-cat-edit" data-id="{{ cat.id }}" title="Editar nome">
                                     Editar
                                 </button>
-                                <form method="POST" action="{{ url_for('category.delete_category', category_id=cat.id) }}" data-name="{{ cat.name }}" onsubmit="return confirmDelete(this.dataset.name);" style="margin: 0;">
-                                    <button type="submit" class="btn-action btn-delete" title="Eliminar Categoria">
-                                        Eliminar
+                                <form method="POST" action="{{ url_for('category.delete_category', category_id=cat.id) }}" data-name="{{ cat.name }}" class="form-delete-category m-0">
+                                    <button type="submit" class="btn-action btn-delete" title="Excluir Categoria">
+                                        Excluir
                                     </button>
                                 </form>
                             </div>
                             {% else %}
-                            <span style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">Apenas Leitura</span>
+                            <span class="text-muted" style="font-size: 0.75rem; font-style: italic;">Apenas Leitura</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -79,33 +79,13 @@
             </table>
         </div>
         {% else %}
-        <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);">
-            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏷️</div>
-            <p><strong>Nenhuma categoria registada.</strong></p>
-            <p style="font-size: 0.85rem;">Utilize o formulário ao lado para registar a primeira categoria da sua loja.</p>
+        <div class="empty-state" style="padding: 2.5rem 1rem;">
+            <div class="empty-state-icon">🏷️</div>
+            <p><strong>Nenhuma categoria cadastrada.</strong></p>
+            <p style="font-size: 0.85rem;">Utilize o formulário ao lado para cadastrar a primeira categoria da sua loja.</p>
         </div>
         {% endif %}
     </div>
 
 </div>
-
-<script>
-function toggleEdit(catId) {
-    const form = document.getElementById('cat-edit-form-' + catId);
-    const display = document.getElementById('cat-name-display-' + catId);
-    if (!form || !display) return;
-
-    if (form.style.display === 'none' || form.style.display === '') {
-        form.style.display = 'flex';
-        display.style.display = 'none';
-    } else {
-        form.style.display = 'none';
-        display.style.display = 'inline';
-    }
-}
-
-function confirmDelete(categoryName) {
-    return confirm('Tem a certeza que deseja eliminar a categoria "' + categoryName + '"? Os produtos vinculados ficarão sem categoria associada.');
-}
-</script>
 {% endblock %}

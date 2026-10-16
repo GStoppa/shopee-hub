@@ -3,6 +3,7 @@ from app.database import DatabaseConnection
 
 class StockMovement:
     def __init__(self, variant_id: int, quantity: int, movement_type: str, 
+                 previous_stock: int = 0, resulting_stock: int = 0,
                  reason: str = None, user_id: int = None, id: int = None, 
                  created_at: str = None, user_name: str = None, 
                  variant_sku: str = None, variant_name: str = None, product_name: str = None):
@@ -11,6 +12,8 @@ class StockMovement:
         self.user_id = user_id
         self.movement_type = movement_type
         self.quantity = int(quantity)
+        self.previous_stock = int(previous_stock or 0)
+        self.resulting_stock = int(resulting_stock or 0)
         self.reason = reason.strip() if reason else ""
         self.created_at = created_at or datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
         self.user_name = user_name or "Sistema"
@@ -20,10 +23,16 @@ class StockMovement:
 
     def salvar(self, cursor=None):
         query = """
-            INSERT INTO stock_movements (variant_id, user_id, movement_type, quantity, reason, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO stock_movements (
+                variant_id, user_id, movement_type, quantity, 
+                previous_stock, resulting_stock, reason, created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """
-        params = (self.variant_id, self.user_id, self.movement_type, self.quantity, self.reason, self.created_at)
+        params = (
+            self.variant_id, self.user_id, self.movement_type, self.quantity,
+            self.previous_stock, self.resulting_stock, self.reason, self.created_at
+        )
         if cursor:
             cursor.execute(query, params)
             self.id = cursor.lastrowid
@@ -56,6 +65,8 @@ class StockMovement:
                     user_id=row["user_id"],
                     movement_type=row["movement_type"],
                     quantity=row["quantity"],
+                    previous_stock=row["previous_stock"] if "previous_stock" in row.keys() else 0,
+                    resulting_stock=row["resulting_stock"] if "resulting_stock" in row.keys() else 0,
                     reason=row["reason"],
                     created_at=row["created_at"],
                     user_name=row["user_name"],
@@ -89,6 +100,8 @@ class StockMovement:
                     user_id=row["user_id"],
                     movement_type=row["movement_type"],
                     quantity=row["quantity"],
+                    previous_stock=row["previous_stock"] if "previous_stock" in row.keys() else 0,
+                    resulting_stock=row["resulting_stock"] if "resulting_stock" in row.keys() else 0,
                     reason=row["reason"],
                     created_at=row["created_at"],
                     user_name=row["user_name"],
@@ -176,6 +189,49 @@ class ProductVariant:
         return self
 
     @classmethod
+    def sku_existe(cls, sku: str, exclude_variant_id: int = None) -> bool:
+        if not sku:
+            return False
+        with DatabaseConnection() as conn:
+            cursor = conn.cursor()
+            sql = "SELECT id FROM product_variants WHERE UPPER(sku) = UPPER(?)"
+            params = [sku.strip()]
+            if exclude_variant_id:
+                sql += " AND id != ?"
+                params.append(exclude_variant_id)
+            cursor.execute(sql, tuple(params))
+            return cursor.fetchone() is not None
+
+    @classmethod
+    def contar_por_produto(cls, product_id: int) -> int:
+        with DatabaseConnection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) AS total FROM product_variants WHERE product_id = ?", (product_id,))
+            row = cursor.fetchone()
+            return row["total"] if row else 0
+
+    @classmethod
+    def excluir(cls, variant_id: int, store_id: int) -> bool:
+        from app.utils.upload import remover_imagem_produto
+        with DatabaseConnection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT pv.image_url, pv.product_id
+                FROM product_variants pv
+                JOIN products p ON pv.product_id = p.id
+                WHERE pv.id = ? AND p.store_id = ?
+            """, (variant_id, store_id))
+            row = cursor.fetchone()
+            if not row:
+                return False
+
+            if row["image_url"]:
+                remover_imagem_produto(row["image_url"])
+
+            cursor.execute("DELETE FROM product_variants WHERE id = ?", (variant_id,))
+            return True
+
+    @classmethod
     def buscar_por_id(cls, variant_id: int, store_id: int):
         with DatabaseConnection() as conn:
             cursor = conn.cursor()
@@ -230,6 +286,8 @@ class ProductVariant:
                 user_id=user_id,
                 movement_type=tipo,
                 quantity=abs(diferenca),
+                previous_stock=estoque_antigo,
+                resulting_stock=nova_quantidade,
                 reason=motivo
             )
             movimento.salvar(cursor=cursor)
@@ -262,11 +320,15 @@ class ProductVariant:
 
             cursor.execute("UPDATE product_variants SET stock_quantity = ? WHERE id = ?", (novo_saldo, variant_id))
 
+            qtd_registrada = quantidade if tipo != "ajuste" else abs(novo_saldo - atual)
+
             mov = StockMovement(
                 variant_id=variant_id,
                 user_id=user_id,
                 movement_type=tipo,
-                quantity=quantidade,
+                quantity=qtd_registrada,
+                previous_stock=atual,
+                resulting_stock=novo_saldo,
                 reason=motivo
             )
             mov.salvar(cursor=cursor)
@@ -310,9 +372,8 @@ class Product:
         p_max = f"{maior:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         return f"R$ {p_min} - R$ {p_max}"
 
-    def salvar(self):
-        with DatabaseConnection() as conn:
-            cursor = conn.cursor()
+    def salvar(self, cursor=None):
+        def _executar(c):
             if self.id is None:
                 query = """
                     INSERT INTO products (
@@ -321,12 +382,12 @@ class Product:
                     )
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """
-                cursor.execute(query, (
+                c.execute(query, (
                     self.store_id, self.category_id, self.name, self.description,
                     self.weight_g, self.length_cm, self.width_cm, self.height_cm,
                     self.is_active, self.created_at
                 ))
-                self.id = cursor.lastrowid
+                self.id = c.lastrowid
             else:
                 query = """
                     UPDATE products
@@ -334,7 +395,7 @@ class Product:
                         length_cm = ?, width_cm = ?, height_cm = ?, is_active = ?
                     WHERE id = ? AND store_id = ?
                 """
-                cursor.execute(query, (
+                c.execute(query, (
                     self.category_id, self.name, self.description, self.weight_g,
                     self.length_cm, self.width_cm, self.height_cm, self.is_active,
                     self.id, self.store_id
@@ -343,7 +404,13 @@ class Product:
             if self.variants:
                 for v in self.variants:
                     v.product_id = self.id
-                    v.salvar(cursor=cursor)
+                    v.salvar(cursor=c)
+
+        if cursor:
+            _executar(cursor)
+        else:
+            with DatabaseConnection() as conn:
+                _executar(conn.cursor())
         return self
 
     @classmethod
@@ -474,8 +541,20 @@ class Product:
 
     @classmethod
     def excluir(cls, product_id: int, store_id: int):
+        from app.utils.upload import remover_imagem_produto
         with DatabaseConnection() as conn:
             cursor = conn.cursor()
+            cursor.execute("""
+                SELECT pv.image_url 
+                FROM product_variants pv
+                JOIN products p ON pv.product_id = p.id
+                WHERE p.id = ? AND p.store_id = ?
+            """, (product_id, store_id))
+            rows = cursor.fetchall()
+            for r in rows:
+                if r["image_url"]:
+                    remover_imagem_produto(r["image_url"])
+
             cursor.execute("DELETE FROM products WHERE id = ? AND store_id = ?", (product_id, store_id))
 
     @classmethod

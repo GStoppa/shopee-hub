@@ -37,7 +37,6 @@
                     <option value="owner" {% if member.role == 'owner' %}selected{% endif %}>Dono (Acesso total)</option>
                 </select>
             {% else %}
-                <!-- Gerentes não alteram cargos -->
                 <input type="text" class="form-control" value="Operador" disabled style="opacity: 0.7;">
                 <input type="hidden" name="role" value="{{ member.role }}">
             {% endif %}

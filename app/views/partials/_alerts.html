@@ -1,12 +1,12 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="alert-container">
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">
-          <span>{{ message }}</span>
-          <button type="button" class="alert-close" onclick="this.parentElement.remove()">✕</button>
+    {% if messages %}
+        <div class="alerts-container">
+            {% for category, message in messages %}
+                <div class="alert-box alert-{{ category }}">
+                    <span>{{ message }}</span>
+                    <button type="button" class="alert-close-btn">&times;</button>
+                </div>
+            {% endfor %}
         </div>
-      {% endfor %}
-    </div>
-  {% endif %}
+    {% endif %}
 {% endwith %}

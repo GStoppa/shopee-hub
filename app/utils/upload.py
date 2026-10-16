@@ -1,61 +1,47 @@
 import os
 import time
-from werkzeug.utils import secure_filename
-from config import Config
+from flask import current_app
 
-def allowed_file(filename: str) -> bool:
-    return "." in filename and \
-           filename.rsplit(".", 1)[1].lower() in Config.ALLOWED_EXTENSIONS
+EXTENSOES_PERMITIDAS = {"png", "jpg", "jpeg", "webp"}
 
-def remover_ficheiro_antigo(caminho_relativo: str):
+def extensao_permitida(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in EXTENSOES_PERMITIDAS
+
+def remover_imagem_produto(caminho_relativo):
+    """
+    Remove fisicamente o arquivo de imagem do disco caso exista.
+    Exemplo de caminho_relativo: 'uploads/products/var_1791881647005.jpg'
+    """
     if not caminho_relativo:
         return
-    caminho_limpo = caminho_relativo.replace("\\", "/").lstrip("/")
-    caminho_absoluto = os.path.join(Config.BASE_DIR, "app", "static", caminho_limpo)
-    if os.path.exists(caminho_absoluto):
-        try:
+    try:
+        caminho_absoluto = os.path.join(current_app.static_folder, caminho_relativo)
+        if os.path.exists(caminho_absoluto) and os.path.isfile(caminho_absoluto):
             os.remove(caminho_absoluto)
-        except OSError:
-            pass
+    except Exception as e:
+        print(f"Erro ao remover arquivo de imagem ({caminho_relativo}): {e}")
 
-def salvar_logo_loja(file, store_id: int, logo_antigo: str = None) -> str:
+def salvar_imagem_produto(file, prefixo="var", imagem_antiga=None):
+    """
+    Salva uma nova imagem em app/static/uploads/products/ e remove a anterior caso fornecida.
+    """
     if not file or file.filename == "":
         return None
 
-    if not allowed_file(file.filename):
-        raise ValueError("Formato não suportado. Utilize ficheiros PNG, JPG, JPEG ou WEBP.")
-
-    os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
-
-    ext = file.filename.rsplit(".", 1)[1].lower()
-    timestamp = int(time.time())
-    novo_nome = f"store_{store_id}_{timestamp}.{ext}"
-    caminho_absoluto = os.path.join(Config.UPLOAD_FOLDER, novo_nome)
-
-    file.save(caminho_absoluto)
-
-    if logo_antigo:
-        remover_ficheiro_antigo(logo_antigo)
-
-    return f"uploads/logos/{novo_nome}"
-
-def salvar_imagem_produto(file, prefixo: str = "prod", imagem_antiga: str = None) -> str:
-    if not file or file.filename == "":
+    if not extensao_permitida(file.filename):
         return None
-
-    if not allowed_file(file.filename):
-        raise ValueError("Formato não suportado. Utilize ficheiros PNG, JPG, JPEG ou WEBP.")
-
-    os.makedirs(Config.UPLOAD_PRODUCTS_FOLDER, exist_ok=True)
 
     ext = file.filename.rsplit(".", 1)[1].lower()
     timestamp = int(time.time() * 1000)
     novo_nome = f"{prefixo}_{timestamp}.{ext}"
-    caminho_absoluto = os.path.join(Config.UPLOAD_PRODUCTS_FOLDER, novo_nome)
 
-    file.save(caminho_absoluto)
+    pasta_destino = os.path.join(current_app.static_folder, "uploads", "products")
+    os.makedirs(pasta_destino, exist_ok=True)
+
+    caminho_completo = os.path.join(pasta_destino, novo_nome)
+    file.save(caminho_completo)
 
     if imagem_antiga:
-        remover_ficheiro_antigo(imagem_antiga)
+        remover_imagem_produto(imagem_antiga)
 
     return f"uploads/products/{novo_nome}"

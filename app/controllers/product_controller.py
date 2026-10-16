@@ -1,15 +1,20 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from app.database import DatabaseConnection
 from app.middlewares.auth_middleware import login_required, role_required
 from app.models.product_model import Product, ProductVariant, StockMovement
 from app.models.category_model import Category
-from app.utils.upload import salvar_imagem_produto
+from app.utils.upload import salvar_imagem_produto, remover_imagem_produto
 
 product_bp = Blueprint("product", __name__, url_prefix="/products")
 
 def converter_numero(valor, tipo=float, padrao=0.0):
     if valor is None:
         return padrao
-    limpo = str(valor).strip().replace("R$", "").replace(" ", "").replace(",", ".")
+    limpo = str(valor).strip().replace("R$", "").replace(" ", "")
+    if "," in limpo and "." in limpo:
+        limpo = limpo.replace(".", "").replace(",", ".")
+    else:
+        limpo = limpo.replace(",", ".")
     try:
         return tipo(limpo)
     except (ValueError, TypeError):
@@ -22,10 +27,12 @@ def list_products():
     busca = request.args.get("q", "").strip()
     cat_id = request.args.get("category_id", type=int)
     status = request.args.get("status", "").strip()
+    page = request.args.get("page", 1, type=int)
 
-    products = Product.listar_por_loja(store_id, busca=busca, category_id=cat_id, status=status)
+    pagination = Product.listar_por_loja(store_id, busca=busca, category_id=cat_id, status=status, page=page, per_page=12)
+    products = pagination["items"]
     categories = Category.listar_por_loja(store_id)
-    return render_template("products/list.html", products=products, categories=categories)
+    return render_template("products/list.html", products=products, pagination=pagination, categories=categories)
 
 @product_bp.route("/novo", methods=["GET", "POST"])
 @login_required
@@ -66,6 +73,11 @@ def create_product():
                 categories = Category.listar_por_loja(store_id)
                 return render_template("products/form.html", product=None, categories=categories)
 
+            if ProductVariant.sku_existe(sku):
+                flash(f"O SKU '{sku}' já está cadastrado em outro produto da loja.", "danger")
+                categories = Category.listar_por_loja(store_id)
+                return render_template("products/form.html", product=None, categories=categories)
+
             img_file = request.files.get("simple_image")
             img_url = None
             if img_file and img_file.filename != "":
@@ -85,6 +97,7 @@ def create_product():
                 )
             )
         else:
+            row_ids = request.form.getlist("variant_row_id[]")
             v_names = request.form.getlist("variant_name[]")
             v_skus = request.form.getlist("variant_sku[]")
             v_barcodes = request.form.getlist("variant_barcode[]")
@@ -92,7 +105,6 @@ def create_product():
             v_prices = request.form.getlist("variant_price[]")
             v_stocks = request.form.getlist("variant_stock[]")
             v_min_stocks = request.form.getlist("variant_min_stock[]")
-            v_images = request.files.getlist("variant_image[]")
 
             if not v_skus or len(v_skus) == 0:
                 flash("Adicione pelo menos uma variação.", "danger")
@@ -104,12 +116,19 @@ def create_product():
                 sku = v_skus[i].strip().upper()
                 if not sku:
                     continue
+
                 if sku in skus_vistos:
-                    flash(f"SKU duplicado dentro das variações: {sku}", "danger")
+                    flash(f"SKU duplicado na lista de variações: {sku}", "danger")
                     categories = Category.listar_por_loja(store_id)
                     return render_template("products/form.html", product=None, categories=categories)
                 skus_vistos.add(sku)
 
+                if ProductVariant.sku_existe(sku):
+                    flash(f"O SKU '{sku}' já está cadastrado em outro produto da loja.", "danger")
+                    categories = Category.listar_por_loja(store_id)
+                    return render_template("products/form.html", product=None, categories=categories)
+
+                row_id = row_ids[i] if i < len(row_ids) else f"row_{i}"
                 v_name = v_names[i].strip() if i < len(v_names) else "Variação"
                 v_barcode = v_barcodes[i].strip() if i < len(v_barcodes) else ""
                 v_cost = converter_numero(v_costs[i], float, 0.0) if i < len(v_costs) else 0.0
@@ -117,9 +136,10 @@ def create_product():
                 v_stock = converter_numero(v_stocks[i], int, 0) if i < len(v_stocks) else 0
                 v_min = converter_numero(v_min_stocks[i], int, 5) if i < len(v_min_stocks) else 5
 
+                img_file = request.files.get(f"variant_image_{row_id}")
                 img_url = None
-                if i < len(v_images) and v_images[i] and v_images[i].filename != "":
-                    img_url = salvar_imagem_produto(v_images[i], prefixo="var")
+                if img_file and img_file.filename != "":
+                    img_url = salvar_imagem_produto(img_file, prefixo="var")
 
                 variantes.append(
                     ProductVariant(
@@ -136,36 +156,41 @@ def create_product():
                 )
 
         try:
-            produto = Product(
-                store_id=store_id,
-                category_id=category_id,
-                name=name,
-                description=description,
-                weight_g=weight_g,
-                length_cm=length_cm,
-                width_cm=width_cm,
-                height_cm=height_cm,
-                is_active=is_active,
-                variants=variantes
-            )
-            produto.salvar()
-
             user_id = session.get("user_id")
-            for v in produto.variants:
-                if v.stock_quantity > 0:
-                    mov = StockMovement(
-                        variant_id=v.id,
-                        user_id=user_id,
-                        movement_type="entrada",
-                        quantity=v.stock_quantity,
-                        reason="Saldo inicial no cadastro"
-                    )
-                    mov.salvar()
 
-            flash(f"Produto '{name}' registado com sucesso!", "success")
+            with DatabaseConnection() as conn:
+                cursor = conn.cursor()
+                produto = Product(
+                    store_id=store_id,
+                    category_id=category_id,
+                    name=name,
+                    description=description,
+                    weight_g=weight_g,
+                    length_cm=length_cm,
+                    width_cm=width_cm,
+                    height_cm=height_cm,
+                    is_active=is_active,
+                    variants=variantes
+                )
+                produto.salvar(cursor=cursor)
+
+                for v in produto.variants:
+                    if v.stock_quantity > 0:
+                        mov = StockMovement(
+                            variant_id=v.id,
+                            user_id=user_id,
+                            movement_type="entrada",
+                            quantity=v.stock_quantity,
+                            previous_stock=0,
+                            resulting_stock=v.stock_quantity,
+                            reason="Estoque inicial no cadastro"
+                        )
+                        mov.salvar(cursor=cursor)
+
+            flash(f"Produto '{name}' cadastrado com sucesso!", "success")
             return redirect(url_for("product.list_products"))
         except Exception as e:
-            flash(f"Erro ao registar o produto (verifique se os SKUs já existem): {e}", "danger")
+            flash(f"Erro ao cadastrar o produto: {e}", "danger")
 
     categories = Category.listar_por_loja(store_id)
     return render_template("products/form.html", product=None, categories=categories)
@@ -193,10 +218,17 @@ def edit_product(product_id):
         produto.height_cm = converter_numero(request.form.get("height_cm"), float, 0.0)
         produto.is_active = converter_numero(request.form.get("is_active"), int, 1)
 
+        movimentacoes_pendentes = []
         for v in produto.variants:
             v_id = str(v.id)
+            novo_sku = request.form.get(f"v_sku_{v_id}", v.sku).strip().upper()
+
+            if ProductVariant.sku_existe(novo_sku, exclude_variant_id=v.id):
+                flash(f"O SKU '{novo_sku}' já está cadastrado em outro produto ou variação.", "danger")
+                return redirect(url_for("product.edit_product", product_id=product_id))
+
             v.variant_name = request.form.get(f"v_name_{v_id}", v.variant_name).strip()
-            v.sku = request.form.get(f"v_sku_{v_id}", v.sku).strip().upper()
+            v.sku = novo_sku
             v.barcode = request.form.get(f"v_barcode_{v_id}", "").strip() or None
             v.cost_price = converter_numero(request.form.get(f"v_cost_{v_id}"), float, v.cost_price)
             v.price = converter_numero(request.form.get(f"v_price_{v_id}"), float, v.price)
@@ -206,21 +238,29 @@ def edit_product(product_id):
             if novo_stock != v.stock_quantity:
                 diferenca = novo_stock - v.stock_quantity
                 tipo = "entrada" if diferenca > 0 else "saida"
+                estoque_antigo = v.stock_quantity
                 v.stock_quantity = novo_stock
-                StockMovement(
-                    variant_id=v.id,
-                    user_id=user_id,
-                    movement_type=tipo,
-                    quantity=abs(diferenca),
-                    reason="Ajuste na tela de edição do produto"
-                ).salvar()
+                movimentacoes_pendentes.append({
+                    "variant": v,
+                    "type": tipo,
+                    "qty": abs(diferenca),
+                    "prev": estoque_antigo,
+                    "res": novo_stock,
+                    "reason": "Ajuste na tela de edição do produto"
+                })
 
+            remover_foto = request.form.get(f"v_remove_image_{v_id}") == "1"
             img_file = request.files.get(f"v_image_{v_id}")
+
             if img_file and img_file.filename != "":
                 nova_img = salvar_imagem_produto(img_file, prefixo="var", imagem_antiga=v.image_url)
                 if nova_img:
                     v.image_url = nova_img
+            elif remover_foto and v.image_url:
+                remover_imagem_produto(v.image_url)
+                v.image_url = None
 
+        new_row_ids = request.form.getlist("new_variant_row_id[]")
         new_names = request.form.getlist("new_variant_name[]")
         new_skus = request.form.getlist("new_variant_sku[]")
         new_barcodes = request.form.getlist("new_variant_barcode[]")
@@ -228,12 +268,18 @@ def edit_product(product_id):
         new_prices = request.form.getlist("new_variant_price[]")
         new_stocks = request.form.getlist("new_variant_stock[]")
         new_mins = request.form.getlist("new_variant_min_stock[]")
-        new_images = request.files.getlist("new_variant_image[]")
 
+        novas_variantes_pendentes = []
         for i in range(len(new_skus)):
             n_sku = new_skus[i].strip().upper()
             if not n_sku:
                 continue
+
+            if ProductVariant.sku_existe(n_sku):
+                flash(f"O SKU '{n_sku}' da nova variação já está em uso.", "danger")
+                return redirect(url_for("product.edit_product", product_id=product_id))
+
+            n_row_id = new_row_ids[i] if i < len(new_row_ids) else f"new_{i}"
             n_name = new_names[i].strip() if i < len(new_names) else "Variação"
             n_barcode = new_barcodes[i].strip() if i < len(new_barcodes) else ""
             n_cost = converter_numero(new_costs[i], float, 0.0) if i < len(new_costs) else 0.0
@@ -241,34 +287,54 @@ def edit_product(product_id):
             n_stock = converter_numero(new_stocks[i], int, 0) if i < len(new_stocks) else 0
             n_min = converter_numero(new_mins[i], int, 5) if i < len(new_mins) else 5
 
+            n_img_file = request.files.get(f"new_variant_image_{n_row_id}")
             n_img = None
-            if i < len(new_images) and new_images[i] and new_images[i].filename != "":
-                n_img = salvar_imagem_produto(new_images[i], prefixo="var")
+            if n_img_file and n_img_file.filename != "":
+                n_img = salvar_imagem_produto(n_img_file, prefixo="var")
 
-            nova_variante = ProductVariant(
-                product_id=produto.id,
-                sku=n_sku,
-                barcode=n_barcode or None,
-                variant_name=n_name,
-                cost_price=n_cost,
-                price=n_price,
-                stock_quantity=n_stock,
-                min_stock=n_min,
-                image_url=n_img
+            novas_variantes_pendentes.append(
+                ProductVariant(
+                    product_id=produto.id,
+                    sku=n_sku,
+                    barcode=n_barcode or None,
+                    variant_name=n_name,
+                    cost_price=n_cost,
+                    price=n_price,
+                    stock_quantity=n_stock,
+                    min_stock=n_min,
+                    image_url=n_img
+                )
             )
-            nova_variante.salvar()
-            if n_stock > 0:
-                StockMovement(
-                    variant_id=nova_variante.id,
-                    user_id=user_id,
-                    movement_type="entrada",
-                    quantity=n_stock,
-                    reason="Saldo inicial da nova variação"
-                ).salvar()
-            produto.variants.append(nova_variante)
 
         try:
-            produto.salvar()
+            with DatabaseConnection() as conn:
+                cursor = conn.cursor()
+                produto.salvar(cursor=cursor)
+
+                for mov in movimentacoes_pendentes:
+                    StockMovement(
+                        variant_id=mov["variant"].id,
+                        user_id=user_id,
+                        movement_type=mov["type"],
+                        quantity=mov["qty"],
+                        previous_stock=mov["prev"],
+                        resulting_stock=mov["res"],
+                        reason=mov["reason"]
+                    ).salvar(cursor=cursor)
+
+                for nv in novas_variantes_pendentes:
+                    nv.salvar(cursor=cursor)
+                    if nv.stock_quantity > 0:
+                        StockMovement(
+                            variant_id=nv.id,
+                            user_id=user_id,
+                            movement_type="entrada",
+                            quantity=nv.stock_quantity,
+                            previous_stock=0,
+                            resulting_stock=nv.stock_quantity,
+                            reason="Estoque inicial da nova variação"
+                        ).salvar(cursor=cursor)
+
             flash(f"Produto '{produto.name}' atualizado com sucesso!", "success")
             return redirect(url_for("product.list_products"))
         except Exception as e:
@@ -276,6 +342,30 @@ def edit_product(product_id):
 
     categories = Category.listar_por_loja(store_id)
     return render_template("products/form.html", product=produto, categories=categories)
+
+@product_bp.route("/variant/<int:variant_id>/excluir", methods=["POST"])
+@login_required
+@role_required(["owner", "manager"])
+def delete_variant(variant_id):
+    store_id = session.get("store_id")
+    variant = ProductVariant.buscar_por_id(variant_id, store_id)
+
+    if not variant:
+        flash("Variação não encontrada.", "danger")
+        return redirect(url_for("product.list_products"))
+
+    total_variantes = ProductVariant.contar_por_produto(variant.product_id)
+    if total_variantes <= 1:
+        flash("Não é possível excluir esta variação. O anúncio deve manter pelo menos uma variação ativa.", "warning")
+        return redirect(url_for("product.edit_product", product_id=variant.product_id))
+
+    sucesso = ProductVariant.excluir(variant_id, store_id)
+    if sucesso:
+        flash(f"Variação '{variant.variant_name}' ({variant.sku}) excluída com sucesso.", "info")
+    else:
+        flash("Erro ao excluir variação.", "danger")
+
+    return redirect(url_for("product.edit_product", product_id=variant.product_id))
 
 @product_bp.route("/<int:product_id>/excluir", methods=["POST"])
 @login_required
@@ -286,7 +376,7 @@ def delete_product(product_id):
 
     if produto:
         Product.excluir(product_id, store_id)
-        flash(f"Produto '{produto.name}' removido.", "info")
+        flash(f"Produto '{produto.name}' excluído com sucesso.", "info")
     else:
         flash("Produto não encontrado.", "danger")
     return redirect(url_for("product.list_products"))
@@ -302,7 +392,7 @@ def update_stock(variant_id=None, product_id=None):
         new_stock = converter_numero(request.form.get("stock_quantity"), int, 0)
         motivo = request.form.get("reason", "Ajuste rápido").strip()
         if new_stock < 0:
-            flash("A quantidade em stock não pode ser negativa.", "danger")
+            flash("A quantidade em estoque não pode ser negativa.", "danger")
             return redirect(request.referrer or url_for("product.list_products"))
     except ValueError:
         flash("Valor numérico inválido.", "danger")
@@ -310,7 +400,7 @@ def update_stock(variant_id=None, product_id=None):
 
     sucesso = ProductVariant.atualizar_stock(v_id, store_id, new_stock, user_id=user_id, motivo=motivo)
     if sucesso:
-        flash("Stock atualizado com sucesso.", "success")
+        flash("Estoque atualizado com sucesso.", "success")
     else:
         flash("Variação não encontrada nesta loja.", "danger")
     return redirect(request.referrer or url_for("product.list_products"))
@@ -319,8 +409,10 @@ def update_stock(variant_id=None, product_id=None):
 @login_required
 def stock_movements():
     store_id = session.get("store_id")
-    movements = StockMovement.listar_por_loja(store_id, limite=100)
-    return render_template("products/movements.html", movements=movements, variant=None)
+    page = request.args.get("page", 1, type=int)
+    pagination = StockMovement.listar_por_loja(store_id, page=page, per_page=20)
+    movements = pagination["items"]
+    return render_template("products/movements.html", movements=movements, pagination=pagination, variant=None)
 
 @product_bp.route("/variant/<int:variant_id>/history")
 @login_required
@@ -332,7 +424,7 @@ def variant_history(variant_id):
         return redirect(url_for("product.list_products"))
 
     movements = StockMovement.listar_por_variante(variant_id, store_id)
-    return render_template("products/movements.html", movements=movements, variant=variant)
+    return render_template("products/movements.html", movements=movements, pagination=None, variant=variant)
 
 @product_bp.route("/variant/<int:variant_id>/movement", methods=["POST"])
 @login_required
@@ -352,7 +444,7 @@ def create_movement(variant_id):
             flash("O saldo do ajuste não pode ser negativo.", "danger")
             return redirect(request.referrer or url_for("product.list_products"))
     except ValueError:
-        flash("Introduza uma quantidade numérica válida.", "danger")
+        flash("Insira uma quantidade numérica válida.", "danger")
         return redirect(request.referrer or url_for("product.list_products"))
 
     sucesso = ProductVariant.registrar_movimento(
@@ -365,7 +457,7 @@ def create_movement(variant_id):
     )
 
     if sucesso:
-        flash("Movimentação de stock registada com sucesso!", "success")
+        flash("Movimentação de estoque cadastrada com sucesso!", "success")
     else:
         flash("Erro ao processar a movimentação.", "danger")
 

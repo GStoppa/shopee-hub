@@ -84,6 +84,8 @@ def inicializar_banco():
                 user_id INTEGER,
                 movement_type TEXT NOT NULL,
                 quantity INTEGER NOT NULL,
+                previous_stock INTEGER NOT NULL DEFAULT 0,
+                resulting_stock INTEGER NOT NULL DEFAULT 0,
                 reason TEXT,
                 created_at TEXT NOT NULL,
                 FOREIGN KEY (variant_id) REFERENCES product_variants (id) ON DELETE CASCADE,
@@ -91,6 +93,15 @@ def inicializar_banco():
             );
         """)
 
+        # Migração defensiva: adiciona as colunas caso o banco já existisse
+        cursor.execute("PRAGMA table_info(stock_movements);")
+        colunas_sm = [col["name"] for col in cursor.fetchall()]
+        if "previous_stock" not in colunas_sm:
+            cursor.execute("ALTER TABLE stock_movements ADD COLUMN previous_stock INTEGER NOT NULL DEFAULT 0;")
+        if "resulting_stock" not in colunas_sm:
+            cursor.execute("ALTER TABLE stock_movements ADD COLUMN resulting_stock INTEGER NOT NULL DEFAULT 0;")
+
+        # Reparação: vincula variações padrão para produtos que porventura estejam sem modelos
         cursor.execute("""
             SELECT p.id, p.name, p.created_at
             FROM products p

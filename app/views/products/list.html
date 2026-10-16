@@ -5,19 +5,19 @@
 
 {% block content %}
 <div class="content-box">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div class="page-header-actions">
         <div>
             <h2>Meus Produtos</h2>
-            <p>Gerencie anúncios, categorias e o stock de cada variação cadastrada.</p>
+            <p>Gerencie anúncios, categorias e o estoque de cada variação cadastrada.</p>
         </div>
 
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <div class="action-buttons-group">
             <a href="{{ url_for('product.stock_movements') }}" class="btn-secondary">
-                📋 Auditoria de Stock
+                📋 Auditoria de Estoque
             </a>
             {% if session.get('user_role') in ['owner', 'manager'] %}
                 <a href="{{ url_for('product.create_product') }}" class="btn-primary">
-                    + Registar Produto
+                    + Cadastrar Produto
                 </a>
             {% endif %}
         </div>
@@ -37,17 +37,17 @@
         </select>
 
         <select name="status" class="form-control filter-select">
-            <option value="">Todos os Estados</option>
+            <option value="">Todos os Status</option>
             <option value="ativo" {{ 'selected' if request.args.get('status') == 'ativo' else '' }}>Apenas Ativos</option>
             <option value="inativo" {{ 'selected' if request.args.get('status') == 'inativo' else '' }}>Apenas Inativos</option>
-            <option value="baixo" {{ 'selected' if request.args.get('status') == 'baixo' else '' }}>Em Alerta de Stock</option>
+            <option value="baixo" {{ 'selected' if request.args.get('status') == 'baixo' else '' }}>Em Alerta de Estoque</option>
             <option value="esgotado" {{ 'selected' if request.args.get('status') == 'esgotado' else '' }}>Esgotados</option>
         </select>
 
-        <button type="submit" class="btn-primary" style="padding: 0.65rem 1rem;">Filtrar</button>
+        <button type="submit" class="btn-primary">Filtrar</button>
 
         {% if request.args.get('q') or request.args.get('category_id') or request.args.get('status') %}
-            <a href="{{ url_for('product.list_products') }}" class="btn-secondary" style="padding: 0.65rem 0.85rem;" title="Limpar Filtros">
+            <a href="{{ url_for('product.list_products') }}" class="btn-secondary" title="Limpar Filtros">
                 ✕ Limpar
             </a>
         {% endif %}
@@ -58,25 +58,25 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th style="width: 40px;"></th>
+                    <th class="col-chevron"></th>
                     <th>Produto / Anúncio</th>
                     <th>Categoria</th>
                     <th>Faixa de Preço</th>
                     <th>Variações</th>
-                    <th>Stock Total</th>
-                    <th>Estado</th>
-                    <th style="text-align: right;">Ações</th>
+                    <th>Estoque Total</th>
+                    <th>Status</th>
+                    <th class="text-right">Ações</th>
                 </tr>
             </thead>
             <tbody>
                 {% for prod in products %}
-                <tr class="accordion-row" data-id="{{ prod.id }}" onclick="toggleAccordion(this.dataset.id)">
-                    <td style="text-align: center;">
+                <tr class="accordion-row" data-id="{{ prod.id }}">
+                    <td class="col-chevron">
                         <span id="chevron-{{ prod.id }}" class="chevron-icon">▶</span>
                     </td>
                     <td>
                         <strong>{{ prod.name }}</strong>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">
+                        <div class="text-muted" style="font-size: 0.75rem;">
                             {{ prod.weight_g }}g | {{ prod.length_cm }}x{{ prod.width_cm }}x{{ prod.height_cm }} cm
                         </div>
                     </td>
@@ -86,7 +86,7 @@
                                 {{ prod.category_name }}
                             </span>
                         {% else %}
-                            <span style="color: var(--text-muted); font-size: 0.8rem;">—</span>
+                            <span class="text-muted">—</span>
                         {% endif %}
                     </td>
                     <td>
@@ -112,8 +112,8 @@
                             <span class="badge badge-danger">Inativo</span>
                         {% endif %}
                     </td>
-                    <td style="text-align: right;" onclick="event.stopPropagation()">
-                        <div style="display: inline-flex; gap: 0.4rem; align-items: center;">
+                    <td class="text-right">
+                        <div class="inline-actions">
                             {% if session.get('user_role') in ['owner', 'manager'] %}
                                 <a href="{{ url_for('product.edit_product', product_id=prod.id) }}" class="btn-action btn-edit">
                                     Editar
@@ -121,9 +121,9 @@
                             {% endif %}
 
                             {% if session.get('user_role') == 'owner' %}
-                                <form method="POST" action="{{ url_for('product.delete_product', product_id=prod.id) }}" data-name="{{ prod.name }}" onsubmit="return confirmDeleteProduct(this.dataset.name);" style="margin: 0;">
+                                <form method="POST" action="{{ url_for('product.delete_product', product_id=prod.id) }}" data-name="{{ prod.name }}" class="form-delete-product m-0">
                                     <button type="submit" class="btn-action btn-delete">
-                                        Eliminar
+                                        Excluir
                                     </button>
                                 </form>
                             {% endif %}
@@ -132,7 +132,7 @@
                 </tr>
 
                 <!-- Linha Expansível com as Variações Filhas -->
-                <tr id="variants-{{ prod.id }}" class="variant-subrow" style="display: none;">
+                <tr id="variants-{{ prod.id }}" class="variant-subrow">
                     <td colspan="8">
                         <table class="variant-table">
                             <thead>
@@ -144,8 +144,8 @@
                                     <th>Custo</th>
                                     <th>Venda</th>
                                     <th>Margem</th>
-                                    <th>Stock</th>
-                                    <th style="text-align: right;">Ajuste de Stock</th>
+                                    <th>Estoque</th>
+                                    <th class="text-right">Ajuste de Estoque</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -155,7 +155,7 @@
                                         {% if v.image_url %}
                                             <img src="{{ url_for('static', filename=v.image_url) }}" class="variant-thumb" alt="Foto">
                                         {% else %}
-                                            <span style="font-size: 1.1rem; vertical-align: middle;">📦</span>
+                                            <span>📦</span>
                                         {% endif %}
                                     </td>
                                     <td><strong>{{ v.variant_name }}</strong></td>
@@ -175,15 +175,15 @@
                                             <span class="badge badge-success">{{ v.stock_quantity }} un</span>
                                         {% endif %}
                                     </td>
-                                    <td style="text-align: right;">
-                                        <div style="display: inline-flex; gap: 0.4rem; align-items: center; justify-content: flex-end;">
+                                    <td class="text-right">
+                                        <div class="inline-actions-right">
                                             <a href="{{ url_for('product.variant_history', variant_id=v.id) }}" class="btn-small" title="Ver histórico de auditoria">
                                                 📋
                                             </a>
-                                            <form method="POST" action="{{ url_for('product.update_stock', variant_id=v.id) }}" class="quick-stock-form">
+                                            <form method="POST" action="{{ url_for('product.update_stock', variant_id=v.id) }}" class="quick-stock-form m-0">
                                                 <input type="number" name="stock_quantity" value="{{ v.stock_quantity }}" min="0" class="quick-stock-input">
                                                 <input type="hidden" name="reason" value="Ajuste rápido pelo catálogo">
-                                                <button type="submit" class="btn-small">Gravar</button>
+                                                <button type="submit" class="btn-small">Salvar</button>
                                             </form>
                                         </div>
                                     </td>
@@ -198,31 +198,11 @@
         </table>
     </div>
     {% else %}
-    <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
-        <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🔍</div>
+    <div class="empty-state">
+        <div class="empty-state-icon">🔍</div>
         <p><strong>Nenhum produto encontrado.</strong></p>
         <p style="font-size: 0.85rem; margin-top: 0.25rem;">Tente ajustar os termos de pesquisa ou os filtros selecionados.</p>
     </div>
     {% endif %}
 </div>
-
-<script>
-function toggleAccordion(prodId) {
-    const row = document.getElementById('variants-' + prodId);
-    const chevron = document.getElementById('chevron-' + prodId);
-    if (!row || !chevron) return;
-
-    if (row.style.display === 'none' || row.style.display === '') {
-        row.style.display = 'table-row';
-        chevron.classList.add('expanded');
-    } else {
-        row.style.display = 'none';
-        chevron.classList.remove('expanded');
-    }
-}
-
-function confirmDeleteProduct(name) {
-    return confirm('Tem a certeza que deseja eliminar o produto "' + name + '"? Todas as variações e saldos associados serão removidos.');
-}
-</script>
 {% endblock %}

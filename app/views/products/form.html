@@ -1,16 +1,16 @@
 {% extends "layouts/admin_base.html" %}
 
-{% set header_title = "Modificar Produto" if product else "Registar Produto" %}
+{% set header_title = "Editar Produto" if product else "Cadastrar Produto" %}
 {% block title %}{{ header_title }} - Shopee Hub{% endblock %}
 
 {% block content %}
-<div style="max-width: 960px; margin: 0 auto;">
+<div class="form-container-md">
 
     <form method="POST" enctype="multipart/form-data" action="{{ url_for('product.edit_product', product_id=product.id) if product else url_for('product.create_product') }}">
 
         <div class="content-box">
             <h2>Informações Gerais</h2>
-            <p style="margin-bottom: 1.5rem;">Defina o título do anúncio, categoria e descrição do produto.</p>
+            <p class="mb-3">Defina o título do anúncio, categoria e descrição do produto.</p>
 
             <div class="form-group">
                 <label for="name">Nome do Anúncio / Produto *</label>
@@ -31,7 +31,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="is_active">Estado de Publicação</label>
+                    <label for="is_active">Status de Publicação</label>
                     <select id="is_active" name="is_active" class="form-control">
                         <option value="1" {% if not product or product.is_active == 1 %}selected{% endif %}>Ativo (Disponível no catálogo)</option>
                         <option value="0" {% if product and product.is_active == 0 %}selected{% endif %}>Inativo (Pausado)</option>
@@ -39,7 +39,7 @@
                 </div>
             </div>
 
-            <div class="form-group" style="margin-bottom: 0;">
+            <div class="form-group mb-0">
                 <label for="description">Descrição do Produto (Opcional)</label>
                 <textarea id="description" name="description" class="form-control" rows="3" placeholder="Detalhes técnicos, composição, instruções de uso...">{{ product.description if product else '' }}</textarea>
             </div>
@@ -47,9 +47,9 @@
 
         <div class="content-box">
             <h2>Logística & Embalagem (Shopee)</h2>
-            <p style="margin-bottom: 1.5rem;">Dados utilizados para o cálculo do frete e emissão de etiquetas.</p>
+            <p class="mb-3">Dados utilizados para o cálculo do frete e emissão de etiquetas.</p>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            <div class="logistics-grid">
                 <div class="form-group">
                     <label for="weight_g">Peso do Pacote (gramas)</label>
                     <input type="text" id="weight_g" name="weight_g" class="form-control" value="{{ product.weight_g if product else '200' }}" placeholder="Ex: 250">
@@ -72,15 +72,15 @@
         {% if not product %}
         <div class="content-box">
             <h2>Estrutura de Preço & Variações</h2>
-            <p style="margin-bottom: 1.25rem;">Escolha se o produto é unitário ou possui cores, tamanhos e modelos diferentes.</p>
+            <p class="mb-2">Escolha se o produto é unitário ou possui cores, tamanhos e modelos diferentes.</p>
 
-            <div style="display: flex; gap: 2rem; margin-bottom: 1.5rem;">
-                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                    <input type="radio" name="has_variants" value="0" checked onchange="alternarTipoProduto(false)">
+            <div class="radio-group-horizontal">
+                <label class="radio-label">
+                    <input type="radio" name="has_variants" value="0" checked>
                     <strong>Produto Simples (Sem variações)</strong>
                 </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                    <input type="radio" name="has_variants" value="1" onchange="alternarTipoProduto(true)">
+                <label class="radio-label">
+                    <input type="radio" name="has_variants" value="1">
                     <strong>Com Grade de Variações (Cores, Tamanhos, etc.)</strong>
                 </label>
             </div>
@@ -97,7 +97,7 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+                <div class="logistics-grid">
                     <div class="form-group">
                         <label for="simple_cost_price">Preço de Custo (R$)</label>
                         <input type="text" id="simple_cost_price" name="simple_cost_price" class="form-control" placeholder="0,00">
@@ -107,28 +107,33 @@
                         <input type="text" id="simple_price" name="simple_price" class="form-control" placeholder="49,90">
                     </div>
                     <div class="form-group">
-                        <label for="simple_stock">Stock Inicial</label>
+                        <label for="simple_stock">Estoque Inicial</label>
                         <input type="number" id="simple_stock" name="simple_stock" class="form-control" value="0" min="0">
                     </div>
                     <div class="form-group">
-                        <label for="simple_min_stock">Alerta de Stock Mínimo</label>
+                        <label for="simple_min_stock">Alerta de Estoque Mínimo</label>
                         <input type="number" id="simple_min_stock" name="simple_min_stock" class="form-control" value="5" min="1">
                     </div>
                 </div>
 
-                <div class="form-group" style="margin-bottom: 0;">
+                <div class="form-group mb-0">
                     <label for="simple_image">Foto do Produto (Opcional)</label>
-                    <input type="file" id="simple_image" name="simple_image" class="form-control" accept=".png, .jpg, .jpeg, .webp">
+                    <div class="simple-preview-container">
+                        <div class="simple-preview-thumb" id="preview_simple">
+                            <span class="preview-placeholder-icon">📦</span>
+                        </div>
+                        <input type="file" id="simple_image" name="simple_image" class="form-control file-preview-input" accept=".png, .jpg, .jpeg, .webp" data-preview-target="preview_simple">
+                    </div>
                 </div>
             </div>
 
             <div id="bloco-variacoes" style="display: none;">
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+                <p class="text-muted mb-2" style="font-size: 0.85rem;">
                     Adicione os modelos filhos. Cada variação possui saldo, código e preço próprios.
                 </p>
 
-                <div class="table-responsive" style="margin-bottom: 1rem;">
-                    <table class="data-table" id="tabela-variacoes">
+                <div class="table-responsive mb-2">
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Nome (ex: Azul G)</th>
@@ -136,7 +141,7 @@
                                 <th>Cód. Barras</th>
                                 <th>Custo (R$)</th>
                                 <th>Venda (R$) *</th>
-                                <th>Stock</th>
+                                <th>Estoque</th>
                                 <th>Mín.</th>
                                 <th>Foto</th>
                                 <th></th>
@@ -144,33 +149,43 @@
                         </thead>
                         <tbody id="corpo-variacoes">
                             <tr>
-                                <td><input type="text" name="variant_name[]" class="form-control" placeholder="Padrão" required style="min-width: 110px;"></td>
-                                <td><input type="text" name="variant_sku[]" class="form-control" placeholder="SKU-01" required style="min-width: 110px;"></td>
-                                <td><input type="text" name="variant_barcode[]" class="form-control" placeholder="EAN" style="min-width: 90px;"></td>
-                                <td><input type="text" name="variant_cost[]" class="form-control" placeholder="0,00" style="min-width: 75px;"></td>
-                                <td><input type="text" name="variant_price[]" class="form-control" placeholder="49,90" required style="min-width: 75px;"></td>
-                                <td><input type="number" name="variant_stock[]" class="form-control" value="0" min="0" style="min-width: 65px;"></td>
-                                <td><input type="number" name="variant_min_stock[]" class="form-control" value="5" min="1" style="min-width: 60px;"></td>
-                                <td><input type="file" name="variant_image[]" accept=".png, .jpg, .jpeg, .webp" style="font-size: 0.75rem; width: 140px;"></td>
-                                <td><button type="button" class="btn-action btn-delete" onclick="removerLinha(this)">✕</button></td>
+                                <td>
+                                    <input type="hidden" name="variant_row_id[]" value="row_0">
+                                    <input type="text" name="variant_name[]" class="form-control input-col-name" placeholder="Padrão" required>
+                                </td>
+                                <td><input type="text" name="variant_sku[]" class="form-control input-col-sku" placeholder="SKU-01" required></td>
+                                <td><input type="text" name="variant_barcode[]" class="form-control input-col-ean" placeholder="EAN"></td>
+                                <td><input type="text" name="variant_cost[]" class="form-control input-col-cost" placeholder="0,00"></td>
+                                <td><input type="text" name="variant_price[]" class="form-control input-col-sale" placeholder="49,90" required></td>
+                                <td><input type="number" name="variant_stock[]" class="form-control input-col-qty" value="0" min="0"></td>
+                                <td><input type="number" name="variant_min_stock[]" class="form-control input-col-min" value="5" min="1"></td>
+                                <td>
+                                    <div class="file-preview-cell">
+                                        <div class="preview-thumb-box" id="preview_row_0">
+                                            <span class="preview-placeholder-icon">📦</span>
+                                        </div>
+                                        <input type="file" name="variant_image_row_0" accept=".png, .jpg, .jpeg, .webp" class="input-col-file file-preview-input" data-preview-target="preview_row_0">
+                                    </div>
+                                </td>
+                                <td><button type="button" class="btn-action btn-delete btn-remove-row">✕</button></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <button type="button" class="btn-secondary" onclick="adicionarLinhaVariacao()">
+                <button type="button" class="btn-secondary" id="btn-add-variant">
                     + Adicionar Outra Variação
                 </button>
             </div>
         </div>
         {% else %}
         <div class="content-box">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div class="page-header-actions mb-2">
                 <div>
                     <h2>Variações & Estoque Cadastrados</h2>
                     <p>Ajuste os dados de cada modelo ou adicione novas variações a este anúncio.</p>
                 </div>
-                <button type="button" class="btn-secondary" onclick="adicionarNovaVariacaoEdicao()">
+                <button type="button" class="btn-secondary" id="btn-add-edit-variant">
                     + Nova Variação
                 </button>
             </div>
@@ -184,40 +199,68 @@
                             <th>Cód. Barras</th>
                             <th>Custo (R$)</th>
                             <th>Venda (R$)</th>
-                            <th>Stock Atual</th>
+                            <th>Estoque Atual</th>
                             <th>Alerta Mín.</th>
                             <th>Foto</th>
+                            <th style="width: 50px;" class="text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="corpo-variacoes-edicao">
                         {% for v in product.variants %}
                         <tr>
                             <td>
-                                <input type="text" name="v_name_{{ v.id }}" value="{{ v.variant_name }}" class="form-control" required style="min-width: 100px;">
+                                <input type="text" name="v_name_{{ v.id }}" value="{{ v.variant_name }}" class="form-control input-col-name" required>
                             </td>
                             <td>
-                                <input type="text" name="v_sku_{{ v.id }}" value="{{ v.sku }}" class="form-control" required style="min-width: 110px;">
+                                <input type="text" name="v_sku_{{ v.id }}" value="{{ v.sku }}" class="form-control input-col-sku" required>
                             </td>
                             <td>
-                                <input type="text" name="v_barcode_{{ v.id }}" value="{{ v.barcode or '' }}" class="form-control" style="min-width: 90px;">
+                                <input type="text" name="v_barcode_{{ v.id }}" value="{{ v.barcode or '' }}" class="form-control input-col-ean">
                             </td>
                             <td>
-                                <input type="text" name="v_cost_{{ v.id }}" value="{{ '%.2f'|format(v.cost_price) }}" class="form-control" style="min-width: 75px;">
+                                <input type="text" name="v_cost_{{ v.id }}" value="{{ '%.2f'|format(v.cost_price) }}" class="form-control input-col-cost">
                             </td>
                             <td>
-                                <input type="text" name="v_price_{{ v.id }}" value="{{ '%.2f'|format(v.price) }}" class="form-control" required style="min-width: 75px;">
+                                <input type="text" name="v_price_{{ v.id }}" value="{{ '%.2f'|format(v.price) }}" class="form-control input-col-sale" required>
                             </td>
                             <td>
-                                <input type="number" name="v_stock_{{ v.id }}" value="{{ v.stock_quantity }}" class="form-control" min="0" style="min-width: 70px;">
+                                <input type="number" name="v_stock_{{ v.id }}" value="{{ v.stock_quantity }}" class="form-control input-col-qty" min="0">
                             </td>
                             <td>
-                                <input type="number" name="v_min_{{ v.id }}" value="{{ v.min_stock }}" class="form-control" min="1" style="min-width: 60px;">
+                                <input type="number" name="v_min_{{ v.id }}" value="{{ v.min_stock }}" class="form-control input-col-min" min="1">
                             </td>
                             <td>
-                                {% if v.image_url %}
-                                    <img src="{{ url_for('static', filename=v.image_url) }}" alt="Foto" style="width: 28px; height: 28px; object-fit: cover; border-radius: 4px; display: block; margin-bottom: 0.25rem;">
+                                <div class="file-preview-cell">
+                                    <div class="preview-thumb-box" id="preview_v_{{ v.id }}">
+                                        {% if v.image_url %}
+                                            <img src="{{ url_for('static', filename=v.image_url) }}" alt="Foto" class="variant-thumb">
+                                        {% else %}
+                                            <span class="preview-placeholder-icon">📦</span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <input type="file" name="v_image_{{ v.id }}" accept=".png, .jpg, .jpeg, .webp" class="input-col-file file-preview-input" data-preview-target="preview_v_{{ v.id }}">
+                                        {% if v.image_url %}
+                                            <label class="btn-remove-photo-checkbox">
+                                                <input type="checkbox" name="v_remove_image_{{ v.id }}" value="1">
+                                                Remover foto
+                                            </label>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                {% if product.variants|length > 1 %}
+                                <button type="button" class="btn-action btn-delete btn-delete-single-variant" 
+                                        data-id="{{ v.id }}" 
+                                        data-name="{{ v.variant_name }}" 
+                                        data-sku="{{ v.sku }}"
+                                        title="Excluir Variação">
+                                    ✕
+                                </button>
+                                {% else %}
+                                <span class="text-muted" title="O anúncio deve manter pelo menos uma variação cadastrada" style="cursor: not-allowed; font-size: 0.85rem;">🔒</span>
                                 {% endif %}
-                                <input type="file" name="v_image_{{ v.id }}" accept=".png, .jpg, .jpeg, .webp" style="font-size: 0.75rem; width: 120px;">
                             </td>
                         </tr>
                         {% endfor %}
@@ -227,78 +270,17 @@
         </div>
         {% endif %}
 
-        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+        <div class="form-footer-actions">
             <a href="{{ url_for('product.list_products') }}" class="btn-secondary">Cancelar</a>
             <button type="submit" class="btn-primary" style="padding: 0.75rem 2rem;">
-                {{ 'Guardar Alterações' if product else 'Concluir Registo' }}
+                {{ 'Salvar Alterações' if product else 'Concluir Cadastro' }}
             </button>
         </div>
 
     </form>
 
+    <!-- Formulário auxiliar para exclusão individual de variação existente (evita formulários aninhados inválidos) -->
+    <form id="form-delete-single-variant" method="POST" action="" style="display: none;"></form>
+
 </div>
-
-<script>
-function alternarTipoProduto(comVariacoes) {
-    const simples = document.getElementById('bloco-simples');
-    const variacoes = document.getElementById('bloco-variacoes');
-    const skuSimples = document.getElementById('simple_sku');
-    const precoSimples = document.getElementById('simple_price');
-
-    if (comVariacoes) {
-        simples.style.display = 'none';
-        variacoes.style.display = 'block';
-        skuSimples.removeAttribute('required');
-        precoSimples.removeAttribute('required');
-    } else {
-        simples.style.display = 'block';
-        variacoes.style.display = 'none';
-        skuSimples.setAttribute('required', 'required');
-        precoSimples.setAttribute('required', 'required');
-    }
-}
-
-function adicionarLinhaVariacao() {
-    const corpo = document.getElementById('corpo-variacoes');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td><input type="text" name="variant_name[]" class="form-control" placeholder="Modelo / Cor" required style="min-width: 110px;"></td>
-        <td><input type="text" name="variant_sku[]" class="form-control" placeholder="SKU" required style="min-width: 110px;"></td>
-        <td><input type="text" name="variant_barcode[]" class="form-control" placeholder="EAN" style="min-width: 90px;"></td>
-        <td><input type="text" name="variant_cost[]" class="form-control" placeholder="0,00" style="min-width: 75px;"></td>
-        <td><input type="text" name="variant_price[]" class="form-control" placeholder="0,00" required style="min-width: 75px;"></td>
-        <td><input type="number" name="variant_stock[]" class="form-control" value="0" min="0" style="min-width: 65px;"></td>
-        <td><input type="number" name="variant_min_stock[]" class="form-control" value="5" min="1" style="min-width: 60px;"></td>
-        <td><input type="file" name="variant_image[]" accept=".png, .jpg, .jpeg, .webp" style="font-size: 0.75rem; width: 140px;"></td>
-        <td><button type="button" class="btn-action btn-delete" onclick="removerLinha(this)">✕</button></td>
-    `;
-    corpo.appendChild(tr);
-}
-
-function adicionarNovaVariacaoEdicao() {
-    const corpo = document.getElementById('corpo-variacoes-edicao');
-    const tr = document.createElement('tr');
-    tr.style.backgroundColor = 'var(--table-hover)';
-    tr.innerHTML = `
-        <td><input type="text" name="new_variant_name[]" class="form-control" placeholder="Nova Cor/Tam" required style="min-width: 100px;"></td>
-        <td><input type="text" name="new_variant_sku[]" class="form-control" placeholder="NOVO-SKU" required style="min-width: 110px;"></td>
-        <td><input type="text" name="new_variant_barcode[]" class="form-control" placeholder="EAN" style="min-width: 90px;"></td>
-        <td><input type="text" name="new_variant_cost[]" class="form-control" placeholder="0,00" style="min-width: 75px;"></td>
-        <td><input type="text" name="new_variant_price[]" class="form-control" placeholder="49,90" required style="min-width: 75px;"></td>
-        <td><input type="number" name="new_variant_stock[]" class="form-control" value="0" min="0" style="min-width: 70px;"></td>
-        <td><input type="number" name="new_variant_min_stock[]" class="form-control" value="5" min="1" style="min-width: 60px;"></td>
-        <td><input type="file" name="new_variant_image[]" accept=".png, .jpg, .jpeg, .webp" style="font-size: 0.75rem; width: 120px;"></td>
-    `;
-    corpo.appendChild(tr);
-}
-
-function removerLinha(btn) {
-    const corpo = document.getElementById('corpo-variacoes');
-    if (corpo.children.length > 1) {
-        btn.closest('tr').remove();
-    } else {
-        alert('É necessário manter pelo menos uma variação.');
-    }
-}
-</script>
 {% endblock %}

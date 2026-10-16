@@ -1,34 +1,32 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Shopee Hub{% endblock %}</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/catalog.css') }}">
 
-    <script>
-        (function() {
-            const savedTheme = localStorage.getItem('shopee_hub_theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        })();
-    </script>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/products.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/categories.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/movements.js') }}" defer></script>
 </head>
 <body>
     <div class="admin-layout">
         {% include "partials/_sidebar.html" %}
 
-        <div class="main-wrapper">
+        <div class="main-content">
             {% include "partials/_navbar.html" %}
 
-            <main class="content-area">
+            <main class="content-body">
                 {% include "partials/_alerts.html" %}
                 {% block content %}{% endblock %}
             </main>
         </div>
     </div>
-
-    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
-    {% block scripts %}{% endblock %}
 </body>
 </html>

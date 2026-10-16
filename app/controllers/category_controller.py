@@ -58,6 +58,14 @@ def delete_category(category_id):
         flash("Categoria não encontrada.", "danger")
         return redirect(url_for("category.list_categories"))
 
+    produtos_vinculados = Category.contar_produtos_vinculados(category_id, store_id)
+    if produtos_vinculados > 0:
+        flash(
+            f"Não é possível excluir a categoria '{category.name}' pois existem {produtos_vinculados} produto(s) associado(s) a ela. Reatribua os produtos para outra categoria antes de excluir.",
+            "warning"
+        )
+        return redirect(url_for("category.list_categories"))
+
     Category.excluir(category_id, store_id)
-    flash(f"Categoria '{category.name}' removida com sucesso.", "info")
+    flash(f"Categoria '{category.name}' excluída com sucesso.", "info")
     return redirect(url_for("category.list_categories"))
