@@ -1,72 +1,61 @@
-{% extends "layouts/admin_base.html" %}
-
-{% set header_title = "Meu Perfil" %}
-{% block title %}Meu Perfil - Shopee Hub{% endblock %}
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Meu Perfil{% endblock %}
+{% block page_title %}Perfil de Acesso{% endblock %}
 
 {% block content %}
-<div style="max-width: 800px; margin: 0 auto;">
-
+<div class="form-container-sm">
     <div class="content-box">
         <h2>Dados Pessoais</h2>
-        <p style="margin-bottom: 1.5rem;">Atualize o seu nome de apresentação e e-mail de acesso.</p>
+        <p class="mb-2">Atualize suas informações básicas de identificação.</p>
 
-        <form method="POST" action="{{ url_for('profile.update_info') }}">
+        <form method="POST" action="{{ url_for('profile.index') }}">
+            <input type="hidden" name="action" value="update_info">
+
             <div class="form-group">
                 <label for="name">Nome Completo</label>
-                <input type="text" id="name" name="name" class="form-control" value="{{ user.name }}" required>
-            </div>
-
-            <div class="form-group">
-                <label for="email">Endereço de E-mail</label>
-                <input type="email" id="email" name="email" class="form-control" value="{{ user.email }}" required>
-            </div>
-
-            <div class="form-group">
-                <label>Cargo / Perfil na Loja</label>
-                <div style="margin-top: 0.25rem;">
-                    {% if user.role == 'owner' %}
-                        <span class="role-badge role-owner">Dono da Loja</span>
-                    {% elif user.role == 'manager' %}
-                        <span class="role-badge role-manager">Gerente</span>
-                    {% else %}
-                        <span class="role-badge role-operator">Operador</span>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end;">
-                <button type="submit" class="btn-primary">Guardar Dados Pessoais</button>
-            </div>
-        </form>
-    </div>
-
-    <div class="content-box">
-        <h2>Segurança da Conta</h2>
-        <p style="margin-bottom: 1.5rem;">Altere a sua palavra-passe de acesso ao sistema.</p>
-
-        <form method="POST" action="{{ url_for('profile.update_password') }}">
-            <div class="form-group">
-                <label for="current_password">Palavra-passe Atual</label>
-                <input type="password" id="current_password" name="current_password" class="form-control" required placeholder="Introduza a palavra-passe atual">
+                <input type="text" id="name" name="name" value="{{ user.name }}" class="form-control" required>
             </div>
 
             <div class="form-grid-2">
                 <div class="form-group">
-                    <label for="new_password">Nova Palavra-passe</label>
-                    <input type="password" id="new_password" name="new_password" class="form-control" minlength="6" required placeholder="Mínimo 6 carateres">
+                    <label for="email">E-mail de Acesso</label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}" class="form-control" required>
                 </div>
-
                 <div class="form-group">
-                    <label for="confirm_password">Confirmar Nova Palavra-passe</label>
-                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" minlength="6" required placeholder="Repita a nova palavra-passe">
+                    <label>Cargo / Função</label>
+                    <input type="text" value="{{ user.role | upper }}" class="form-control" disabled>
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: flex-end;">
-                <button type="submit" class="btn-primary">Alterar Palavra-passe</button>
-            </div>
+            <button type="submit" class="btn-primary">Salvar Dados</button>
         </form>
     </div>
 
+    <div class="content-box">
+        <h2>Alterar Senha</h2>
+        <p class="mb-2">Recomendamos utilizar uma senha forte com letras e números.</p>
+
+        <form method="POST" action="{{ url_for('profile.index') }}">
+            <input type="hidden" name="action" value="update_password">
+
+            <div class="form-group">
+                <label for="current_password">Senha Atual</label>
+                <input type="password" id="current_password" name="current_password" class="form-control" placeholder="••••••••" required>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="new_password">Nova Senha</label>
+                    <input type="password" id="new_password" name="new_password" class="form-control" minlength="6" placeholder="Mínimo 6 caracteres" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirmar Nova Senha</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" minlength="6" placeholder="Repita a nova senha" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-secondary">Atualizar Senha</button>
+        </form>
+    </div>
 </div>
 {% endblock %}

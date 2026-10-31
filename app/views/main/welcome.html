@@ -1,200 +1,120 @@
-{% extends "layouts/admin_base.html" %}
-
-{% set header_title = "Painel de Controle" %}
-{% block title %}Dashboard - Shopee Hub{% endblock %}
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Visão Geral da Operação{% endblock %}
 
 {% block content %}
 <div class="dashboard-metrics-grid">
-    
     <div class="kpi-card kpi-primary">
         <div class="kpi-header">
-            <span class="kpi-title">Catálogo Ativo</span>
-            <div class="kpi-icon-badge">📦</div>
+            <span class="kpi-title">Produtos Ativos</span>
+            <span>📦</span>
         </div>
         <div class="kpi-value">{{ metricas.total_produtos }}</div>
-        <div class="kpi-footer">
-            <span>Anúncios cadastrados</span>
-        </div>
-    </div>
-
-    <div class="kpi-card kpi-info">
-        <div class="kpi-header">
-            <span class="kpi-title">Capital Investido</span>
-            <div class="kpi-icon-badge">🏷️</div>
-        </div>
-        <div class="kpi-value">{{ metricas.custo_estoque | currency }}</div>
-        <div class="kpi-footer">
-            <span>Preço de custo em estoque</span>
-        </div>
-    </div>
-
-    <div class="kpi-card kpi-success">
-        <div class="kpi-header">
-            <span class="kpi-title">Faturamento Projetado</span>
-            <div class="kpi-icon-badge">💰</div>
-        </div>
-        <div class="kpi-value">{{ metricas.valor_estoque | currency }}</div>
-        <div class="kpi-footer">
-            <strong style="color: var(--success);">Margem estimada: {{ margem_geral }}%</strong>
-        </div>
+        <div class="kpi-footer">Anúncios cadastrados</div>
     </div>
 
     <div class="kpi-card kpi-warning">
         <div class="kpi-header">
-            <span class="kpi-title">Abaixo do Mínimo</span>
-            <div class="kpi-icon-badge">⚠️</div>
+            <span class="kpi-title">Estoque Baixo</span>
+            <span>⚠️</span>
         </div>
-        <div class="kpi-value">{{ metricas.baixo_estoque }}</div>
-        <div class="kpi-footer">
-            {% if metricas.baixo_estoque > 0 %}
-                <strong style="color: var(--warning);">Exige reposição imediata</strong>
-            {% else %}
-                <span style="color: var(--success);">Nenhum item abaixo da margem</span>
-            {% endif %}
-        </div>
+        <div class="kpi-value text-warning">{{ metricas.baixo_estoque }}</div>
+        <div class="kpi-footer">Próximos do limite mínimo</div>
     </div>
 
     <div class="kpi-card kpi-danger">
         <div class="kpi-header">
             <span class="kpi-title">Esgotados</span>
-            <div class="kpi-icon-badge">🚨</div>
+            <span>🚨</span>
         </div>
-        <div class="kpi-value">{{ metricas.esgotados }}</div>
-        <div class="kpi-footer">
-            {% if metricas.esgotados > 0 %}
-                <strong style="color: var(--danger);">Variações sem saldo</strong>
-            {% else %}
-                <span style="color: var(--success);">Sem rupturas ativas</span>
-            {% endif %}
-        </div>
+        <div class="kpi-value text-danger">{{ metricas.esgotados }}</div>
+        <div class="kpi-footer">Sem saldo disponível</div>
     </div>
 
+    <div class="kpi-card kpi-success">
+        <div class="kpi-header">
+            <span class="kpi-title">Valor do Estoque</span>
+            <span>💰</span>
+        </div>
+        <div class="kpi-value text-success">{{ metricas.valor_estoque | currency }}</div>
+        <div class="kpi-footer">Margem Bruta Estimada: <strong>{{ margem_geral }}%</strong></div>
+    </div>
 </div>
 
 <div class="dashboard-split-layout">
-
-    <div class="content-box" style="margin-bottom: 0;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
-            <div>
-                <h2>Reposição Prioritária</h2>
-                <p>Variações com saldo igual ou inferior ao estoque mínimo individual configurado.</p>
-            </div>
-            <a href="{{ url_for('product.list_products') }}" class="btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
-                Ver Catálogo Completo →
-            </a>
-        </div>
+    <div class="content-box">
+        <h2>Itens com Reposição Urgente</h2>
+        <p class="mb-2">Variações com estoque zerado ou abaixo do estoque mínimo de segurança.</p>
 
         {% if produtos_criticos %}
-        <div class="table-responsive">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Produto / Variação</th>
-                        <th>SKU</th>
-                        <th>Venda</th>
-                        <th>Saldo Atual</th>
-                        <th style="text-align: right;">Ajuste Rápido</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for prod in produtos_criticos %}
-                    <tr>
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 0.6rem;">
-                                {% if prod.image_url %}
-                                    <img src="{{ url_for('static', filename=prod.image_url) }}" style="width: 28px; height: 28px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                                {% else %}
-                                    <span style="font-size: 1.1rem;">📦</span>
-                                {% endif %}
-                                <strong>{{ prod.display_name }}</strong>
-                            </div>
-                        </td>
-                        <td><code>{{ prod.sku }}</code></td>
-                        <td>{{ prod.price | currency }}</td>
-                        <td>
-                            {% if prod.stock_quantity == 0 %}
-                                <span class="badge badge-danger">Esgotado (0 un)</span>
-                            {% else %}
-                                <span class="badge badge-warning">{{ prod.stock_quantity }} un (Mín: {{ prod.min_stock }})</span>
-                            {% endif %}
-                        </td>
-                        <td style="text-align: right;">
-                            <div style="display: inline-flex; gap: 0.35rem; align-items: center; justify-content: flex-end;">
-                                <a href="{{ url_for('product.variant_history', variant_id=prod.id) }}" class="btn-small" title="Ver histórico de auditoria">
-                                    📋
-                                </a>
-                                <form method="POST" action="{{ url_for('product.update_stock', variant_id=prod.id) }}" class="quick-stock-form">
-                                    <input type="number" name="stock_quantity" value="{{ prod.stock_quantity }}" min="0" class="quick-stock-input">
-                                    <input type="hidden" name="reason" value="Reposição rápida via Dashboard">
-                                    <button type="submit" class="btn-small" title="Salvar saldo">Salvar</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Produto / Variação</th>
+                            <th>SKU</th>
+                            <th class="text-center">Saldo / Mínimo</th>
+                            <th class="text-right">Ajuste Rápido</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in produtos_criticos %}
+                            <tr>
+                                <td>
+                                    <strong>{{ item.display_name }}</strong>
+                                </td>
+                                <td><code>{{ item.sku }}</code></td>
+                                <td class="text-center">
+                                    {% if item.stock_quantity == 0 %}
+                                        <span class="badge badge-danger">0 un (Esgotado)</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">{{ item.stock_quantity }} un (Mín: {{ item.min_stock }})</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-right">
+                                    <form method="POST" action="{{ url_for('product.update_stock', variant_id=item.id) }}" class="quick-stock-form">
+                                        <input type="number" name="stock_quantity" value="{{ item.stock_quantity }}" min="0" class="quick-stock-input" required>
+                                        <input type="hidden" name="reason" value="Reposição rápida pelo painel inicial">
+                                        <button type="submit" class="btn-action btn-edit">Salvar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% else %}
-        <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
-            <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">✅</div>
-            <p><strong>Nenhum item em estado crítico!</strong></p>
-            <p style="font-size: 0.85rem; margin-top: 0.25rem;">Todas as variações ativas estão com saldos superiores ao limite mínimo.</p>
-        </div>
+            <div class="empty-state">
+                <div class="empty-state-icon">✅</div>
+                <p>Excelente! Não há itens com estoque crítico no momento.</p>
+            </div>
         {% endif %}
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-        
-        <div class="content-box" style="margin-bottom: 0;">
-            <h2>Ações Rápidas</h2>
-            <p style="margin-bottom: 1.25rem;">Atalhos operacionais frequentes</p>
+    <div class="content-box">
+        <h2>Ações Rápidas</h2>
+        <p class="mb-2">Atalhos para operações diárias da loja.</p>
 
-            <div class="quick-action-list">
-                {% if session.get('user_role') in ['owner', 'manager'] %}
-                    <a href="{{ url_for('product.create_product') }}" class="quick-action-item">
-                        <span>📦 Cadastrar Novo Produto</span>
-                        <span style="font-weight: 700;">+</span>
-                    </a>
-                    <a href="{{ url_for('category.list_categories') }}" class="quick-action-item">
-                        <span>🏷️ Gestão de Categorias</span>
-                        <span>→</span>
-                    </a>
-                {% endif %}
-                <a href="{{ url_for('product.stock_movements') }}" class="quick-action-item">
-                    <span>📋 Auditoria de Movimentações</span>
-                    <span>→</span>
-                </a>
-                {% if session.get('user_role') in ['owner', 'manager'] %}
-                    <a href="{{ url_for('team.create_member') }}" class="quick-action-item">
-                        <span>👥 Convidar Membro da Equipe</span>
-                        <span style="font-weight: 700;">+</span>
-                    </a>
-                    <a href="{{ url_for('store.settings') }}" class="quick-action-item">
-                        <span>⚙️ Configurações da Loja</span>
-                        <span>→</span>
-                    </a>
-                {% endif %}
-                <a href="{{ url_for('profile.index') }}" class="quick-action-item">
-                    <span>👤 Meu Perfil & Segurança</span>
-                    <span>→</span>
-                </a>
-            </div>
-        </div>
-
-        <div class="content-box" style="margin-bottom: 0; background-color: var(--table-hover);">
-            <h3 style="font-size: 0.95rem; margin-bottom: 0.4rem; color: var(--text-main);">Canal Shopee</h3>
-            <p style="font-size: 0.82rem; margin-bottom: 0.75rem;">
-                Loja vinculada: <strong>{{ session.get('store_name', 'Minha Loja') }}</strong>
-            </p>
+        <div class="quick-action-list">
+            <a href="{{ url_for('product.create_product') }}" class="quick-action-item">
+                <span>+ Novo Produto no Catálogo</span>
+                <span>➔</span>
+            </a>
+            <a href="{{ url_for('category.list_categories') }}" class="quick-action-item">
+                <span>+ Gerenciar Categorias</span>
+                <span>➔</span>
+            </a>
+            <a href="{{ url_for('product.stock_movements') }}" class="quick-action-item">
+                <span>📑 Ver Auditoria de Movimentações</span>
+                <span>➔</span>
+            </a>
             {% if session.get('user_role') in ['owner', 'manager'] %}
-                <a href="{{ url_for('store.settings') }}" style="font-size: 0.8rem; color: var(--primary); text-decoration: none; font-weight: 600;">
-                    Gerenciar Shopee Shop ID →
+                <a href="{{ url_for('team.create_member') }}" class="quick-action-item">
+                    <span>👥 Cadastrar Novo Membro</span>
+                    <span>➔</span>
                 </a>
             {% endif %}
         </div>
-
     </div>
-
 </div>
 {% endblock %}

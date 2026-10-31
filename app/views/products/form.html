@@ -1,29 +1,32 @@
-{% extends "layouts/admin_base.html" %}
-
-{% set header_title = "Editar Produto" if product else "Cadastrar Produto" %}
-{% block title %}{{ header_title }} - Shopee Hub{% endblock %}
+{% extends 'layouts/admin_base.html' %}
+{% block title %}{% if product %}Editar Produto{% else %}Novo Produto{% endif %}{% endblock %}
+{% block page_title %}{% if product %}Editar Anúncio: {{ product.name }}{% else %}Cadastrar Novo Produto{% endif %}{% endblock %}
 
 {% block content %}
 <div class="form-container-md">
-
-    <form method="POST" enctype="multipart/form-data" action="{{ url_for('product.edit_product', product_id=product.id) if product else url_for('product.create_product') }}">
-
+    <form method="POST" enctype="multipart/form-data" action="{% if product %}{{ url_for('product.edit_product', product_id=product.id) }}{% else %}{{ url_for('product.create_product') }}{% endif %}" id="product-form">
+        
         <div class="content-box">
-            <h2>Informações Gerais</h2>
-            <p class="mb-3">Defina o título do anúncio, categoria e descrição do produto.</p>
+            <h2>Dados Gerais do Anúncio</h2>
+            <p class="mb-2">Informações principais exibidas na Shopee.</p>
 
             <div class="form-group">
                 <label for="name">Nome do Anúncio / Produto *</label>
-                <input type="text" id="name" name="name" class="form-control" value="{{ product.name if product else '' }}" placeholder="Ex: Camiseta Básica 100% Algodão" required>
+                <input type="text" id="name" name="name" value="{{ form_data.get('name') if form_data else (product.name if product else '') }}" class="form-control" placeholder="Ex: Jaqueta Corta Vento Esportiva Impermeável" required autofocus>
             </div>
 
             <div class="form-grid-2">
                 <div class="form-group">
-                    <label for="category_id">Categoria da Loja</label>
+                    <label for="category_id">Categoria</label>
                     <select id="category_id" name="category_id" class="form-control">
-                        <option value="">Sem categoria definida</option>
+                        <option value="">Selecione uma Categoria</option>
                         {% for cat in categories %}
-                            <option value="{{ cat.id }}" {% if product and product.category_id == cat.id %}selected{% endif %}>
+                            <option value="{{ cat.id }}" 
+                                {% if form_data and form_data.get('category_id') == cat.id|string %}
+                                    selected
+                                {% elif product and product.category_id == cat.id %}
+                                    selected
+                                {% endif %}>
                                 {{ cat.name }}
                             </option>
                         {% endfor %}
@@ -31,256 +34,287 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="is_active">Status de Publicação</label>
+                    <label for="is_active">Status do Anúncio</label>
                     <select id="is_active" name="is_active" class="form-control">
-                        <option value="1" {% if not product or product.is_active == 1 %}selected{% endif %}>Ativo (Disponível no catálogo)</option>
-                        <option value="0" {% if product and product.is_active == 0 %}selected{% endif %}>Inativo (Pausado)</option>
+                        <option value="1" {% if (form_data and form_data.get('is_active') == '1') or (not form_data and (not product or product.is_active == 1)) %}selected{% endif %}>Ativo (Visível na Loja)</option>
+                        <option value="0" {% if (form_data and form_data.get('is_active') == '0') or (product and product.is_active == 0) %}selected{% endif %}>Inativo (Pausado)</option>
                     </select>
                 </div>
             </div>
 
             <div class="form-group mb-0">
-                <label for="description">Descrição do Produto (Opcional)</label>
-                <textarea id="description" name="description" class="form-control" rows="3" placeholder="Detalhes técnicos, composição, instruções de uso...">{{ product.description if product else '' }}</textarea>
+                <label for="description">Descrição do Produto</label>
+                <textarea id="description" name="description" class="form-control" rows="3" placeholder="Detalhes, especificações técnicas, materiais e garantias...">{{ form_data.get('description') if form_data else (product.description if product else '') }}</textarea>
             </div>
         </div>
 
         <div class="content-box">
-            <h2>Logística & Embalagem (Shopee)</h2>
-            <p class="mb-3">Dados utilizados para o cálculo do frete e emissão de etiquetas.</p>
+            <h2>Dimensões & Logística (Frete)</h2>
+            <p class="mb-2">Utilizado no cálculo de cubagem da transportadora Shopee.</p>
 
             <div class="logistics-grid">
-                <div class="form-group">
-                    <label for="weight_g">Peso do Pacote (gramas)</label>
-                    <input type="text" id="weight_g" name="weight_g" class="form-control" value="{{ product.weight_g if product else '200' }}" placeholder="Ex: 250">
+                <div class="form-group mb-0">
+                    <label for="weight_g">Peso (g)</label>
+                    <input type="text" id="weight_g" name="weight_g" value="{{ form_data.get('weight_g') if form_data else ((('%.2f' | format(product.weight_g)).replace('.', ',')).replace(',00', '') if product and product.weight_g else '0') }}" class="form-control" placeholder="Gramas">
                 </div>
-                <div class="form-group">
+                <div class="form-group mb-0">
                     <label for="length_cm">Comprimento (cm)</label>
-                    <input type="text" id="length_cm" name="length_cm" class="form-control" value="{{ product.length_cm if product else '20' }}" placeholder="Ex: 20">
+                    <input type="text" id="length_cm" name="length_cm" value="{{ form_data.get('length_cm') if form_data else ((('%.2f' | format(product.length_cm)).replace('.', ',')).replace(',00', '') if product and product.length_cm else '0') }}" class="form-control" placeholder="cm">
                 </div>
-                <div class="form-group">
+                <div class="form-group mb-0">
                     <label for="width_cm">Largura (cm)</label>
-                    <input type="text" id="width_cm" name="width_cm" class="form-control" value="{{ product.width_cm if product else '15' }}" placeholder="Ex: 15">
+                    <input type="text" id="width_cm" name="width_cm" value="{{ form_data.get('width_cm') if form_data else ((('%.2f' | format(product.width_cm)).replace('.', ',')).replace(',00', '') if product and product.width_cm else '0') }}" class="form-control" placeholder="cm">
                 </div>
-                <div class="form-group">
+                <div class="form-group mb-0">
                     <label for="height_cm">Altura (cm)</label>
-                    <input type="text" id="height_cm" name="height_cm" class="form-control" value="{{ product.height_cm if product else '5' }}" placeholder="Ex: 5">
+                    <input type="text" id="height_cm" name="height_cm" value="{{ form_data.get('height_cm') if form_data else ((('%.2f' | format(product.height_cm)).replace('.', ',')).replace(',00', '') if product and product.height_cm else '0') }}" class="form-control" placeholder="cm">
                 </div>
             </div>
         </div>
 
         {% if not product %}
-        <div class="content-box">
-            <h2>Estrutura de Preço & Variações</h2>
-            <p class="mb-2">Escolha se o produto é unitário ou possui cores, tamanhos e modelos diferentes.</p>
+            <!-- CADASTRO: ESCOLHA ENTRE PRODUTO SIMPLES E PRODUTO COM VARIAÇÕES -->
+            <div class="content-box">
+                <h2>Estrutura de Preço e Estoque</h2>
+                <p class="mb-2">Escolha se este produto é único ou possui grade de tamanhos/cores.</p>
 
-            <div class="radio-group-horizontal">
-                <label class="radio-label">
-                    <input type="radio" name="has_variants" value="0" checked>
-                    <strong>Produto Simples (Sem variações)</strong>
-                </label>
-                <label class="radio-label">
-                    <input type="radio" name="has_variants" value="1">
-                    <strong>Com Grade de Variações (Cores, Tamanhos, etc.)</strong>
-                </label>
-            </div>
-
-            <div id="bloco-simples">
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label for="simple_sku">SKU Principal *</label>
-                        <input type="text" id="simple_sku" name="simple_sku" class="form-control" placeholder="Ex: CAM-ALGODAO-01">
-                    </div>
-                    <div class="form-group">
-                        <label for="simple_barcode">Código de Barras / EAN</label>
-                        <input type="text" id="simple_barcode" name="simple_barcode" class="form-control" placeholder="Ex: 7891234567890">
-                    </div>
+                <div class="radio-group-horizontal">
+                    <label class="radio-label">
+                        <input type="radio" name="has_variants" value="0" {% if not form_data or form_data.get('has_variants') != '1' %}checked{% endif %}>
+                        <span><strong>Produto Simples</strong> (Item único, sem variação de cor/tamanho)</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="has_variants" value="1" {% if form_data and form_data.get('has_variants') == '1' %}checked{% endif %}>
+                        <span><strong>Com Grade de Variações</strong> (Varia por tamanho, cor, modelo)</span>
+                    </label>
                 </div>
 
-                <div class="logistics-grid">
-                    <div class="form-group">
-                        <label for="simple_cost_price">Preço de Custo (R$)</label>
-                        <input type="text" id="simple_cost_price" name="simple_cost_price" class="form-control" placeholder="0,00">
-                    </div>
-                    <div class="form-group">
-                        <label for="simple_price">Preço de Venda (R$) *</label>
-                        <input type="text" id="simple_price" name="simple_price" class="form-control" placeholder="49,90">
-                    </div>
-                    <div class="form-group">
-                        <label for="simple_stock">Estoque Inicial</label>
-                        <input type="number" id="simple_stock" name="simple_stock" class="form-control" value="0" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label for="simple_min_stock">Alerta de Estoque Mínimo</label>
-                        <input type="number" id="simple_min_stock" name="simple_min_stock" class="form-control" value="5" min="1">
-                    </div>
-                </div>
-
-                <div class="form-group mb-0">
-                    <label for="simple_image">Foto do Produto (Opcional)</label>
-                    <div class="simple-preview-container">
-                        <div class="simple-preview-thumb" id="preview_simple">
-                            <span class="preview-placeholder-icon">📦</span>
+                <!-- BLOCO 1: PRODUTO SIMPLES -->
+                <div id="bloco-simples">
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="simple_sku">SKU Principal *</label>
+                            <input type="text" id="simple_sku" name="simple_sku" value="{{ form_data.get('simple_sku', '') if form_data else '' }}" class="form-control" placeholder="Ex: JKT-ESP-01" required>
                         </div>
-                        <input type="file" id="simple_image" name="simple_image" class="form-control file-preview-input" accept=".png, .jpg, .jpeg, .webp" data-preview-target="preview_simple">
+                        <div class="form-group">
+                            <label for="simple_barcode">Código de Barras (EAN)</label>
+                            <input type="text" id="simple_barcode" name="simple_barcode" value="{{ form_data.get('simple_barcode', '') if form_data else '' }}" class="form-control" placeholder="Ex: 7891234567890">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="simple_cost_price">Preço de Custo (R$)</label>
+                            <input type="text" id="simple_cost_price" name="simple_cost_price" value="{{ form_data.get('simple_cost_price', '0,00') if form_data else '0,00' }}" class="form-control" placeholder="0,00">
+                        </div>
+                        <div class="form-group">
+                            <label for="simple_price">Preço de Venda (R$) *</label>
+                            <input type="text" id="simple_price" name="simple_price" value="{{ form_data.get('simple_price', '') if form_data else '' }}" class="form-control" placeholder="99,90" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="simple_stock">Estoque Inicial (unidades)</label>
+                            <input type="number" id="simple_stock" name="simple_stock" value="{{ form_data.get('simple_stock', '0') if form_data else '0' }}" min="0" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="simple_min_stock">Estoque Mínimo de Alerta</label>
+                            <input type="number" id="simple_min_stock" name="simple_min_stock" value="{{ form_data.get('simple_min_stock', '5') if form_data else '5' }}" min="1" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-0">
+                        <label for="simple_image">Foto do Produto (Máx 2MB)</label>
+                        <div class="file-preview-cell mt-1">
+                            <div class="preview-thumb-box" id="preview_simple">
+                                <span class="preview-placeholder-icon">📦</span>
+                            </div>
+                            <input type="file" id="simple_image" name="simple_image" accept=".png, .jpg, .jpeg, .webp" class="form-control file-preview-input" data-preview-target="preview_simple">
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="bloco-variacoes" style="display: none;">
-                <p class="text-muted mb-2" style="font-size: 0.85rem;">
-                    Adicione os modelos filhos. Cada variação possui saldo, código e preço próprios.
-                </p>
+                <!-- BLOCO 2: GRADE DE VARIAÇÕES -->
+                <div id="bloco-variacoes" style="display: none;">
+                    <div class="table-responsive mb-2">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Variação *</th>
+                                    <th>SKU *</th>
+                                    <th>EAN</th>
+                                    <th>Custo (R$)</th>
+                                    <th>Venda (R$) *</th>
+                                    <th>Estoque</th>
+                                    <th>Mínimo</th>
+                                    <th>Foto</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpo-variacoes">
+                                {% if grid_variants and grid_variants | length > 0 %}
+                                    {% for gv in grid_variants %}
+                                        <tr>
+                                            <td>
+                                                <input type="hidden" name="variant_row_id[]" value="{{ gv.row_id }}">
+                                                <input type="text" name="variant_name[]" value="{{ gv.name }}" class="form-control input-col-name" placeholder="Ex: Preto P" required>
+                                            </td>
+                                            <td><input type="text" name="variant_sku[]" value="{{ gv.sku }}" class="form-control input-col-sku" placeholder="SKU" required></td>
+                                            <td><input type="text" name="variant_barcode[]" value="{{ gv.barcode }}" class="form-control input-col-ean" placeholder="EAN"></td>
+                                            <td><input type="text" name="variant_cost[]" value="{{ gv.cost }}" class="form-control input-col-cost" placeholder="0,00"></td>
+                                            <td><input type="text" name="variant_price[]" value="{{ gv.price }}" class="form-control input-col-sale" placeholder="99,90" required></td>
+                                            <td><input type="number" name="variant_stock[]" value="{{ gv.stock }}" class="form-control input-col-qty" min="0"></td>
+                                            <td><input type="number" name="variant_min_stock[]" value="{{ gv.min_stock }}" class="form-control input-col-min" min="1"></td>
+                                            <td>
+                                                <div class="file-preview-cell">
+                                                    <div class="preview-thumb-box" id="preview_{{ gv.row_id }}">
+                                                        <span class="preview-placeholder-icon">📦</span>
+                                                    </div>
+                                                    <input type="file" name="variant_image_{{ gv.row_id }}" accept=".png, .jpg, .jpeg, .webp" class="input-col-file file-preview-input" data-preview-target="preview_{{ gv.row_id }}">
+                                                </div>
+                                            </td>
+                                            <td class="text-center"><button type="button" class="btn-action btn-delete btn-remove-row" title="Remover Linha">✕</button></td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td>
+                                            <input type="hidden" name="variant_row_id[]" value="row_0">
+                                            <input type="text" name="variant_name[]" class="form-control input-col-name" placeholder="Ex: Preto P" required>
+                                        </td>
+                                        <td><input type="text" name="variant_sku[]" class="form-control input-col-sku" placeholder="SKU" required></td>
+                                        <td><input type="text" name="variant_barcode[]" class="form-control input-col-ean" placeholder="EAN"></td>
+                                        <td><input type="text" name="variant_cost[]" class="form-control input-col-cost" placeholder="0,00"></td>
+                                        <td><input type="text" name="variant_price[]" class="form-control input-col-sale" placeholder="99,90" required></td>
+                                        <td><input type="number" name="variant_stock[]" class="form-control input-col-qty" value="0" min="0"></td>
+                                        <td><input type="number" name="variant_min_stock[]" class="form-control input-col-min" value="5" min="1"></td>
+                                        <td>
+                                            <div class="file-preview-cell">
+                                                <div class="preview-thumb-box" id="preview_row_0">
+                                                    <span class="preview-placeholder-icon">📦</span>
+                                                </div>
+                                                <input type="file" name="variant_image_row_0" accept=".png, .jpg, .jpeg, .webp" class="input-col-file file-preview-input" data-preview-target="preview_row_0">
+                                            </div>
+                                        </td>
+                                        <td class="text-center"><button type="button" class="btn-action btn-delete btn-remove-row" title="Remover Linha">✕</button></td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button type="button" id="btn-add-variant" class="btn-secondary">
+                        + Adicionar Outra Variação
+                    </button>
+                </div>
+            </div>
+        {% else %}
+            <!-- EDIÇÃO: LISTA DE VARIAÇÕES EXISTENTES + ADIÇÃO DE NOVAS -->
+            <div class="content-box">
+                <h2>Variações Existentes do Anúncio</h2>
+                <p class="mb-2">Atualize preços, saldos de estoque e imagens das variações já salvas.</p>
+
+                <div class="table-responsive mb-3">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Foto Atual / Trocar</th>
+                                <th>Nome Variação *</th>
+                                <th>SKU *</th>
+                                <th>EAN</th>
+                                <th>Custo (R$)</th>
+                                <th>Venda (R$) *</th>
+                                <th>Estoque</th>
+                                <th>Mínimo</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for v in product.variants %}
+                                <tr>
+                                    <td>
+                                        <div class="file-preview-cell">
+                                            <div class="preview-thumb-box" id="preview_v_{{ v.id }}">
+                                                {% if v.image_url %}
+                                                    <img src="{{ url_for('static', filename=v.image_url) }}" alt="Preview">
+                                                {% else %}
+                                                    <span class="preview-placeholder-icon">📦</span>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <input type="file" name="v_image_{{ v.id }}" accept=".png, .jpg, .jpeg, .webp" class="input-col-file file-preview-input" data-preview-target="preview_v_{{ v.id }}">
+                                                {% if v.image_url %}
+                                                    <label class="btn-remove-photo-checkbox">
+                                                        <input type="checkbox" name="v_remove_image_{{ v.id }}" value="1">
+                                                        Remover
+                                                    </label>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><input type="text" name="v_name_{{ v.id }}" value="{{ v.variant_name }}" class="form-control input-col-name" required></td>
+                                    <td><input type="text" name="v_sku_{{ v.id }}" value="{{ v.sku }}" class="form-control input-col-sku" required></td>
+                                    <td><input type="text" name="v_barcode_{{ v.id }}" value="{{ v.barcode or '' }}" class="form-control input-col-ean"></td>
+                                    <td><input type="text" name="v_cost_{{ v.id }}" value="{{ ('%.2f' | format(v.cost_price)).replace('.', ',') }}" class="form-control input-col-cost"></td>
+                                    <td><input type="text" name="v_price_{{ v.id }}" value="{{ ('%.2f' | format(v.price)).replace('.', ',') }}" class="form-control input-col-sale" required></td>
+                                    <td><input type="number" name="v_stock_{{ v.id }}" value="{{ v.stock_quantity }}" min="0" class="form-control input-col-qty" required></td>
+                                    <td><input type="number" name="v_min_{{ v.id }}" value="{{ v.min_stock }}" min="1" class="form-control input-col-min" required></td>
+                                    <td class="text-center">
+                                        {% if product.variants | length > 1 %}
+                                            <button type="button" class="btn-action btn-delete btn-delete-single-variant" data-id="{{ v.id }}" data-name="{{ v.variant_name }}" data-sku="{{ v.sku }}">✕</button>
+                                        {% else %}
+                                            <span class="text-muted" title="O anúncio deve possuir ao menos uma variação">—</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Adicionar Novas Variações a este Produto</h3>
+                <p class="mb-2">Novos tamanhos ou opções para complementar a grade existente.</p>
 
                 <div class="table-responsive mb-2">
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Nome (ex: Azul G)</th>
+                                <th>Nome Variação *</th>
                                 <th>SKU *</th>
-                                <th>Cód. Barras</th>
+                                <th>EAN</th>
                                 <th>Custo (R$)</th>
                                 <th>Venda (R$) *</th>
                                 <th>Estoque</th>
-                                <th>Mín.</th>
+                                <th>Mínimo</th>
                                 <th>Foto</th>
                                 <th></th>
                             </tr>
                         </thead>
-                        <tbody id="corpo-variacoes">
-                            <tr>
-                                <td>
-                                    <input type="hidden" name="variant_row_id[]" value="row_0">
-                                    <input type="text" name="variant_name[]" class="form-control input-col-name" placeholder="Padrão" required>
-                                </td>
-                                <td><input type="text" name="variant_sku[]" class="form-control input-col-sku" placeholder="SKU-01" required></td>
-                                <td><input type="text" name="variant_barcode[]" class="form-control input-col-ean" placeholder="EAN"></td>
-                                <td><input type="text" name="variant_cost[]" class="form-control input-col-cost" placeholder="0,00"></td>
-                                <td><input type="text" name="variant_price[]" class="form-control input-col-sale" placeholder="49,90" required></td>
-                                <td><input type="number" name="variant_stock[]" class="form-control input-col-qty" value="0" min="0"></td>
-                                <td><input type="number" name="variant_min_stock[]" class="form-control input-col-min" value="5" min="1"></td>
-                                <td>
-                                    <div class="file-preview-cell">
-                                        <div class="preview-thumb-box" id="preview_row_0">
-                                            <span class="preview-placeholder-icon">📦</span>
-                                        </div>
-                                        <input type="file" name="variant_image_row_0" accept=".png, .jpg, .jpeg, .webp" class="input-col-file file-preview-input" data-preview-target="preview_row_0">
-                                    </div>
-                                </td>
-                                <td><button type="button" class="btn-action btn-delete btn-remove-row">✕</button></td>
-                            </tr>
+                        <tbody id="corpo-variacoes-edicao">
+                            <!-- Linhas adicionadas dinamicamente via JavaScript -->
                         </tbody>
                     </table>
                 </div>
 
-                <button type="button" class="btn-secondary" id="btn-add-variant">
-                    + Adicionar Outra Variação
-                </button>
-            </div>
-        </div>
-        {% else %}
-        <div class="content-box">
-            <div class="page-header-actions mb-2">
-                <div>
-                    <h2>Variações & Estoque Cadastrados</h2>
-                    <p>Ajuste os dados de cada modelo ou adicione novas variações a este anúncio.</p>
-                </div>
-                <button type="button" class="btn-secondary" id="btn-add-edit-variant">
+                <button type="button" id="btn-add-edit-variant" class="btn-secondary">
                     + Nova Variação
                 </button>
             </div>
-
-            <div class="table-responsive">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Variação</th>
-                            <th>SKU</th>
-                            <th>Cód. Barras</th>
-                            <th>Custo (R$)</th>
-                            <th>Venda (R$)</th>
-                            <th>Estoque Atual</th>
-                            <th>Alerta Mín.</th>
-                            <th>Foto</th>
-                            <th style="width: 50px;" class="text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="corpo-variacoes-edicao">
-                        {% for v in product.variants %}
-                        <tr>
-                            <td>
-                                <input type="text" name="v_name_{{ v.id }}" value="{{ v.variant_name }}" class="form-control input-col-name" required>
-                            </td>
-                            <td>
-                                <input type="text" name="v_sku_{{ v.id }}" value="{{ v.sku }}" class="form-control input-col-sku" required>
-                            </td>
-                            <td>
-                                <input type="text" name="v_barcode_{{ v.id }}" value="{{ v.barcode or '' }}" class="form-control input-col-ean">
-                            </td>
-                            <td>
-                                <input type="text" name="v_cost_{{ v.id }}" value="{{ '%.2f'|format(v.cost_price) }}" class="form-control input-col-cost">
-                            </td>
-                            <td>
-                                <input type="text" name="v_price_{{ v.id }}" value="{{ '%.2f'|format(v.price) }}" class="form-control input-col-sale" required>
-                            </td>
-                            <td>
-                                <input type="number" name="v_stock_{{ v.id }}" value="{{ v.stock_quantity }}" class="form-control input-col-qty" min="0">
-                            </td>
-                            <td>
-                                <input type="number" name="v_min_{{ v.id }}" value="{{ v.min_stock }}" class="form-control input-col-min" min="1">
-                            </td>
-                            <td>
-                                <div class="file-preview-cell">
-                                    <div class="preview-thumb-box" id="preview_v_{{ v.id }}">
-                                        {% if v.image_url %}
-                                            <img src="{{ url_for('static', filename=v.image_url) }}" alt="Foto" class="variant-thumb">
-                                        {% else %}
-                                            <span class="preview-placeholder-icon">📦</span>
-                                        {% endif %}
-                                    </div>
-                                    <div>
-                                        <input type="file" name="v_image_{{ v.id }}" accept=".png, .jpg, .jpeg, .webp" class="input-col-file file-preview-input" data-preview-target="preview_v_{{ v.id }}">
-                                        {% if v.image_url %}
-                                            <label class="btn-remove-photo-checkbox">
-                                                <input type="checkbox" name="v_remove_image_{{ v.id }}" value="1">
-                                                Remover foto
-                                            </label>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                {% if product.variants|length > 1 %}
-                                <button type="button" class="btn-action btn-delete btn-delete-single-variant" 
-                                        data-id="{{ v.id }}" 
-                                        data-name="{{ v.variant_name }}" 
-                                        data-sku="{{ v.sku }}"
-                                        title="Excluir Variação">
-                                    ✕
-                                </button>
-                                {% else %}
-                                <span class="text-muted" title="O anúncio deve manter pelo menos uma variação cadastrada" style="cursor: not-allowed; font-size: 0.85rem;">🔒</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
         {% endif %}
 
         <div class="form-footer-actions">
             <a href="{{ url_for('product.list_products') }}" class="btn-secondary">Cancelar</a>
-            <button type="submit" class="btn-primary" style="padding: 0.75rem 2rem;">
-                {{ 'Salvar Alterações' if product else 'Concluir Cadastro' }}
+            <button type="submit" class="btn-primary">
+                {% if product %}Salvar Alterações{% else %}Concluir Cadastro{% endif %}
             </button>
         </div>
-
     </form>
 
-    <!-- Formulário auxiliar para exclusão individual de variação existente (evita formulários aninhados inválidos) -->
-    <form id="form-delete-single-variant" method="POST" action="" style="display: none;"></form>
-
+    <form id="form-delete-single-variant" method="POST" style="display: none;"></form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/products.js') }}"></script>
 {% endblock %}

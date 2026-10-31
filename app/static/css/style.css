@@ -39,29 +39,16 @@
 html[data-theme="light"] {
     --bg-main: #f9fafb;
     --bg-card: #ffffff;
-    --sidebar-bg: #1f2937;
+    --sidebar-bg: #111827;
     --navbar-bg: #ffffff;
     --text-main: #111827;
     --text-muted: #6b7280;
     --border-color: #e5e7eb;
     --table-header: #f3f4f6;
     --table-hover: #f9fafb;
+
     --secondary: #e5e7eb;
     --secondary-hover: #d1d5db;
-}
-
-/* ==========================================================================
-   TRANSIÇÃO SUAVE DE TEMA
-   ========================================================================== */
-.theme-transition,
-.theme-transition *,
-.theme-transition *::before,
-.theme-transition *::after {
-    transition: background-color 0.35s ease, 
-                color 0.35s ease, 
-                border-color 0.35s ease, 
-                box-shadow 0.35s ease !important;
-    transition-delay: 0s !important;
 }
 
 /* ==========================================================================
@@ -113,7 +100,7 @@ a {
     align-items: center;
     gap: 0.75rem;
     padding: 0 1.5rem;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .brand-dot {
@@ -121,6 +108,7 @@ a {
     height: 12px;
     background-color: var(--primary);
     border-radius: 50%;
+    flex-shrink: 0;
 }
 
 .brand-title {
@@ -128,6 +116,9 @@ a {
     font-weight: 700;
     letter-spacing: -0.02em;
     color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .sidebar-nav {
@@ -158,13 +149,23 @@ a {
 }
 
 .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(255, 255, 255, 0.06);
     color: #ffffff;
+}
+
+.nav-link.active {
+    background-color: rgba(238, 77, 45, 0.15);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.nav-link.active span:first-child {
+    filter: drop-shadow(0 0 4px rgba(238, 77, 45, 0.5));
 }
 
 .sidebar-footer {
     padding: 1rem;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .btn-logout {
@@ -220,6 +221,10 @@ a {
     font-size: 1.15rem;
     cursor: pointer;
     color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
 }
 
 .user-profile-badge {
@@ -273,7 +278,7 @@ a {
 }
 
 /* ==========================================================================
-   4. CLASSES UTILITÁRIAS (SUBSTITUEM CSS INLINE)
+   4. CLASSES UTILITÁRIAS
    ========================================================================== */
 .form-container-md {
     max-width: 960px;
@@ -365,7 +370,7 @@ a {
 }
 
 /* ==========================================================================
-   5. MENU MOBILE E RESPONSIVIDADE (MEDIA QUERIES)
+   5. MENU MOBILE E MEDIA QUERIES
    ========================================================================== */
 .navbar-left {
     display: flex;
@@ -449,4 +454,71 @@ a {
     .filter-select {
         width: 100%;
     }
+}
+
+/* ==========================================================================
+   6. TRANSIÇÃO SUAVE DE TEMA
+   ========================================================================== */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+    transition: background-color 0.35s ease, 
+                color 0.35s ease, 
+                border-color 0.35s ease, 
+                box-shadow 0.35s ease !important;
+    transition-delay: 0s !important;
+}
+
+/* ==========================================================================
+   UTILITÁRIOS ADICIONAIS & COMPONENTES DA SIDEBAR
+   ========================================================================== */
+.p-0 { padding: 0 !important; }
+.pt-0 { padding-top: 0 !important; }
+.pb-0 { padding-bottom: 0 !important; }
+
+.mt-1 { margin-top: 0.5rem !important; }
+.mt-2 { margin-top: 1rem !important; }
+.mt-3 { margin-top: 1.5rem !important; }
+
+.brand-logo-img {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.nav-section-with-badge {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 0.5rem;
+}
+
+.nav-section-badge {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: var(--info);
+    font-size: 0.65rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.nav-link-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.badge-soon {
+    font-size: 0.65rem;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    padding: 0.15rem 0.45rem;
+    border-radius: 9999px;
+    margin-left: auto;
+    font-weight: 600;
 }

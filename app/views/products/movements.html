@@ -1,159 +1,148 @@
-{% extends "layouts/admin_base.html" %}
-
-{% set header_title = "Histórico de Estoque" if variant else "Auditoria de Movimentações" %}
-{% block title %}{{ header_title }} - Shopee Hub{% endblock %}
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Auditoria de Estoque{% endblock %}
+{% block page_title %}Auditoria de Movimentações{% endblock %}
 
 {% block content %}
+{% if variant %}
+    <div class="content-box">
+        <div class="page-header-actions mb-0">
+            <div>
+                <h2>Movimentar Estoque Manualmente</h2>
+                <p class="m-0">Variação: <strong>{{ variant.display_name }}</strong> (SKU: <code>{{ variant.sku }}</code>) | Saldo Atual: <strong>{{ variant.stock_quantity }} un</strong></p>
+            </div>
+            <a href="{{ url_for('product.list_products') }}" class="btn-secondary">← Voltar ao Catálogo</a>
+        </div>
+
+        <form method="POST" action="{{ url_for('product.create_movement', variant_id=variant.id) }}" class="mt-2">
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="movement_type">Tipo de Operação *</label>
+                    <select id="movement_type" name="movement_type" class="form-control" required>
+                        <option value="entrada">Entrada (+) - Chegada de estoque ou compra</option>
+                        <option value="saida">Saída (-) - Venda externa, perda ou avaria</option>
+                        <option value="ajuste">Ajuste de Balanço (=) - Define novo saldo exato</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="quantity">Quantidade *</label>
+                    <input type="number" id="quantity" name="quantity" class="form-control" placeholder="Ex: 10" min="0" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="reason">Motivo Declarado *</label>
+                <input type="text" id="reason" name="reason" class="form-control" placeholder="Ex: Chegada de lote de fornecedor" required>
+            </div>
+
+            <button type="submit" class="btn-primary">Registrar Movimentação</button>
+        </form>
+    </div>
+{% endif %}
+
 <div class="content-box">
     <div class="page-header-actions">
         <div>
-            {% if variant %}
-                <h2>Histórico: {{ variant.display_name }}</h2>
-                <p>SKU: <code>{{ variant.sku }}</code> | Saldo em Estoque: <strong>{{ variant.stock_quantity }} un</strong></p>
-            {% else %}
-                <h2>Auditoria Geral de Movimentações</h2>
-                <p>Registro cronológico de todas as alterações manuais e ajustes no estoque da loja.</p>
-            {% endif %}
+            <h2>{% if variant %}Histórico desta Variação{% else %}Auditoria Geral de Movimentações{% endif %}</h2>
+            <p class="m-0">Registro cronológico de todas as alterações manuais e ajustes no estoque da loja.</p>
         </div>
-        <div class="action-buttons-group">
-            {% if variant %}
-                <button type="button" class="btn-primary" data-action="open-movement-modal">
-                    + Nova Movimentação
-                </button>
-            {% endif %}
-            <a href="{{ url_for('product.list_products') }}" class="btn-secondary">
-                ← Voltar ao Catálogo
-            </a>
-        </div>
+        {% if not variant %}
+            <a href="{{ url_for('product.list_products') }}" class="btn-secondary">← Voltar ao Catálogo</a>
+        {% endif %}
     </div>
 
     {% if movements %}
-    <div class="table-responsive">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Data & Hora</th>
-                    {% if not variant %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Data & Hora</th>
                         <th>Produto / Variação</th>
                         <th>SKU</th>
-                    {% endif %}
-                    <th>Operação</th>
-                    <th>Saldo Anterior</th>
-                    <th>Movimentação</th>
-                    <th>Saldo Resultante</th>
-                    <th>Motivo Declarado</th>
-                    <th>Responsável</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for mov in movements %}
-                <tr>
-                    <td>{{ mov.created_at }}</td>
-                    {% if not variant %}
-                        <td><strong>{{ mov.product_name }}</strong>{% if mov.variant_name and mov.variant_name != 'Padrão' %} - {{ mov.variant_name }}{% endif %}</td>
-                        <td><code>{{ mov.variant_sku }}</code></td>
-                    {% endif %}
-                    <td>
-                        {% if mov.movement_type == 'entrada' %}
-                            <span class="badge badge-success">Entrada</span>
-                        {% elif mov.movement_type == 'saida' %}
-                            <span class="badge badge-danger">Saída</span>
-                        {% else %}
-                            <span class="badge badge-info">Ajuste</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <span class="text-muted">{{ mov.previous_stock }} un</span>
-                    </td>
-                    <td>
-                        <strong>
-                            {% if mov.movement_type == 'entrada' %}
-                                <span class="text-success">+{{ mov.quantity }} un</span>
-                            {% elif mov.movement_type == 'saida' %}
-                                <span class="text-danger">-{{ mov.quantity }} un</span>
-                            {% else %}
-                                <span>{{ mov.quantity }} un</span>
+                        <th class="text-center">Operação</th>
+                        <th class="text-center">Saldo Anterior</th>
+                        <th class="text-center">Movimentação</th>
+                        <th class="text-center">Saldo Resultante</th>
+                        <th>Motivo Declarado</th>
+                        <th>Responsável</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mov in movements %}
+                        <tr>
+                            <td>{{ mov.created_at | datetime_format }}</td>
+                            <td><strong>{{ mov.product_name }}</strong> {% if mov.variant_name and mov.variant_name != 'Padrão' %}- {{ mov.variant_name }}{% endif %}</td>
+                            <td><code>{{ mov.variant_sku }}</code></td>
+                            <td class="text-center">
+                                {% if mov.movement_type == 'entrada' %}
+                                    <span class="badge badge-success">Entrada</span>
+                                {% elif mov.movement_type == 'saida' %}
+                                    <span class="badge badge-danger">Saída</span>
+                                {% else %}
+                                    <span class="badge badge-info">Ajuste</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center text-muted">{{ mov.previous_stock }} un</td>
+                            <td class="text-center">
+                                {% if mov.movement_type == 'entrada' %}
+                                    <strong class="text-success">+{{ mov.quantity }} un</strong>
+                                {% elif mov.movement_type == 'saida' %}
+                                    <strong class="text-danger">-{{ mov.quantity }} un</strong>
+                                {% else %}
+                                    <strong class="text-info">Δ {{ mov.quantity }} un</strong>
+                                {% endif %}
+                            </td>
+                            <td class="text-center"><strong>{{ mov.resulting_stock }} un</strong></td>
+                            <td>{{ mov.reason or 'Ajuste manual' }}</td>
+                            <td>{{ mov.user_name }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if total_paginas > 1 %}
+            <div class="pagination-bar">
+                <div>Mostrando página <strong>{{ pagina }}</strong> de <strong>{{ total_paginas }}</strong> (Total: {{ total_itens }} registos)</div>
+                <div class="pagination-controls">
+                    {% if variant %}
+                        <a href="{{ url_for('product.variant_history', variant_id=variant.id, page=pagina-1) }}" class="page-link {% if pagina == 1 %}is-disabled{% endif %}">Anterior</a>
+                        
+                        {% set window = 2 %}
+                        {% for p in range(1, total_paginas + 1) %}
+                            {% if p == 1 or p == total_paginas or (p >= pagina - window and p <= pagina + window) %}
+                                <a href="{{ url_for('product.variant_history', variant_id=variant.id, page=p) }}" class="page-link {% if p == pagina %}is-active{% endif %}">{{ p }}</a>
+                            {% elif p == pagina - window - 1 or p == pagina + window + 1 %}
+                                <span class="page-link is-disabled" style="border: none; background: transparent;">...</span>
                             {% endif %}
-                        </strong>
-                    </td>
-                    <td>
-                        <strong>{{ mov.resulting_stock }} un</strong>
-                    </td>
-                    <td>{{ mov.reason or '—' }}</td>
-                    <td>{{ mov.user_name }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                        {% endfor %}
 
-    {% if not variant and total_paginas is defined and total_paginas > 1 %}
-    <div class="pagination-bar">
-        <div class="pagination-info">
-            Exibindo página <strong>{{ pagina }}</strong> de <strong>{{ total_paginas }}</strong> ({{ total_itens }} movimentações no total)
-        </div>
-        <div class="pagination-controls">
-            <a href="{{ url_for('product.stock_movements', page=pagina-1) }}" 
-               class="page-link {{ 'is-disabled' if pagina <= 1 else '' }}">
-                ← Anterior
-            </a>
+                        <a href="{{ url_for('product.variant_history', variant_id=variant.id, page=pagina+1) }}" class="page-link {% if pagina == total_paginas %}is-disabled{% endif %}">Próxima</a>
+                    {% else %}
+                        <a href="{{ url_for('product.stock_movements', page=pagina-1, q=request.args.get('q', ''), tipo=request.args.get('tipo', '')) }}" class="page-link {% if pagina == 1 %}is-disabled{% endif %}">Anterior</a>
+                        
+                        {% set window = 2 %}
+                        {% for p in range(1, total_paginas + 1) %}
+                            {% if p == 1 or p == total_paginas or (p >= pagina - window and p <= pagina + window) %}
+                                <a href="{{ url_for('product.stock_movements', page=p, q=request.args.get('q', ''), tipo=request.args.get('tipo', '')) }}" class="page-link {% if p == pagina %}is-active{% endif %}">{{ p }}</a>
+                            {% elif p == pagina - window - 1 or p == pagina + window + 1 %}
+                                <span class="page-link is-disabled" style="border: none; background: transparent;">...</span>
+                            {% endif %}
+                        {% endfor %}
 
-            {% for p in range(1, total_paginas + 1) %}
-                <a href="{{ url_for('product.stock_movements', page=p) }}" 
-                   class="page-link {{ 'is-active' if p == pagina else '' }}">
-                    {{ p }}
-                </a>
-            {% endfor %}
-
-            <a href="{{ url_for('product.stock_movements', page=pagina+1) }}" 
-               class="page-link {{ 'is-disabled' if pagina >= total_paginas else '' }}">
-                Próxima →
-            </a>
-        </div>
-    </div>
-    {% endif %}
-
+                        <a href="{{ url_for('product.stock_movements', page=pagina+1, q=request.args.get('q', ''), tipo=request.args.get('tipo', '')) }}" class="page-link {% if pagina == total_paginas %}is-disabled{% endif %}">Próxima</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
     {% else %}
-    <div class="empty-state">
-        <div class="empty-state-icon">📋</div>
-        <p><strong>Nenhuma movimentação registrada até o momento.</strong></p>
-        <p style="font-size: 0.85rem;">As alterações manuais de saldo e vendas serão registradas nesta tabela.</p>
-    </div>
+        <div class="empty-state">
+            <div class="empty-state-icon">📑</div>
+            <p>Nenhuma movimentação de estoque registrada até o momento.</p>
+        </div>
     {% endif %}
 </div>
+{% endblock %}
 
-{% if variant %}
-<div id="modal-movimento" class="modal-overlay">
-    <div class="modal-card">
-        <h2>Registrar Movimentação</h2>
-        <p class="mb-2">{{ variant.display_name }} (<code>{{ variant.sku }}</code>)</p>
-
-        <form method="POST" action="{{ url_for('product.create_movement', variant_id=variant.id) }}">
-            <div class="form-group">
-                <label for="movement_type">Tipo de Operação</label>
-                <select id="movement_type" name="movement_type" class="form-control" required>
-                    <option value="entrada">Entrada (+ Adicionar unidades ao estoque)</option>
-                    <option value="saida">Saída (- Subtrair unidades do estoque)</option>
-                    <option value="ajuste">Ajuste / Balanço (Definir novo saldo total)</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="quantity">Quantidade</label>
-                <input type="number" id="quantity" name="quantity" class="form-control" min="0" placeholder="Ex: 10" required>
-            </div>
-
-            <div class="form-group">
-                <label for="reason">Motivo / Justificativa</label>
-                <input type="text" id="reason" name="reason" class="form-control" placeholder="Ex: Recebimento de fornecedor, avaria" required>
-            </div>
-
-            <div class="form-footer-actions">
-                <button type="button" class="btn-secondary" data-action="close-movement-modal">Cancelar</button>
-                <button type="submit" class="btn-primary">Salvar Movimentação</button>
-            </div>
-        </form>
-    </div>
-</div>
-{% endif %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/movements.js') }}"></script>
 {% endblock %}

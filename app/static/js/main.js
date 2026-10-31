@@ -14,17 +14,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 2. Prevenção de envio duplo em formulários (Double Submit)
+    // 2. Prevenção de envio duplo em formulários (respeita confirmação de exclusão)
     const forms = document.querySelectorAll("form");
     forms.forEach((form) => {
-        form.addEventListener("submit", () => {
+        form.addEventListener("submit", (e) => {
+            if (e.defaultPrevented) return;
+
             const submitBtn = form.querySelector('button[type="submit"]');
             if (submitBtn && !submitBtn.disabled) {
                 setTimeout(() => {
-                    submitBtn.disabled = true;
-                    submitBtn.style.opacity = "0.7";
-                    submitBtn.style.cursor = "not-allowed";
-                }, 10);
+                    if (!e.defaultPrevented) {
+                        submitBtn.disabled = true;
+                        submitBtn.style.opacity = "0.7";
+                        submitBtn.style.cursor = "not-allowed";
+                    }
+                }, 20);
             }
         });
     });

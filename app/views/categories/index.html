@@ -1,91 +1,99 @@
-{% extends "layouts/admin_base.html" %}
-
-{% set header_title = "Categorias" %}
-{% block title %}Categorias - Shopee Hub{% endblock %}
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Categorias{% endblock %}
+{% block page_title %}Categorias de Produtos{% endblock %}
 
 {% block content %}
 <div class="categories-grid">
+    <div class="content-box">
+        {% if category_to_edit %}
+            <h2>Editar Categoria</h2>
+            <p class="mb-2">Atualize o nome da categoria selecionada.</p>
 
-    <div class="content-box mb-0">
-        <h2>Nova Categoria</h2>
-        <p class="mb-2">Crie seções para organizar o seu catálogo de produtos.</p>
+            <form method="POST" action="{{ url_for('category.edit_category', category_id=category_to_edit.id) }}">
+                <div class="form-group">
+                    <label for="name">Nome da Categoria *</label>
+                    <input type="text" id="name" name="name" value="{{ category_to_edit.name }}" class="form-control" placeholder="Ex: Vestuário" required autofocus>
+                </div>
 
-        {% if session.get('user_role') in ['owner', 'manager'] %}
-        <form method="POST" action="{{ url_for('category.create_category') }}">
-            <div class="form-group">
-                <label for="name">Nome da Categoria</label>
-                <input type="text" id="name" name="name" class="form-control" placeholder="Ex: Vestuário, Eletrônicos" required>
-            </div>
-            <button type="submit" class="btn-primary w-100">
-                + Adicionar Categoria
-            </button>
-        </form>
+                <button type="submit" class="btn-primary w-100">
+                    Salvar Alterações
+                </button>
+                <a href="{{ url_for('category.list_categories') }}" class="btn-secondary w-100 mt-1">
+                    Cancelar Edição
+                </a>
+            </form>
         {% else %}
-        <p class="text-muted" style="font-size: 0.85rem; font-style: italic;">
-            Apenas proprietários e gerentes podem adicionar novas categorias.
-        </p>
+            <h2>Cadastrar Categoria</h2>
+            <p class="mb-2">Organize o catálogo de produtos da sua loja.</p>
+
+            <form method="POST" action="{{ url_for('category.create_category') }}">
+                <div class="form-group">
+                    <label for="name">Nome da Categoria *</label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="Ex: Vestuário" required autofocus>
+                </div>
+
+                <button type="submit" class="btn-primary w-100">
+                    + Salvar Categoria
+                </button>
+            </form>
         {% endif %}
     </div>
 
-    <div class="content-box mb-0">
+    <div class="content-box">
         <h2>Categorias Cadastradas</h2>
-        <p class="mb-2">Gerencie os nomes e a organização da loja.</p>
+        <p class="mb-2">Lista das categorias ativas da loja.</p>
 
         {% if categories %}
-        <div class="table-responsive">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nome</th>
-                        <th>Data de Cadastro</th>
-                        <th class="text-right">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cat in categories %}
-                    <tr>
-                        <td>#{{ cat.id }}</td>
-                        <td>
-                            <strong id="cat-name-display-{{ cat.id }}">{{ cat.name }}</strong>
-                            {% if session.get('user_role') in ['owner', 'manager'] %}
-                            <form id="cat-edit-form-{{ cat.id }}" method="POST" action="{{ url_for('category.edit_category', category_id=cat.id) }}" class="inline-actions" style="display: none; margin-top: 0.35rem;">
-                                <input type="text" name="name" value="{{ cat.name }}" class="form-control" style="padding: 0.3rem 0.5rem; font-size: 0.85rem;" required>
-                                <button type="submit" class="btn-small">Salvar</button>
-                                <button type="button" class="btn-small" data-action="toggle-cat-edit" data-id="{{ cat.id }}">Cancelar</button>
-                            </form>
-                            {% endif %}
-                        </td>
-                        <td>{{ cat.created_at[:10] }}</td>
-                        <td class="text-right">
-                            {% if session.get('user_role') in ['owner', 'manager'] %}
-                            <div class="inline-actions">
-                                <button type="button" class="btn-action btn-edit" data-action="toggle-cat-edit" data-id="{{ cat.id }}" title="Editar nome">
-                                    Editar
-                                </button>
-                                <form method="POST" action="{{ url_for('category.delete_category', category_id=cat.id) }}" data-name="{{ cat.name }}" class="form-delete-category m-0">
-                                    <button type="submit" class="btn-action btn-delete" title="Excluir Categoria">
-                                        Excluir
-                                    </button>
-                                </form>
-                            </div>
-                            {% else %}
-                            <span class="text-muted" style="font-size: 0.75rem; font-style: italic;">Apenas Leitura</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nome da Categoria</th>
+                            <th class="text-center">Produtos Vinculados</th>
+                            <th>Data de Cadastro</th>
+                            <th class="text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in categories %}
+                            <tr>
+                                <td>
+                                    <strong>{{ cat.name }}</strong>
+                                    {% if category_to_edit and category_to_edit.id == cat.id %}
+                                        <span class="badge badge-warning" style="margin-left: 0.35rem;">Editando</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-info">{{ cat.total_produtos }} produtos</span>
+                                </td>
+                                <td>{{ cat.created_at | date_format }}</td>
+                                <td class="text-right">
+                                    {% if session.get('user_role') in ['owner', 'manager'] %}
+                                        <div class="inline-actions-right">
+                                            <a href="{{ url_for('category.edit_category', category_id=cat.id) }}" class="btn-action btn-edit">Editar</a>
+                                            <form method="POST" action="{{ url_for('category.delete_category', category_id=cat.id) }}" class="inline-actions form-delete-category" data-name="{{ cat.name }}">
+                                                <button type="submit" class="btn-action btn-delete">Excluir</button>
+                                            </form>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% else %}
-        <div class="empty-state" style="padding: 2.5rem 1rem;">
-            <div class="empty-state-icon">🏷️</div>
-            <p><strong>Nenhuma categoria cadastrada.</strong></p>
-            <p style="font-size: 0.85rem;">Utilize o formulário ao lado para cadastrar a primeira categoria da sua loja.</p>
-        </div>
+            <div class="empty-state">
+                <div class="empty-state-icon">🏷️</div>
+                <p>Nenhuma categoria cadastrada ainda. Utilize o formulário ao lado para começar.</p>
+            </div>
         {% endif %}
     </div>
-
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/categories.js') }}"></script>
 {% endblock %}

@@ -1,32 +1,15 @@
-<header class="top-navbar">
-    <div class="navbar-left">
-        <button type="button" id="mobile-menu-btn" class="mobile-menu-btn" title="Abrir Menu">
-            ☰
-        </button>
-        <div class="page-title">
-            {{ header_title | default('Dashboard') }}
+<div class="navbar-user-actions">
+    <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar Tema">☀️</button>
+
+    <a href="{{ url_for('profile.index') }}" class="user-profile-badge">
+        <div class="user-avatar">
+            {{ session.get('user_name', 'U')[:1] | upper }}
         </div>
-    </div>
-
-    <div class="navbar-user-actions">
-        <button type="button" id="theme-toggle" class="theme-toggle-btn" title="Alternar Tema">
-            <span id="theme-icon">☀️</span>
-        </button>
-
-        {% if session.get('user_id') %}
-            <div class="user-profile-badge">
-                <div class="user-avatar">
-                    {{ session.get('user_name', 'U')[0] | upper }}
-                </div>
-                <div class="user-meta">
-                    <div class="user-meta-name">{{ session.get('user_name') }}</div>
-                    <div>
-                        <span class="role-badge role-{{ session.get('user_role', 'operator') }}">
-                            {{ session.get('user_role', 'operator') }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-    </div>
-</header>
+        <div class="user-meta-info">
+            <div class="user-meta-name">{{ session.get('user_name', 'Usuário') }}</div>
+            <span class="role-badge role-{{ session.get('user_role', 'operator') }}">
+                {{ session.get('user_role', 'operator') | upper }}
+            </span>
+        </div>
+    </a>
+</div>

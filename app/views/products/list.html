@@ -1,36 +1,16 @@
-{% extends "layouts/admin_base.html" %}
-
-{% set header_title = "Catálogo de Produtos" %}
-{% block title %}Produtos - Shopee Hub{% endblock %}
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Catálogo de Produtos{% endblock %}
+{% block page_title %}Catálogo de Produtos{% endblock %}
 
 {% block content %}
-<div class="content-box">
-    <div class="page-header-actions">
-        <div>
-            <h2>Meus Produtos</h2>
-            <p>Gerencie anúncios, categorias e o estoque de cada variação cadastrada.</p>
-        </div>
+<div class="page-header-actions">
+    <form method="GET" action="{{ url_for('product.list_products') }}" class="catalog-filters m-0">
+        <input type="text" name="q" value="{{ request.args.get('q', '') }}" class="form-control filter-input" placeholder="Buscar por anúncio, SKU ou EAN...">
 
-        <div class="action-buttons-group">
-            <a href="{{ url_for('product.stock_movements') }}" class="btn-secondary">
-                📋 Auditoria de Estoque
-            </a>
-            {% if session.get('user_role') in ['owner', 'manager'] %}
-                <a href="{{ url_for('product.create_product') }}" class="btn-primary">
-                    + Cadastrar Produto
-                </a>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Barra de Pesquisa e Filtros -->
-    <form method="GET" action="{{ url_for('product.list_products') }}" class="catalog-filters">
-        <input type="text" name="q" value="{{ request.args.get('q', '') }}" class="form-control filter-input" placeholder="Pesquisar por Nome, SKU ou Código de Barras...">
-        
         <select name="category_id" class="form-control filter-select">
             <option value="">Todas as Categorias</option>
             {% for cat in categories %}
-                <option value="{{ cat.id }}" {{ 'selected' if request.args.get('category_id') == cat.id|string else '' }}>
+                <option value="{{ cat.id }}" {% if request.args.get('category_id') == cat.id|string %}selected{% endif %}>
                     {{ cat.name }}
                 </option>
             {% endfor %}
@@ -38,198 +18,181 @@
 
         <select name="status" class="form-control filter-select">
             <option value="">Todos os Status</option>
-            <option value="ativo" {{ 'selected' if request.args.get('status') == 'ativo' else '' }}>Apenas Ativos</option>
-            <option value="inativo" {{ 'selected' if request.args.get('status') == 'inativo' else '' }}>Apenas Inativos</option>
-            <option value="baixo" {{ 'selected' if request.args.get('status') == 'baixo' else '' }}>Em Alerta de Estoque</option>
-            <option value="esgotado" {{ 'selected' if request.args.get('status') == 'esgotado' else '' }}>Esgotados</option>
+            <option value="ativo" {% if request.args.get('status') == 'ativo' %}selected{% endif %}>Ativos</option>
+            <option value="inativo" {% if request.args.get('status') == 'inativo' %}selected{% endif %}>Inativos</option>
+            <option value="baixo" {% if request.args.get('status') == 'baixo' %}selected{% endif %}>Estoque Baixo</option>
+            <option value="esgotado" {% if request.args.get('status') == 'esgotado' %}selected{% endif %}>Esgotados</option>
         </select>
 
-        <button type="submit" class="btn-primary">Filtrar</button>
-
+        <button type="submit" class="btn-secondary">Filtrar</button>
         {% if request.args.get('q') or request.args.get('category_id') or request.args.get('status') %}
-            <a href="{{ url_for('product.list_products') }}" class="btn-secondary" title="Limpar Filtros">
-                ✕ Limpar
-            </a>
+            <a href="{{ url_for('product.list_products') }}" class="btn-small">Limpar</a>
         {% endif %}
     </form>
 
-    {% if products %}
-    <div class="table-responsive">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th class="col-chevron"></th>
-                    <th>Produto / Anúncio</th>
-                    <th>Categoria</th>
-                    <th>Faixa de Preço</th>
-                    <th>Variações</th>
-                    <th>Estoque Total</th>
-                    <th>Status</th>
-                    <th class="text-right">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for prod in products %}
-                <tr class="accordion-row" data-id="{{ prod.id }}">
-                    <td class="col-chevron">
-                        <span id="chevron-{{ prod.id }}" class="chevron-icon">▶</span>
-                    </td>
-                    <td>
-                        <strong>{{ prod.name }}</strong>
-                        <div class="text-muted" style="font-size: 0.75rem;">
-                            {{ prod.weight_g }}g | {{ prod.length_cm }}x{{ prod.width_cm }}x{{ prod.height_cm }} cm
-                        </div>
-                    </td>
-                    <td>
-                        {% if prod.category_name %}
-                            <span class="badge" style="background-color: var(--table-hover); color: var(--text-main);">
-                                {{ prod.category_name }}
-                            </span>
-                        {% else %}
-                            <span class="text-muted">—</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <strong>{{ prod.price_range }}</strong>
-                    </td>
-                    <td>
-                        <span class="badge badge-info">{{ prod.variants|length }} mod.</span>
-                    </td>
-                    <td>
-                        {% set total = prod.total_stock %}
-                        {% if total == 0 %}
-                            <span class="badge badge-danger">Esgotado</span>
-                        {% elif total < 5 %}
-                            <span class="badge badge-warning">{{ total }} un (Crítico)</span>
-                        {% else %}
-                            <span class="badge badge-success">{{ total }} un</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if prod.is_active == 1 %}
-                            <span class="badge badge-success">Ativo</span>
-                        {% else %}
-                            <span class="badge badge-danger">Inativo</span>
-                        {% endif %}
-                    </td>
-                    <td class="text-right">
-                        <div class="inline-actions">
-                            {% if session.get('user_role') in ['owner', 'manager'] %}
-                                <a href="{{ url_for('product.edit_product', product_id=prod.id) }}" class="btn-action btn-edit">
-                                    Editar
-                                </a>
-                            {% endif %}
-
-                            {% if session.get('user_role') == 'owner' %}
-                                <form method="POST" action="{{ url_for('product.delete_product', product_id=prod.id) }}" data-name="{{ prod.name }}" class="form-delete-product m-0">
-                                    <button type="submit" class="btn-action btn-delete">
-                                        Excluir
-                                    </button>
-                                </form>
-                            {% endif %}
-                        </div>
-                    </td>
-                </tr>
-
-                <!-- Linha Expansível com as Variações Filhas -->
-                <tr id="variants-{{ prod.id }}" class="variant-subrow">
-                    <td colspan="8">
-                        <table class="variant-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 36px;">Foto</th>
-                                    <th>Variação</th>
-                                    <th>SKU</th>
-                                    <th>Cód. Barras</th>
-                                    <th>Custo</th>
-                                    <th>Venda</th>
-                                    <th>Margem</th>
-                                    <th>Estoque</th>
-                                    <th class="text-right">Ajuste de Estoque</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for v in prod.variants %}
-                                <tr>
-                                    <td>
-                                        {% if v.image_url %}
-                                            <img src="{{ url_for('static', filename=v.image_url) }}" class="variant-thumb" alt="Foto">
-                                        {% else %}
-                                            <span>📦</span>
-                                        {% endif %}
-                                    </td>
-                                    <td><strong>{{ v.variant_name }}</strong></td>
-                                    <td><code>{{ v.sku }}</code></td>
-                                    <td>{{ v.barcode or '—' }}</td>
-                                    <td>{{ v.cost_price | currency }}</td>
-                                    <td><strong>{{ v.price | currency }}</strong></td>
-                                    <td>
-                                        <span class="badge badge-info">{{ v.margin_percent }}%</span>
-                                    </td>
-                                    <td>
-                                        {% if v.stock_quantity == 0 %}
-                                            <span class="badge badge-danger">0 un</span>
-                                        {% elif v.stock_quantity <= v.min_stock %}
-                                            <span class="badge badge-warning">{{ v.stock_quantity }} un (Mín: {{ v.min_stock }})</span>
-                                        {% else %}
-                                            <span class="badge badge-success">{{ v.stock_quantity }} un</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-right">
-                                        <div class="inline-actions-right">
-                                            <a href="{{ url_for('product.variant_history', variant_id=v.id) }}" class="btn-small" title="Ver histórico de auditoria">
-                                                📋
-                                            </a>
-                                            <form method="POST" action="{{ url_for('product.update_stock', variant_id=v.id) }}" class="quick-stock-form m-0">
-                                                <input type="number" name="stock_quantity" value="{{ v.stock_quantity }}" min="0" class="quick-stock-input">
-                                                <input type="hidden" name="reason" value="Ajuste rápido pelo catálogo">
-                                                <button type="submit" class="btn-small">Salvar</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    {% if total_paginas > 1 %}
-    <div class="pagination-bar">
-        <div class="pagination-info">
-            Exibindo página <strong>{{ pagina }}</strong> de <strong>{{ total_paginas }}</strong> ({{ total_itens }} produtos no total)
-        </div>
-        <div class="pagination-controls">
-            <a href="{{ url_for('product.list_products', page=pagina-1, q=request.args.get('q', ''), category_id=request.args.get('category_id', ''), status=request.args.get('status', '')) }}" 
-               class="page-link {{ 'is-disabled' if pagina <= 1 else '' }}">
-                ← Anterior
-            </a>
-
-            {% for p in range(1, total_paginas + 1) %}
-                <a href="{{ url_for('product.list_products', page=p, q=request.args.get('q', ''), category_id=request.args.get('category_id', ''), status=request.args.get('status', '')) }}" 
-                   class="page-link {{ 'is-active' if p == pagina else '' }}">
-                    {{ p }}
-                </a>
-            {% endfor %}
-
-            <a href="{{ url_for('product.list_products', page=pagina+1, q=request.args.get('q', ''), category_id=request.args.get('category_id', ''), status=request.args.get('status', '')) }}" 
-               class="page-link {{ 'is-disabled' if pagina >= total_paginas else '' }}">
-                Próxima →
-            </a>
-        </div>
-    </div>
-    {% endif %}
-
-    {% else %}
-    <div class="empty-state">
-        <div class="empty-state-icon">🔍</div>
-        <p><strong>Nenhum produto encontrado.</strong></p>
-        <p style="font-size: 0.85rem; margin-top: 0.25rem;">Tente ajustar os termos de pesquisa ou os filtros selecionados.</p>
-    </div>
+    {% if session.get('user_role') in ['owner', 'manager'] %}
+        <a href="{{ url_for('product.create_product') }}" class="btn-primary">
+            + Cadastrar Produto
+        </a>
     {% endif %}
 </div>
+
+<div class="content-box p-0">
+    {% if products %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="col-chevron"></th>
+                        <th>Produto / Anúncio</th>
+                        <th>Categoria</th>
+                        <th>Faixa de Preço</th>
+                        <th class="text-center">Estoque Total</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prod in products %}
+                        <tr class="accordion-row" data-id="{{ prod.id }}">
+                            <td class="col-chevron">
+                                <span class="chevron-icon" id="chevron-{{ prod.id }}">▶</span>
+                            </td>
+                            <td>
+                                <strong>{{ prod.name }}</strong>
+                                <div class="text-muted" style="font-size: 0.75rem;">
+                                    {{ prod.variants | length }} {% if prod.variants | length == 1 %}variação{% else %}variações{% endif %}
+                                </div>
+                            </td>
+                            <td>{{ prod.category_name or 'Sem categoria' }}</td>
+                            <td><strong>{{ prod.price_range }}</strong></td>
+                            <td class="text-center">
+                                {% if prod.total_stock == 0 %}
+                                    <span class="badge badge-danger">0 un (Esgotado)</span>
+                                {% elif prod.has_out_of_stock_variant %}
+                                    <span class="badge badge-warning" title="Pelo menos uma das variações deste produto está esgotada">{{ prod.total_stock }} un (Item Esgotado)</span>
+                                {% elif prod.has_low_stock_variant %}
+                                    <span class="badge badge-warning">{{ prod.total_stock }} un (Estoque Baixo)</span>
+                                {% else %}
+                                    <span class="badge badge-success">{{ prod.total_stock }} un</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if prod.is_active %}
+                                    <span class="badge badge-success">Ativo</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Inativo</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-right">
+                                <div class="inline-actions-right">
+                                    {% if session.get('user_role') in ['owner', 'manager'] %}
+                                        <a href="{{ url_for('product.edit_product', product_id=prod.id) }}" class="btn-action btn-edit">Editar</a>
+                                    {% endif %}
+                                    {% if session.get('user_role') == 'owner' %}
+                                        <form method="POST" action="{{ url_for('product.delete_product', product_id=prod.id) }}" class="inline-actions form-delete-product" data-name="{{ prod.name }}">
+                                            <button type="submit" class="btn-action btn-delete">Excluir</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Sub-tabela com as variações detalhadas do anúncio -->
+                        <tr class="variant-subrow" id="variants-{{ prod.id }}">
+                            <td colspan="7" style="padding: 0 0 1rem 2.5rem;">
+                                <table class="variant-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Foto</th>
+                                            <th>Variação</th>
+                                            <th>SKU</th>
+                                            <th>EAN</th>
+                                            <th>Custo</th>
+                                            <th>Venda</th>
+                                            <th>Margem</th>
+                                            <th class="text-center">Estoque</th>
+                                            <th class="text-right">Ajuste Rápido</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for v in prod.variants %}
+                                            <tr>
+                                                <td>
+                                                    {% if v.image_url %}
+                                                        <img src="{{ url_for('static', filename=v.image_url) }}" alt="Foto" class="variant-thumb">
+                                                    {% else %}
+                                                        <span class="text-muted">📦</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ v.variant_name }}</td>
+                                                <td><code>{{ v.sku }}</code></td>
+                                                <td>{{ v.barcode or '—' }}</td>
+                                                <td>{{ v.cost_price | currency }}</td>
+                                                <td><strong>{{ v.price | currency }}</strong></td>
+                                                <td>
+                                                    <span class="{% if v.margin_percent > 30 %}text-success{% elif v.margin_percent > 15 %}text-warning{% else %}text-danger{% endif %}">
+                                                        {{ v.margin_percent }}%
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    {% if v.stock_quantity == 0 %}
+                                                        <span class="badge badge-danger">0 un</span>
+                                                    {% elif v.stock_quantity <= v.min_stock %}
+                                                        <span class="badge badge-warning">{{ v.stock_quantity }} un</span>
+                                                    {% else %}
+                                                        <span class="badge badge-success">{{ v.stock_quantity }} un</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-right">
+                                                    <div class="inline-actions-right">
+                                                        <form method="POST" action="{{ url_for('product.update_stock', variant_id=v.id) }}" class="quick-stock-form">
+                                                            <input type="number" name="stock_quantity" value="{{ v.stock_quantity }}" min="0" class="quick-stock-input" required>
+                                                            <input type="hidden" name="reason" value="Ajuste rápido pelo catálogo">
+                                                            <button type="submit" class="btn-action btn-edit">Salvar</button>
+                                                        </form>
+                                                        <a href="{{ url_for('product.variant_history', variant_id=v.id) }}" class="btn-action btn-secondary" title="Histórico de Auditoria">Auditoria</a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if total_paginas > 1 %}
+            <div class="pagination-bar" style="padding: 1rem 1.5rem;">
+                <div>Mostrando página <strong>{{ pagina }}</strong> de <strong>{{ total_paginas }}</strong> (Total: {{ total_itens }} produtos)</div>
+                <div class="pagination-controls">
+                    <a href="{{ url_for('product.list_products', page=pagina-1, q=request.args.get('q', ''), category_id=request.args.get('category_id', ''), status=request.args.get('status', '')) }}" class="page-link {% if pagina == 1 %}is-disabled{% endif %}">Anterior</a>
+                    
+                    {% set window = 2 %}
+                    {% for p in range(1, total_paginas + 1) %}
+                        {% if p == 1 or p == total_paginas or (p >= pagina - window and p <= pagina + window) %}
+                            <a href="{{ url_for('product.list_products', page=p, q=request.args.get('q', ''), category_id=request.args.get('category_id', ''), status=request.args.get('status', '')) }}" class="page-link {% if p == pagina %}is-active{% endif %}">{{ p }}</a>
+                        {% elif p == pagina - window - 1 or p == pagina + window + 1 %}
+                            <span class="page-link is-disabled" style="border: none; background: transparent;">...</span>
+                        {% endif %}
+                    {% endfor %}
+
+                    <a href="{{ url_for('product.list_products', page=pagina+1, q=request.args.get('q', ''), category_id=request.args.get('category_id', ''), status=request.args.get('status', '')) }}" class="page-link {% if pagina == total_paginas %}is-disabled{% endif %}">Próxima</a>
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📦</div>
+            <p>Nenhum produto encontrado com os filtros aplicados.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/products.js') }}"></script>
 {% endblock %}

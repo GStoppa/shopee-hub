@@ -1,34 +1,16 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Shopee Hub{% endblock %}</title>
-
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script>
-        (function() {
-            const savedTheme = localStorage.getItem('shopee_hub_theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        })();
-    </script>
-</head>
-<body class="auth-body">
-
-    <div class="auth-theme-toggle">
-        <button type="button" class="btn-theme-toggle" onclick="toggleTheme()" title="Alternar Modo Escuro / Claro">
-            <span class="theme-toggle-icon">🌙</span>
-            <span style="font-size: 0.8rem; font-weight: 500;">Tema</span>
-        </button>
-    </div>
-
-    <main class="auth-container">
-        {% include "partials/_alerts.html" %}
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Script de Gestão do Tema -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
     <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
-    {% block scripts %}{% endblock %}
+</head>
+<body>
+    {% block body %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/masks.js') }}"></script>
 </body>
 </html>

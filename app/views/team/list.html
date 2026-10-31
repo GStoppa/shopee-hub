@@ -1,81 +1,62 @@
-{% extends "layouts/admin_base.html" %}
-
-{% set header_title = "Equipe" %}
-{% block title %}Equipe - Shopee Hub{% endblock %}
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Equipe{% endblock %}
+{% block page_title %}Gestão de Membros da Equipe{% endblock %}
 
 {% block content %}
-<div class="content-box">
-    <div class="page-header-actions">
-        <div>
-            <h2>Membros da Equipe</h2>
-            <p>Gerencie os operadores e administradores com acesso à loja.</p>
-        </div>
-        <div class="action-buttons-group">
-            <a href="{{ url_for('team.create_member') }}" class="btn-primary">
-                + Novo Membro
-            </a>
-        </div>
+<div class="page-header-actions">
+    <div>
+        <h2>Membros Ativos</h2>
+        <p class="m-0">Usuários com permissão de acesso ao painel desta loja.</p>
     </div>
+    <a href="{{ url_for('team.create_member') }}" class="btn-primary">+ Convidar Membro</a>
+</div>
 
+<div class="content-box p-0">
     {% if members %}
-    <div class="table-responsive">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>E-mail</th>
-                    <th>Função / Permissão</th>
-                    <th>Data de Cadastro</th>
-                    <th class="text-right">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for member in members %}
-                <tr>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 0.65rem;">
-                            <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.8rem;">
-                                {{ member.name[0] | upper }}
-                            </div>
-                            <strong>{{ member.name }}</strong>
-                        </div>
-                    </td>
-                    <td>{{ member.email }}</td>
-                    <td>
-                        {% if member.role == 'owner' %}
-                            <span class="role-badge role-owner">Proprietário</span>
-                        {% elif member.role == 'manager' %}
-                            <span class="role-badge role-manager">Gerente</span>
-                        {% else %}
-                            <span class="role-badge role-operator">Operador</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ member.created_at[:10] }}</td>
-                    <td class="text-right">
-                        <div class="inline-actions">
-                            <a href="{{ url_for('team.edit_member', member_id=member.id) }}" class="btn-action btn-edit" title="Editar Colaborador">
-                                Editar
-                            </a>
-
-                            {% if session.get('user_role') == 'owner' and member.id != session.get('user_id') %}
-                                <form method="POST" action="{{ url_for('team.delete_member', member_id=member.id) }}" data-name="{{ member.name }}" class="form-delete-member m-0">
-                                    <button type="submit" class="btn-action btn-delete" title="Excluir Colaborador">
-                                        Excluir
-                                    </button>
-                                </form>
-                            {% endif %}
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nome Completo</th>
+                        <th>E-mail</th>
+                        <th class="text-center">Cargo / Nível</th>
+                        <th>Data de Cadastro</th>
+                        <th class="text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in members %}
+                        <tr>
+                            <td><strong>{{ m.name }}</strong></td>
+                            <td>{{ m.email }}</td>
+                            <td class="text-center">
+                                <span class="role-badge role-{{ m.role }}">{{ m.role | upper }}</span>
+                            </td>
+                            <td>{{ m.created_at | date_format }}</td>
+                            <td class="text-right">
+                                {% if session.get('user_role') == 'manager' and m.role == 'owner' %}
+                                    <span class="text-muted" style="font-size: 0.8rem;">Acesso Protegido</span>
+                                {% else %}
+                                    <div class="inline-actions-right">
+                                        <a href="{{ url_for('team.edit_member', member_id=m.id) }}" class="btn-action btn-edit">Editar</a>
+                                        {% if m.id != session.get('user_id') %}
+                                            <form method="POST" action="{{ url_for('team.delete_member', member_id=m.id) }}" class="inline-actions form-delete-member" data-name="{{ m.name }}">
+                                                <button type="submit" class="btn-action btn-delete">Excluir</button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
-    <div class="empty-state">
-        <div class="empty-state-icon">👥</div>
-        <p><strong>Nenhum membro cadastrado até o momento.</strong></p>
-    </div>
+        <div class="empty-state">
+            <div class="empty-state-icon">👥</div>
+            <p>Nenhum membro cadastrado.</p>
+        </div>
     {% endif %}
 </div>
 {% endblock %}

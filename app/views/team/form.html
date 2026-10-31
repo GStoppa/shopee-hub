@@ -1,42 +1,46 @@
-{% extends "layouts/admin_base.html" %}
-
-{% block title %}Novo Membro - Shopee Hub{% endblock %}
-{% block header_title %}Adicionar Colaborador{% endblock %}
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Novo Membro{% endblock %}
+{% block page_title %}Cadastrar Membro da Equipe{% endblock %}
 
 {% block content %}
-<div class="content-box" style="max-width: 600px; margin: 0 auto;">
-    <h2 style="margin-bottom: 1.5rem;">Dados de Acesso do Colaborador</h2>
+<div class="form-container-sm">
+    <div class="content-box">
+        <h2>Novo Usuário</h2>
+        <p class="mb-2">Defina as credenciais e permissões de acesso.</p>
 
-    <form method="POST" action="{{ url_for('team.create_member') }}">
-        <div class="form-group">
-            <label for="name">Nome Completo</label>
-            <input type="text" id="name" name="name" class="form-control" placeholder="Ex: Carlos Silva" required>
-        </div>
+        <form method="POST" action="{{ url_for('team.create_member') }}">
+            <div class="form-group">
+                <label for="name">Nome Completo *</label>
+                <input type="text" id="name" name="name" value="{{ form_data.get('name', '') if form_data else '' }}" class="form-control" placeholder="Ex: Lucas Ferreira" required autofocus>
+            </div>
 
-        <div class="form-group">
-            <label for="email">E-mail Corporativo</label>
-            <input type="email" id="email" name="email" class="form-control" placeholder="carlos@exemplo.com" required>
-        </div>
+            <div class="form-group">
+                <label for="email">E-mail de Acesso *</label>
+                <input type="email" id="email" name="email" value="{{ form_data.get('email', '') if form_data else '' }}" class="form-control" placeholder="lucas@loja.com" required>
+            </div>
 
-        <div class="form-group">
-            <label for="password">Palavra-passe Inicial</label>
-            <input type="password" id="password" name="password" class="form-control" placeholder="Mínimo 6 carateres" minlength="6" required>
-        </div>
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="password">Senha Provisória *</label>
+                    <input type="password" id="password" name="password" class="form-control" minlength="6" placeholder="Mínimo 6 dígitos" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Cargo / Permissão *</label>
+                    <select id="role" name="role" class="form-control" required>
+                        <option value="operator" {% if form_data and form_data.get('role') == 'operator' %}selected{% endif %}>Operador (Apenas Catálogo e Auditoria)</option>
+                        <option value="manager" {% if form_data and form_data.get('role') == 'manager' %}selected{% endif %}>Gerente (Gestão de Produtos, Categorias e Equipe)</option>
+                        {% if session.get('user_role') == 'owner' %}
+                            <option value="owner" {% if form_data and form_data.get('role') == 'owner' %}selected{% endif %}>Proprietário (Acesso Total irrestrito)</option>
+                        {% endif %}
+                    </select>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <label for="role">Cargo / Nível de Permissão</label>
-            <select id="role" name="role" class="form-control" style="background-color: var(--bg-input);">
-                <option value="operator">Operador (Apenas visualiza e altera stock)</option>
-                {% if session.get('user_role') == 'owner' %}
-                    <option value="manager">Gerente (Gere catálogo e adiciona operadores)</option>
-                {% endif %}
-            </select>
-        </div>
-
-        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-            <button type="submit" class="btn-primary">Criar Conta</button>
-            <a href="{{ url_for('team.list_members') }}" class="btn-secondary" style="text-decoration: none; text-align: center;">Cancelar</a>
-        </div>
-    </form>
+            <div class="form-footer-actions">
+                <a href="{{ url_for('team.list_members') }}" class="btn-secondary">Cancelar</a>
+                <button type="submit" class="btn-primary">Criar Membro</button>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

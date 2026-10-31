@@ -6,6 +6,7 @@ def inicializar_banco():
     with DatabaseConnection() as conn:
         cursor = conn.cursor()
 
+        # 1. Tabela de Lojas
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS stores (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,6 +20,7 @@ def inicializar_banco():
             );
         """)
 
+        # 2. Tabela de Usuários
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,6 +34,7 @@ def inicializar_banco():
             );
         """)
 
+        # 3. Tabela de Categorias
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS categories (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,6 +45,7 @@ def inicializar_banco():
             );
         """)
 
+        # 4. Tabela de Produtos
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS products (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,11 +64,12 @@ def inicializar_banco():
             );
         """)
 
+        # 5. Tabela de Variações de Produto
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS product_variants (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 product_id INTEGER NOT NULL,
-                sku TEXT NOT NULL UNIQUE,
+                sku TEXT NOT NULL,
                 barcode TEXT,
                 variant_name TEXT NOT NULL DEFAULT 'Padrão',
                 cost_price REAL NOT NULL DEFAULT 0.0,
@@ -77,6 +82,7 @@ def inicializar_banco():
             );
         """)
 
+        # 6. Tabela de Auditoria de Estoque
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS stock_movements (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -93,7 +99,7 @@ def inicializar_banco():
             );
         """)
 
-        # Migração defensiva: adiciona as colunas caso o banco já existisse
+        # Migração defensiva: colunas de saldo
         cursor.execute("PRAGMA table_info(stock_movements);")
         colunas_sm = [col["name"] for col in cursor.fetchall()]
         if "previous_stock" not in colunas_sm:
@@ -101,25 +107,34 @@ def inicializar_banco():
         if "resulting_stock" not in colunas_sm:
             cursor.execute("ALTER TABLE stock_movements ADD COLUMN resulting_stock INTEGER NOT NULL DEFAULT 0;")
 
-        # Reparação: vincula variações padrão para produtos que porventura estejam sem modelos
+        # Índices de Alta Performance (Evita Full Table Scans)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_store_id ON users (store_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_categories_store_id ON categories (store_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_products_store_id ON products (store_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_products_category_id ON products (category_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_product_variants_product_id ON product_variants (product_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_product_variants_sku ON product_variants (sku);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_stock_movements_variant_id ON stock_movements (variant_id);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_stock_movements_user_id ON stock_movements (user_id);")
+
+        # Reparação: garante variações padrão para produtos antigos sem variação
         cursor.execute("""
             SELECT p.id, p.name, p.created_at
             FROM products p
             LEFT JOIN product_variants pv ON p.id = pv.product_id
             WHERE pv.id IS NULL;
         """)
-        produtos_sem_variacao = cursor.fetchall()
-
-        for prod in produtos_sem_variacao:
-            sku_gerado = f"SKU-{prod['id']}"
+        for prod in cursor.fetchall():
             cursor.execute("""
                 INSERT INTO product_variants (
                     product_id, sku, variant_name, cost_price, price,
                     stock_quantity, min_stock, created_at
                 )
                 VALUES (?, ?, 'Padrão', 0.0, 0.0, 0, 5, ?);
-            """, (prod["id"], sku_gerado, prod["created_at"]))
+            """, (prod["id"], f"SKU-{prod['id']}", prod["created_at"]))
 
+    # Garante loja padrão
     with DatabaseConnection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT id FROM stores LIMIT 1;")
@@ -136,16 +151,24 @@ def inicializar_banco():
     else:
         store_id = store_row["id"]
 
-    admin_existente = User.buscar_por_email("admin@shopee.com")
-    if not admin_existente:
-        admin = User(
-            name="Administrador Shopee",
-            email="admin@shopee.com",
-            store_id=store_id,
-            role="owner"
-        )
-        admin.set_password("123456")
-        admin.salvar()
+    # Garante administrador da loja se ainda não houver nenhum proprietário cadastrado
+    with DatabaseConnection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) AS total FROM users WHERE store_id = ? AND role = 'owner';", (store_id,))
+        total_owners = cursor.fetchone()["total"]
+
+    if total_owners == 0:
+        admin_existente = User.buscar_por_email("admin@shopee.com")
+        if not admin_existente:
+            admin = User(
+                name="Administrador Shopee",
+                email="admin@shopee.com",
+                store_id=store_id,
+                role="owner"
+            )
+            admin.set_password("123456")
+            admin.salvar()
 
 if __name__ == "__main__":
     inicializar_banco()
+    print("Banco de dados inicializado com sucesso!")

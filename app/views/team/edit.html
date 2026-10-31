@@ -1,51 +1,56 @@
-{% extends "layouts/admin_base.html" %}
-
-{% block title %}Editar Membro - Shopee Hub{% endblock %}
-{% block header_title %}Editar Colaborador{% endblock %}
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Editar Membro{% endblock %}
+{% block page_title %}Editar Membro: {{ member.name }}{% endblock %}
 
 {% block content %}
-<div class="content-box" style="max-width: 600px; margin: 0 auto;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h2>Alterar Dados de Acesso</h2>
-        <span class="badge" style="background-color: var(--table-hover); color: var(--text-muted);">
-            ID #{{ member.id }}
-        </span>
-    </div>
+<div class="form-container-sm">
+    <div class="content-box">
+        <h2>Editar Acesso</h2>
+        <p class="mb-2">Atualize o nome, e-mail, permissões ou redefina a senha deste membro.</p>
 
-    <form method="POST" action="{{ url_for('team.edit_member', member_id=member.id) }}">
-        <div class="form-group">
-            <label for="name">Nome Completo</label>
-            <input type="text" id="name" name="name" class="form-control" value="{{ member.name }}" required>
-        </div>
+        <form method="POST" action="{{ url_for('team.edit_member', member_id=member.id) }}">
+            <div class="form-group">
+                <label for="name">Nome Completo *</label>
+                <input type="text" id="name" name="name" value="{{ member.name }}" class="form-control" required autofocus>
+            </div>
 
-        <div class="form-group">
-            <label for="email">E-mail Corporativo</label>
-            <input type="email" id="email" name="email" class="form-control" value="{{ member.email }}" required>
-        </div>
+            <div class="form-group">
+                <label for="email">E-mail de Acesso *</label>
+                <input type="email" id="email" name="email" value="{{ member.email }}" class="form-control" required>
+            </div>
 
-        <div class="form-group">
-            <label for="password">Nova Palavra-passe <span style="font-weight: normal; color: var(--text-muted);">(deixe em branco para manter a atual)</span></label>
-            <input type="password" id="password" name="password" class="form-control" placeholder="Mínimo 6 carateres (opcional)" minlength="6">
-        </div>
-
-        <div class="form-group">
-            <label for="role">Cargo / Nível de Permissão</label>
-            {% if session.get('user_role') == 'owner' %}
-                <select id="role" name="role" class="form-control" style="background-color: var(--bg-input);">
-                    <option value="operator" {% if member.role == 'operator' %}selected{% endif %}>Operador (Visualização e gestão de stock)</option>
-                    <option value="manager" {% if member.role == 'manager' %}selected{% endif %}>Gerente (Gere catálogo e colaboradores)</option>
-                    <option value="owner" {% if member.role == 'owner' %}selected{% endif %}>Dono (Acesso total)</option>
+            <div class="form-group">
+                <label for="role">Cargo / Permissão *</label>
+                <select id="role" name="role" class="form-control" required>
+                    <option value="operator" {% if member.role == 'operator' %}selected{% endif %}>Operador (Apenas Catálogo e Auditoria)</option>
+                    <option value="manager" {% if member.role == 'manager' %}selected{% endif %}>Gerente (Gestão de Produtos, Categorias e Equipe)</option>
+                    {% if session.get('user_role') == 'owner' or member.role == 'owner' %}
+                        <option value="owner" {% if member.role == 'owner' %}selected{% endif %}>Proprietário (Acesso Total irrestrito)</option>
+                    {% endif %}
                 </select>
-            {% else %}
-                <input type="text" class="form-control" value="Operador" disabled style="opacity: 0.7;">
-                <input type="hidden" name="role" value="{{ member.role }}">
-            {% endif %}
-        </div>
+            </div>
 
-        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-            <button type="submit" class="btn-primary">Guardar Alterações</button>
-            <a href="{{ url_for('team.list_members') }}" class="btn-secondary" style="text-decoration: none; text-align: center;">Cancelar</a>
-        </div>
-    </form>
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+            <h3>Redefinir Senha de Acesso</h3>
+            <p class="mb-2 text-muted" style="font-size: 0.85rem;">Deixe os campos abaixo em branco caso deseje manter a senha atual do usuário intacta.</p>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="password">Nova Senha Provisória</label>
+                    <input type="password" id="password" name="password" class="form-control" minlength="6" placeholder="Mínimo 6 dígitos">
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirmar Nova Senha</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" minlength="6" placeholder="Repita a nova senha">
+                </div>
+            </div>
+
+            <div class="form-footer-actions">
+                <a href="{{ url_for('team.list_members') }}" class="btn-secondary">Cancelar</a>
+                <button type="submit" class="btn-primary">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

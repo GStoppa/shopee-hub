@@ -1,20 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const modal = document.getElementById("modal-movimento");
-    if (!modal) return;
+    const movementTypeSelect = document.getElementById("movement_type");
+    const quantityInput = document.getElementById("quantity");
+    const reasonInput = document.getElementById("reason");
 
-    const openBtns = document.querySelectorAll("[data-action='open-movement-modal']");
-    openBtns.forEach((btn) => {
-        btn.addEventListener("click", () => modal.classList.add("is-active"));
-    });
-
-    const closeBtns = document.querySelectorAll("[data-action='close-movement-modal']");
-    closeBtns.forEach((btn) => {
-        btn.addEventListener("click", () => modal.classList.remove("is-active"));
-    });
-
-    modal.addEventListener("click", (e) => {
-        if (e.target === modal) {
-            modal.classList.remove("is-active");
-        }
-    });
+    if (movementTypeSelect && quantityInput && reasonInput) {
+        movementTypeSelect.addEventListener("change", (e) => {
+            if (e.target.value === "entrada") {
+                reasonInput.placeholder = "Ex: Chegada de lote de fornecedor";
+            } else if (e.target.value === "saida") {
+                reasonInput.placeholder = "Ex: Envio de pedido ou avaria de mercadoria";
+            } else if (e.target.value === "ajuste") {
+                reasonInput.placeholder = "Ex: Contagem física de balanço";
+            }
+        });
+    }
 });

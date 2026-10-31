@@ -1,65 +1,55 @@
-{% extends "layouts/admin_base.html" %}
-
-{% set header_title = "Configurações da Loja" %}
-{% block title %}Configurações da Loja - Shopee Hub{% endblock %}
+{% extends 'layouts/admin_base.html' %}
+{% block title %}Configurações da Loja{% endblock %}
+{% block page_title %}Configurações da Loja{% endblock %}
 
 {% block content %}
 <div class="form-container-sm">
-
     <div class="content-box">
-        <h2>Dados da Loja</h2>
-        <p class="mb-3">Gerencie as informações cadastrais e a integração com a sua conta de vendedor da Shopee.</p>
+        <h2>Dados da Empresa</h2>
+        <p class="mb-2">Identificação fiscal e integrações da loja.</p>
 
         <form method="POST" enctype="multipart/form-data" action="{{ url_for('store.settings') }}">
-            
             <div class="form-group">
-                <label for="name">Nome da Loja *</label>
-                <input type="text" id="name" name="name" class="form-control" value="{{ store.name if store else '' }}" required placeholder="Ex: Minha Loja Oficial">
+                <label for="name">Nome Fantasia da Loja *</label>
+                <input type="text" id="name" name="name" value="{{ store.name if store else '' }}" class="form-control" required>
             </div>
 
             <div class="form-grid-2">
                 <div class="form-group">
-                    <label for="document">CNPJ / CPF</label>
-                    <input type="text" id="document" name="document" class="form-control" value="{{ store.document if store and store.document else '' }}" placeholder="00.000.000/0001-00">
+                    <label for="document">CNPJ ou CPF</label>
+                    <input type="text" id="document" name="document" value="{{ store.document if store else '' }}" class="form-control" placeholder="00.000.000/0001-00">
                 </div>
-
                 <div class="form-group">
                     <label for="phone">Telefone / WhatsApp</label>
-                    <input type="text" id="phone" name="phone" class="form-control" value="{{ store.phone if store and store.phone else '' }}" placeholder="(11) 99999-9999">
+                    <input type="text" id="phone" name="phone" value="{{ store.phone if store else '' }}" class="form-control" placeholder="(11) 99999-9999">
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="address">Endereço de Expedição</label>
-                <input type="text" id="address" name="address" class="form-control" value="{{ store.address if store and store.address else '' }}" placeholder="Rua, Número, Bairro, Cidade - UF">
+                <label for="address">Endereço Completo</label>
+                <input type="text" id="address" name="address" value="{{ store.address if store else '' }}" class="form-control" placeholder="Rua, Número, Bairro, Cidade - UF">
             </div>
 
             <div class="form-group">
-                <label for="shopee_shop_id">Shopee Shop ID (Código da Loja no Marketplace)</label>
-                <input type="text" id="shopee_shop_id" name="shopee_shop_id" class="form-control" value="{{ store.shopee_shop_id if store and store.shopee_shop_id else '' }}" placeholder="Ex: 123456789">
-                <small class="text-muted" style="display: block; margin-top: 0.35rem;">
-                    Identificador numérico fornecido na Central do Vendedor Shopee para integrações via API.
-                </small>
+                <label for="shopee_shop_id">ID da Loja na Shopee (Shop ID)</label>
+                <input type="text" id="shopee_shop_id" name="shopee_shop_id" value="{{ store.shopee_shop_id if store else '' }}" class="form-control" placeholder="Ex: 123456789">
             </div>
 
-            <div class="form-group" style="margin-bottom: 1.75rem;">
-                <label for="logo">Logo da Loja</label>
+            <div class="form-group mb-3">
+                <label for="logo">Logotipo da Loja (Máx 2MB)</label>
                 {% if store and store.logo_url %}
-                    <div class="mb-1">
-                        <img src="{{ url_for('static', filename=store.logo_url) }}" alt="Logo" style="max-height: 60px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); padding: 2px;">
+                    <div class="simple-preview-container mb-2">
+                        <div class="simple-preview-thumb">
+                            <img src="{{ url_for('static', filename=store.logo_url) }}" alt="Logo">
+                        </div>
+                        <span class="text-muted" style="font-size: 0.8rem;">Logotipo atual ativo</span>
                     </div>
                 {% endif %}
-                <input type="file" id="logo" name="logo" class="form-control" accept=".png, .jpg, .jpeg, .webp">
+                <input type="file" id="logo" name="logo" accept=".png, .jpg, .jpeg, .webp" class="form-control">
             </div>
 
-            <div class="form-footer-actions">
-                <button type="submit" class="btn-primary" style="padding: 0.75rem 2rem;">
-                    Salvar Alterações
-                </button>
-            </div>
-
+            <button type="submit" class="btn-primary">Salvar Configurações</button>
         </form>
     </div>
-
 </div>
 {% endblock %}

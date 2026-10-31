@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Flask, render_template, flash, redirect, request
 from config import Config
 
@@ -9,12 +10,49 @@ def format_currency(value):
     except (ValueError, TypeError):
         return "R$ 0,00"
 
+def format_datetime(value):
+    try:
+        if not value:
+            return "—"
+        s = str(value)
+        if len(s) >= 19 and s[4] == "-" and s[7] == "-":
+            data, hora = s[:10], s[11:19]
+            ano, mes, dia = data.split("-")
+            return f"{dia}/{mes}/{ano} {hora}"
+        return s
+    except Exception:
+        return value
+
+def format_date(value):
+    try:
+        if not value:
+            return "—"
+        s = str(value)[:10]
+        if len(s) == 10 and s[4] == "-" and s[7] == "-":
+            ano, mes, dia = s.split("-")
+            return f"{dia}/{mes}/{ano}"
+        return s
+    except Exception:
+        return value
+
 def create_app():
     app = Flask(__name__, template_folder="views", static_folder="static")
     app.config.from_object(Config)
 
-    app.jinja_env.filters["currency"] = format_currency
+    # Inicialização automática e idempotente do banco de dados
+    with app.app_context():
+        try:
+            from init_db import inicializar_banco
+            inicializar_banco()
+        except Exception as e:
+            print(f"Aviso durante a inicialização automática do banco: {e}")
 
+    # Filtros personalizados no Jinja2
+    app.jinja_env.filters["currency"] = format_currency
+    app.jinja_env.filters["datetime_format"] = format_datetime
+    app.jinja_env.filters["date_format"] = format_date
+
+    # Registro modular dos Blueprints (Controllers)
     from app.controllers.auth_controller import auth_bp
     from app.controllers.main_controller import main_bp
     from app.controllers.product_controller import product_bp
@@ -38,6 +76,7 @@ def create_app():
     @app.errorhandler(413)
     def file_too_large(error):
         flash("O arquivo enviado excede o limite máximo permitido de 2MB.", "danger")
-        return redirect(request.url)
+        destino = request.referrer or "/"
+        return redirect(destino)
 
     return app

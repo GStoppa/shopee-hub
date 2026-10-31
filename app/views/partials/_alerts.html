@@ -1,10 +1,10 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-        <div class="alerts-container">
+        <div class="alert-container">
             {% for category, message in messages %}
                 <div class="alert-box alert-{{ category }}">
                     <span>{{ message }}</span>
-                    <button type="button" class="alert-close-btn">&times;</button>
+                    <button type="button" class="alert-close-btn" aria-label="Fechar">&times;</button>
                 </div>
             {% endfor %}
         </div>

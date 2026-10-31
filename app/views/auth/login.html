@@ -1,30 +1,39 @@
-{% extends "layouts/base.html" %}
+{% extends 'layouts/base.html' %}
+{% block title %}Acessar Conta - Shopee Hub{% endblock %}
 
-{% block title %}Login - Shopee Gestor{% endblock %}
+{% block body %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-brand-logo">
+                    <div class="brand-dot"></div>
+                    <span class="brand-title">Shopee Hub</span>
+                </div>
+                <h1>Acessar Plataforma</h1>
+                <p>Gerencie o estoque e o catálogo da sua loja</p>
+            </div>
 
-{% block content %}
-<div class="auth-card">
-    <div class="auth-header">
-        <h1>Shopee Hub</h1>
-        <p>Acesse o painel para gerenciar suas vendas</p>
-    </div>
+            {% include 'partials/_alerts.html' %}
 
-    <form method="POST" action="{{ url_for('auth.login') }}">
-        <div class="form-group">
-            <label for="email">E-mail</label>
-            <input type="email" id="email" name="email" class="form-control" placeholder="admin@shopee.com" required>
+            <form method="POST" action="{{ url_for('auth.login') }}">
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="exemplo@loja.com" required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Senha de Acesso</label>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn-primary w-100 mb-2">Entrar no Painel</button>
+            </form>
+
+            <div class="auth-footer">
+                Não tem uma conta cadastrada? <a href="{{ url_for('auth.register') }}">Criar Loja</a>
+            </div>
         </div>
-
-        <div class="form-group">
-            <label for="password">Senha</label>
-            <input type="password" id="password" name="password" class="form-control" placeholder="******" required>
-        </div>
-
-        <button type="submit" class="btn-primary">Entrar na Conta</button>
-    </form>
-
-    <div class="auth-footer">
-        Ainda não tem conta? <a href="{{ url_for('auth.register') }}">Cadastre-se</a>
     </div>
 </div>
 {% endblock %}
