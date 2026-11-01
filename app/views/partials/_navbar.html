@@ -1,14 +1,16 @@
-<div class="navbar-user-actions">
-    <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar Tema">☀️</button>
+<div class="navbar-right">
+    <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar Tema" aria-label="Alternar Tema">
+        <span class="theme-icon-indicator">☀️</span>
+    </button>
 
-    <a href="{{ url_for('profile.index') }}" class="user-profile-badge">
+    <a href="{{ url_for('profile.index') }}" class="user-profile-badge" title="Ver Perfil">
         <div class="user-avatar">
-            {{ session.get('user_name', 'U')[:1] | upper }}
+            {{ (session.get('user_name') or 'U')[0] | upper }}
         </div>
         <div class="user-meta-info">
-            <div class="user-meta-name">{{ session.get('user_name', 'Usuário') }}</div>
-            <span class="role-badge role-{{ session.get('user_role', 'operator') }}">
-                {{ session.get('user_role', 'operator') | upper }}
+            <span class="user-meta-name">{{ session.get('user_name') or 'Utilizador' }}</span>
+            <span class="role-badge role-{{ session.get('user_role') or 'operator' }}">
+                {{ (session.get('user_role') or 'operator') | upper }}
             </span>
         </div>
     </a>

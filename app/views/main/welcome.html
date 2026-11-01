@@ -4,47 +4,65 @@
 
 {% block content %}
 <div class="dashboard-metrics-grid">
-    <div class="kpi-card kpi-primary">
-        <div class="kpi-header">
-            <span class="kpi-title">Produtos Ativos</span>
-            <span>📦</span>
+    <div class="kpi-card kpi-card-primary">
+        <div class="kpi-card-header">
+            <span class="kpi-label">Produtos Ativos</span>
+            <div class="kpi-icon-pill icon-pill-blue">📦</div>
         </div>
-        <div class="kpi-value">{{ metricas.total_produtos }}</div>
-        <div class="kpi-footer">Anúncios cadastrados</div>
+        <div class="kpi-metric-number">{{ metricas.total_produtos }}</div>
+        <div class="kpi-card-footer">
+            <span class="kpi-subtext">Anúncios no catálogo</span>
+        </div>
     </div>
 
-    <div class="kpi-card kpi-warning">
-        <div class="kpi-header">
-            <span class="kpi-title">Estoque Baixo</span>
-            <span>⚠️</span>
+    <div class="kpi-card kpi-card-warning">
+        <div class="kpi-card-header">
+            <span class="kpi-label">Estoque Baixo</span>
+            <div class="kpi-icon-pill icon-pill-amber">⚠️</div>
         </div>
-        <div class="kpi-value text-warning">{{ metricas.baixo_estoque }}</div>
-        <div class="kpi-footer">Próximos do limite mínimo</div>
+        <div class="kpi-metric-number text-amber">{{ metricas.baixo_estoque }}</div>
+        <div class="kpi-card-footer">
+            <span class="kpi-subtext">Abaixo do limite mínimo</span>
+        </div>
     </div>
 
-    <div class="kpi-card kpi-danger">
-        <div class="kpi-header">
-            <span class="kpi-title">Esgotados</span>
-            <span>🚨</span>
+    <div class="kpi-card kpi-card-danger">
+        <div class="kpi-card-header">
+            <span class="kpi-label">Esgotados</span>
+            <div class="kpi-icon-pill icon-pill-rose">🚨</div>
         </div>
-        <div class="kpi-value text-danger">{{ metricas.esgotados }}</div>
-        <div class="kpi-footer">Sem saldo disponível</div>
+        <div class="kpi-metric-number text-rose">{{ metricas.esgotados }}</div>
+        <div class="kpi-card-footer">
+            <span class="kpi-subtext">Sem estoque disponível</span>
+        </div>
     </div>
 
-    <div class="kpi-card {% if margem_negativa %}kpi-danger{% else %}kpi-success{% endif %}">
-        <div class="kpi-header">
-            <span class="kpi-title">Valor do Estoque</span>
-            <span>💰</span>
+    <div class="kpi-card {% if margem_negativa %}kpi-card-danger{% else %}kpi-card-success{% endif %}">
+        <div class="kpi-card-header">
+            <span class="kpi-label">Valor do Estoque</span>
+            <div class="kpi-icon-pill icon-pill-emerald">💰</div>
         </div>
-        <div class="kpi-value {% if margem_negativa %}text-danger{% else %}text-success{% endif %}">{{ metricas.valor_estoque | currency }}</div>
-        <div class="kpi-footer">Margem Bruta Estimada: <strong class="{% if margem_negativa %}text-danger{% endif %}">{{ margem_geral }}%</strong></div>
+        <div class="kpi-metric-number {% if margem_negativa %}text-rose{% else %}text-emerald{% endif %}">
+            {{ metricas.valor_estoque | currency }}
+        </div>
+        <div class="kpi-card-footer">
+            <span class="kpi-subtext">Margem Estimada:</span>
+            <strong class="{% if margem_negativa %}text-rose{% else %}text-emerald{% endif %}">{{ margem_geral }}%</strong>
+        </div>
     </div>
 </div>
 
 <div class="dashboard-split-layout">
-    <div class="content-box">
-        <h2>Itens com Reposição Urgente</h2>
-        <p class="mb-2">Variações com estoque zerado ou abaixo do estoque mínimo de segurança.</p>
+    <div class="content-panel">
+        <div class="panel-header">
+            <div>
+                <h2>Itens com Reposição Urgente</h2>
+                <p>Variações esgotadas ou com saldo abaixo do estoque mínimo de segurança.</p>
+            </div>
+            {% if produtos_criticos %}
+                <span class="badge badge-danger">{{ produtos_criticos | length }} críticos</span>
+            {% endif %}
+        </div>
 
         {% if produtos_criticos %}
             <div class="table-responsive">
@@ -63,7 +81,7 @@
                                 <td>
                                     <strong>{{ item.display_name }}</strong>
                                 </td>
-                                <td><code>{{ item.sku }}</code></td>
+                                <td><code class="sku-chip">{{ item.sku }}</code></td>
                                 <td class="text-center">
                                     {% if item.stock_quantity == 0 %}
                                         <span class="badge badge-danger">0 un (Esgotado)</span>
@@ -84,34 +102,62 @@
                 </table>
             </div>
         {% else %}
-            <div class="empty-state">
-                <div class="empty-state-icon">✅</div>
-                <p>Excelente! Não há itens com estoque crítico no momento.</p>
+            <div class="empty-state-card">
+                <div class="empty-state-icon-box">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <h3>Tudo em dia com o estoque!</h3>
+                <p>Excelente! Não há nenhum item esgotado ou próximo do limite mínimo no momento.</p>
             </div>
         {% endif %}
     </div>
 
-    <div class="content-box">
-        <h2>Ações Rápidas</h2>
-        <p class="mb-2">Atalhos para operações diárias da loja.</p>
+    <div class="content-panel">
+        <div class="panel-header">
+            <div>
+                <h2>Ações Rápidas</h2>
+                <p>Atalhos para as operações mais recorrentes.</p>
+            </div>
+        </div>
 
-        <div class="quick-action-list">
-            <a href="{{ url_for('product.create_product') }}" class="quick-action-item">
-                <span>+ Novo Produto no Catálogo</span>
-                <span>➔</span>
+        <div class="quick-action-grid">
+            <a href="{{ url_for('product.create_product') }}" class="action-card">
+                <div class="action-card-icon">📦</div>
+                <div class="action-card-text">
+                    <span class="action-card-title">Novo Produto</span>
+                    <span class="action-card-desc">Cadastre anúncios simples ou com grade</span>
+                </div>
+                <span class="action-card-chevron">➔</span>
             </a>
-            <a href="{{ url_for('category.list_categories') }}" class="quick-action-item">
-                <span>+ Gerenciar Categorias</span>
-                <span>➔</span>
+
+            <a href="{{ url_for('category.list_categories') }}" class="action-card">
+                <div class="action-card-icon">🏷️</div>
+                <div class="action-card-text">
+                    <span class="action-card-title">Categorias</span>
+                    <span class="action-card-desc">Crie e edite seções da sua loja</span>
+                </div>
+                <span class="action-card-chevron">➔</span>
             </a>
-            <a href="{{ url_for('stock.stock_movements') }}" class="quick-action-item">
-                <span>📑 Ver Auditoria de Movimentações</span>
-                <span>➔</span>
+
+            <a href="{{ url_for('stock.stock_movements') }}" class="action-card">
+                <div class="action-card-icon">📑</div>
+                <div class="action-card-text">
+                    <span class="action-card-title">Auditoria de Estoque</span>
+                    <span class="action-card-desc">Histórico completo de entradas e saídas</span>
+                </div>
+                <span class="action-card-chevron">➔</span>
             </a>
+
             {% if session.get('user_role') in ['owner', 'manager'] %}
-                <a href="{{ url_for('team.create_member') }}" class="quick-action-item">
-                    <span>👥 Cadastrar Novo Membro</span>
-                    <span>➔</span>
+                <a href="{{ url_for('team.create_member') }}" class="action-card">
+                    <div class="action-card-icon">👥</div>
+                    <div class="action-card-text">
+                        <span class="action-card-title">Novo Membro</span>
+                        <span class="action-card-desc">Adicione operadores ou gerentes</span>
+                    </div>
+                    <span class="action-card-chevron">➔</span>
                 </a>
             {% endif %}
         </div>

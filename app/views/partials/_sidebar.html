@@ -1,12 +1,17 @@
 <aside class="admin-sidebar" id="sidebar">
     <div class="sidebar-brand">
         <a href="{{ url_for('main.welcome') }}" class="brand-link">
-            {% if session.get('store_logo_url') %}
-                <img src="{{ url_for('static', filename=session.get('store_logo_url')) }}" alt="Logo" class="brand-logo-img">
-            {% else %}
-                <span class="brand-icon">🛍️</span>
-            {% endif %}
-            <span class="brand-text">{{ session.get('store_name') or 'Shopee Hub' }}</span>
+            <div class="brand-logo-box">
+                {% if session.get('store_logo_url') %}
+                    <img src="{{ url_for('static', filename=session.get('store_logo_url')) }}" alt="Logo" class="brand-logo-img">
+                {% else %}
+                    <span class="brand-icon">🛍️</span>
+                {% endif %}
+            </div>
+            <div class="brand-info">
+                <span class="brand-text">{{ session.get('store_name') or 'Shopee Hub' }}</span>
+                <span class="brand-subtext">Painel de Controle</span>
+            </div>
         </a>
     </div>
 
@@ -14,43 +19,43 @@
         <div class="menu-section-label">Principal</div>
         <a href="{{ url_for('main.welcome') }}" class="menu-item {% if request.endpoint == 'main.welcome' %}is-active{% endif %}">
             <span class="menu-icon">📊</span>
-            <span>Dashboard</span>
+            <span class="menu-title">Dashboard</span>
         </a>
 
         <div class="menu-section-label">Catálogo & Estoque</div>
         <a href="{{ url_for('product.list_products') }}" class="menu-item {% if request.endpoint in ['product.list_products', 'product.create_product', 'product.edit_product'] %}is-active{% endif %}">
             <span class="menu-icon">📦</span>
-            <span>Produtos</span>
+            <span class="menu-title">Produtos</span>
         </a>
         <a href="{{ url_for('category.list_categories') }}" class="menu-item {% if request.endpoint == 'category.list_categories' %}is-active{% endif %}">
             <span class="menu-icon">🏷️</span>
-            <span>Categorias</span>
+            <span class="menu-title">Categorias</span>
         </a>
         <a href="{{ url_for('stock.stock_movements') }}" class="menu-item {% if request.endpoint in ['stock.stock_movements', 'stock.variant_history'] %}is-active{% endif %}">
             <span class="menu-icon">📑</span>
-            <span>Auditoria de Estoque</span>
+            <span class="menu-title">Auditoria de Estoque</span>
         </a>
 
         {% if session.get('user_role') in ['owner', 'manager'] %}
             <div class="menu-section-label">Administração</div>
             <a href="{{ url_for('team.list_members') }}" class="menu-item {% if request.endpoint in ['team.list_members', 'team.create_member', 'team.edit_member'] %}is-active{% endif %}">
                 <span class="menu-icon">👥</span>
-                <span>Equipe</span>
+                <span class="menu-title">Equipa</span>
             </a>
             <a href="{{ url_for('store.settings') }}" class="menu-item {% if request.endpoint == 'store.settings' %}is-active{% endif %}">
                 <span class="menu-icon">⚙️</span>
-                <span>Configurações da Loja</span>
+                <span class="menu-title">Configurações da Loja</span>
             </a>
         {% endif %}
 
         <div class="menu-section-label">Minha Conta</div>
         <a href="{{ url_for('profile.index') }}" class="menu-item {% if request.endpoint == 'profile.index' %}is-active{% endif %}">
             <span class="menu-icon">👤</span>
-            <span>Perfil</span>
+            <span class="menu-title">Perfil</span>
         </a>
-        <a href="{{ url_for('auth.logout') }}" class="menu-item text-danger">
+        <a href="{{ url_for('auth.logout') }}" class="menu-item menu-item-logout">
             <span class="menu-icon">🚪</span>
-            <span>Sair do Sistema</span>
+            <span class="menu-title">Sair do Sistema</span>
         </a>
     </nav>
 </aside>

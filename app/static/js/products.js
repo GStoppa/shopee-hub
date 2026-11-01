@@ -183,4 +183,17 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+
+    // Permite clicar diretamente na caixa da miniatura para abrir a seleção de foto
+    document.addEventListener("click", (e) => {
+        const thumbBox = e.target.closest(".preview-thumb-box");
+        if (thumbBox) {
+            const container = thumbBox.closest(".file-preview-cell") || thumbBox.closest("td");
+            if (container) {
+                const fileInput = container.querySelector('input[type="file"]');
+                if (fileInput) fileInput.click();
+            }
+        }
+    });
+    
 });

@@ -4,21 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Painel{% endblock %} - Shopee Hub</title>
+
+    <!-- Execução síncrona antecipada para impedir piscar de tema -->
+    <script>
+        (function() {
+            var salvo = localStorage.getItem("shopee_hub_theme") || "dark";
+            document.documentElement.setAttribute("data-theme", salvo);
+        })();
+    </script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/catalog.css') }}">
+    {% block extra_css %}{% endblock %}
+
     <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 </head>
-<body>
-    <div class="admin-layout">
+<body class="admin-body">
+    <div class="admin-layout" id="admin-layout">
         <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        
         {% include 'partials/_sidebar.html' %}
 
         <div class="main-content">
             <header class="top-navbar">
                 <div class="navbar-left">
                     <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir Menu">☰</button>
-                    <h1 class="page-title">{% block page_title %}Painel de Controle{% endblock %}</h1>
+                    <h1 class="page-title">{% block page_title %}Painel de Controlo{% endblock %}</h1>
                 </div>
 
                 {% include 'partials/_navbar.html' %}
