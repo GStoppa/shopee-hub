@@ -18,9 +18,12 @@ def welcome():
             2
         )
 
+    margem_negativa = margem_geral <= 0
+
     return render_template(
         "main/welcome.html",
         metricas=metricas,
         produtos_criticos=produtos_criticos,
-        margem_geral=margem_geral
+        margem_geral=margem_geral,
+        margem_negativa=margem_negativa
     )

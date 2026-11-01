@@ -157,10 +157,11 @@ class ProductVariant:
         self.barcode = barcode.strip() if barcode else None
         self.variant_name = variant_name.strip() if variant_name else "Padrão"
         
-        self.cost_price = float(cost_price) if cost_price is not None else 0.0
-        self.price = float(price) if price is not None else 0.0
-        self.stock_quantity = int(stock_quantity) if stock_quantity is not None else 0
-        self.min_stock = int(min_stock) if min_stock is not None else 5
+        # Proteção estrita contra valores negativos
+        self.cost_price = max(0.0, float(cost_price)) if cost_price is not None else 0.0
+        self.price = max(0.0, float(price)) if price is not None else 0.0
+        self.stock_quantity = max(0, int(stock_quantity)) if stock_quantity is not None else 0
+        self.min_stock = max(1, int(min_stock)) if min_stock is not None else 5
         
         self.image_url = image_url.strip() if image_url else None
         self.created_at = created_at or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -168,8 +169,13 @@ class ProductVariant:
 
     @property
     def margin_percent(self) -> float:
+        """
+        Calcula a margem de lucro sobre o preço de venda.
+        Retorna porcentagem positiva ou negativa (prejuízo unitário).
+        """
         if self.price > 0:
-            return round(((self.price - self.cost_price) / self.price) * 100, 2)
+            margem = ((self.price - self.cost_price) / self.price) * 100
+            return round(margem, 2)
         return 0.0
 
     @property
@@ -180,66 +186,98 @@ class ProductVariant:
             return self.product_name
         return self.variant_name
 
+    @classmethod
+    def sku_existe(cls, sku: str, store_id: int, exclude_variant_id: int = None, cursor = None) -> bool:
+        """
+        Verifica se o SKU já existe na loja informada.
+        Permite passar um cursor ativo para validar dentro da mesma transação atômica.
+        """
+        sku_limpo = sku.strip().upper()
+        query = """
+            SELECT pv.id
+            FROM product_variants pv
+            JOIN products p ON pv.product_id = p.id
+            WHERE UPPER(pv.sku) = ? AND p.store_id = ?
+        """
+        params = [sku_limpo, store_id]
+        if exclude_variant_id:
+            query += " AND pv.id != ?"
+            params.append(exclude_variant_id)
+
+        if cursor:
+            cursor.execute(query, tuple(params))
+            return cursor.fetchone() is not None
+
+        with DatabaseConnection() as conn:
+            c = conn.cursor()
+            c.execute(query, tuple(params))
+            return c.fetchone() is not None
+
     def salvar(self, cursor=None):
-        if self.id is None:
-            query = """
-                INSERT INTO product_variants (
-                    product_id, sku, barcode, variant_name, cost_price, price, 
-                    stock_quantity, min_stock, image_url, created_at
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """
-            params = (
-                self.product_id, self.sku, self.barcode, self.variant_name,
-                self.cost_price, self.price, self.stock_quantity,
-                self.min_stock, self.image_url, self.created_at
-            )
-            if cursor:
-                cursor.execute(query, params)
-                self.id = cursor.lastrowid
+        def _executar(c):
+            if self.id:
+                query = """
+                    UPDATE product_variants SET
+                        sku = ?, barcode = ?, variant_name = ?, cost_price = ?,
+                        price = ?, stock_quantity = ?, min_stock = ?, image_url = ?
+                    WHERE id = ?
+                """
+                c.execute(query, (
+                    self.sku, self.barcode, self.variant_name, self.cost_price,
+                    self.price, self.stock_quantity, self.min_stock, self.image_url,
+                    self.id
+                ))
             else:
-                with DatabaseConnection() as conn:
-                    c = conn.cursor()
-                    c.execute(query, params)
-                    self.id = c.lastrowid
-        else:
-            query = """
-                UPDATE product_variants
-                SET sku = ?, barcode = ?, variant_name = ?, cost_price = ?, price = ?, 
-                    stock_quantity = ?, min_stock = ?, image_url = ?
-                WHERE id = ? AND product_id = ?
-            """
-            params = (
-                self.sku, self.barcode, self.variant_name, self.cost_price,
-                self.price, self.stock_quantity, self.min_stock,
-                self.image_url, self.id, self.product_id
-            )
-            if cursor:
-                cursor.execute(query, params)
-            else:
-                with DatabaseConnection() as conn:
-                    c = conn.cursor()
-                    c.execute(query, params)
-        return self
+                query = """
+                    INSERT INTO product_variants (
+                        product_id, sku, barcode, variant_name, cost_price, price,
+                        stock_quantity, min_stock, image_url, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """
+                c.execute(query, (
+                    self.product_id, self.sku, self.barcode, self.variant_name,
+                    self.cost_price, self.price, self.stock_quantity, self.min_stock,
+                    self.image_url, self.created_at
+                ))
+                self.id = c.lastrowid
+            return self
+
+        if cursor:
+            return _executar(cursor)
+
+        with DatabaseConnection() as conn:
+            c = conn.cursor()
+            res = _executar(c)
+            return res
 
     @classmethod
-    def sku_existe(cls, sku: str, store_id: int, exclude_variant_id: int = None) -> bool:
-        if not sku:
-            return False
+    def buscar_por_id(cls, variant_id: int, store_id: int):
         with DatabaseConnection() as conn:
             cursor = conn.cursor()
-            sql = """
-                SELECT pv.id
+            query = """
+                SELECT pv.*, p.name AS product_name
                 FROM product_variants pv
                 JOIN products p ON pv.product_id = p.id
-                WHERE p.store_id = ? AND UPPER(pv.sku) = UPPER(?)
+                WHERE pv.id = ? AND p.store_id = ?
             """
-            params = [store_id, sku.strip()]
-            if exclude_variant_id:
-                sql += " AND pv.id != ?"
-                params.append(exclude_variant_id)
-            cursor.execute(sql, tuple(params))
-            return cursor.fetchone() is not None
+            cursor.execute(query, (variant_id, store_id))
+            row = cursor.fetchone()
+            if not row:
+                return None
+            return cls(
+                id=row["id"],
+                product_id=row["product_id"],
+                sku=row["sku"],
+                barcode=row["barcode"],
+                variant_name=row["variant_name"],
+                cost_price=row["cost_price"],
+                price=row["price"],
+                stock_quantity=row["stock_quantity"],
+                min_stock=row["min_stock"],
+                image_url=row["image_url"],
+                created_at=row["created_at"],
+                product_name=row["product_name"]
+            )
 
     @classmethod
     def contar_por_produto(cls, product_id: int) -> int:
@@ -248,6 +286,88 @@ class ProductVariant:
             cursor.execute("SELECT COUNT(*) AS total FROM product_variants WHERE product_id = ?", (product_id,))
             row = cursor.fetchone()
             return row["total"] if row else 0
+
+    @classmethod
+    def atualizar_stock(cls, variant_id: int, store_id: int, new_stock: int, user_id: int = None, motivo: str = "Ajuste manual") -> bool:
+        new_stock = max(0, int(new_stock))
+        with DatabaseConnection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT pv.id, pv.stock_quantity
+                FROM product_variants pv
+                JOIN products p ON pv.product_id = p.id
+                WHERE pv.id = ? AND p.store_id = ?
+            """, (variant_id, store_id))
+            row = cursor.fetchone()
+            if not row:
+                return False
+
+            old_stock = row["stock_quantity"]
+            if old_stock == new_stock:
+                return True
+
+            diff = new_stock - old_stock
+            tipo = "entrada" if diff > 0 else "saida"
+
+            cursor.execute("UPDATE product_variants SET stock_quantity = ? WHERE id = ?", (new_stock, variant_id))
+
+            StockMovement(
+                variant_id=variant_id,
+                user_id=user_id,
+                movement_type=tipo,
+                quantity=abs(diff),
+                previous_stock=old_stock,
+                resulting_stock=new_stock,
+                reason=motivo
+            ).salvar(cursor=cursor)
+
+            return True
+
+    @classmethod
+    def registrar_movimento(cls, variant_id: int, store_id: int, user_id: int, tipo: str, quantidade: int, motivo: str) -> bool:
+        quantidade = max(0, int(quantidade))
+        with DatabaseConnection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT pv.id, pv.stock_quantity
+                FROM product_variants pv
+                JOIN products p ON pv.product_id = p.id
+                WHERE pv.id = ? AND p.store_id = ?
+            """, (variant_id, store_id))
+            row = cursor.fetchone()
+            if not row:
+                return False
+
+            old_stock = row["stock_quantity"]
+
+            if tipo == "entrada":
+                new_stock = old_stock + quantidade
+                qtd_mov = quantidade
+            elif tipo == "saida":
+                if old_stock < quantidade:
+                    return False
+                new_stock = old_stock - quantidade
+                qtd_mov = quantidade
+            elif tipo == "ajuste":
+                new_stock = quantidade
+                qtd_mov = abs(new_stock - old_stock)
+                tipo_real = "entrada" if new_stock >= old_stock else "saida"
+            else:
+                return False
+
+            cursor.execute("UPDATE product_variants SET stock_quantity = ? WHERE id = ?", (new_stock, variant_id))
+
+            StockMovement(
+                variant_id=variant_id,
+                user_id=user_id,
+                movement_type=tipo if tipo != "ajuste" else tipo_real,
+                quantity=qtd_mov,
+                previous_stock=old_stock,
+                resulting_stock=new_stock,
+                reason=motivo
+            ).salvar(cursor=cursor)
+
+            return True
 
     @classmethod
     def excluir(cls, variant_id: int, store_id: int) -> bool:
@@ -269,123 +389,10 @@ class ProductVariant:
             image_to_remove = row["image_url"]
             cursor.execute("DELETE FROM product_variants WHERE id = ?", (variant_id,))
 
-        # Remove fisicamente o arquivo do disco SOMENTE APÓS o commit bem-sucedido
         if image_to_remove:
             remover_imagem_produto(image_to_remove)
 
         return True
-
-    @classmethod
-    def buscar_por_id(cls, variant_id: int, store_id: int):
-        with DatabaseConnection() as conn:
-            cursor = conn.cursor()
-            query = """
-                SELECT pv.*, p.name AS product_name
-                FROM product_variants pv
-                JOIN products p ON pv.product_id = p.id
-                WHERE pv.id = ? AND p.store_id = ?
-            """
-            cursor.execute(query, (variant_id, store_id))
-            row = cursor.fetchone()
-            if row:
-                return cls(
-                    id=row["id"],
-                    product_id=row["product_id"],
-                    sku=row["sku"],
-                    barcode=row["barcode"],
-                    variant_name=row["variant_name"],
-                    cost_price=row["cost_price"],
-                    price=row["price"],
-                    stock_quantity=row["stock_quantity"],
-                    min_stock=row["min_stock"],
-                    image_url=row["image_url"],
-                    created_at=row["created_at"],
-                    product_name=row["product_name"]
-                )
-        return None
-
-    @classmethod
-    def atualizar_stock(cls, variant_id: int, store_id: int, nova_quantidade: int, user_id: int = None, motivo: str = "Ajuste manual"):
-        with DatabaseConnection() as conn:
-            cursor = conn.cursor()
-            query_busca = """
-                SELECT pv.id, pv.stock_quantity
-                FROM product_variants pv
-                JOIN products p ON pv.product_id = p.id
-                WHERE pv.id = ? AND p.store_id = ?
-            """
-            cursor.execute(query_busca, (variant_id, store_id))
-            row = cursor.fetchone()
-            if not row:
-                return False
-
-            estoque_antigo = row["stock_quantity"]
-            diferenca = nova_quantidade - estoque_antigo
-            
-            if diferenca == 0:
-                return True
-
-            tipo = "entrada" if diferenca > 0 else "saida"
-
-            cursor.execute("UPDATE product_variants SET stock_quantity = ? WHERE id = ?", (nova_quantidade, variant_id))
-
-            movimento = StockMovement(
-                variant_id=variant_id,
-                user_id=user_id,
-                movement_type=tipo,
-                quantity=abs(diferenca),
-                previous_stock=estoque_antigo,
-                resulting_stock=nova_quantidade,
-                reason=motivo
-            )
-            movimento.salvar(cursor=cursor)
-            return True
-
-    @classmethod
-    def registrar_movimento(cls, variant_id: int, store_id: int, user_id: int, tipo: str, quantidade: int, motivo: str):
-        with DatabaseConnection() as conn:
-            cursor = conn.cursor()
-            query = """
-                SELECT pv.id, pv.stock_quantity
-                FROM product_variants pv
-                JOIN products p ON pv.product_id = p.id
-                WHERE pv.id = ? AND p.store_id = ?
-            """
-            cursor.execute(query, (variant_id, store_id))
-            row = cursor.fetchone()
-            if not row:
-                return False
-
-            atual = row["stock_quantity"]
-            if tipo == "entrada":
-                novo_saldo = atual + quantidade
-                qtd_registrada = quantidade
-            elif tipo == "saida":
-                if quantidade > atual:
-                    return False
-                novo_saldo = atual - quantidade
-                qtd_registrada = quantidade
-            elif tipo == "ajuste":
-                novo_saldo = max(0, quantidade)
-                qtd_registrada = abs(novo_saldo - atual)
-                if novo_saldo == atual:
-                    return True
-            else:
-                return False
-
-            cursor.execute("UPDATE product_variants SET stock_quantity = ? WHERE id = ?", (novo_saldo, variant_id))
-
-            mov = StockMovement(
-                variant_id=variant_id,
-                user_id=user_id,
-                movement_type=tipo,
-                quantity=qtd_registrada,
-                previous_stock=atual,
-                resulting_stock=novo_saldo,
-                reason=motivo
-            )
-            mov.salvar(cursor=cursor)
-            return True
 
 
 class Product:

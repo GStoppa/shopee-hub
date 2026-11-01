@@ -98,7 +98,7 @@
                             </td>
                         </tr>
 
-                        <!-- Sub-tabela com as variações detalhadas do anúncio -->
+                        <!-- Subtabela com as variações detalhadas do anúncio -->
                         <tr class="variant-subrow" id="variants-{{ prod.id }}">
                             <td colspan="7" style="padding: 0 0 1rem 2.5rem;">
                                 <table class="variant-table">
@@ -131,8 +131,9 @@
                                                 <td>{{ v.cost_price | currency }}</td>
                                                 <td><strong>{{ v.price | currency }}</strong></td>
                                                 <td>
-                                                    <span class="{% if v.margin_percent > 30 %}text-success{% elif v.margin_percent > 15 %}text-warning{% else %}text-danger{% endif %}">
+                                                    <span class="{% if v.margin_percent > 30 %}text-success{% elif v.margin_percent > 15 %}text-warning{% else %}text-danger{% endif %}" {% if v.margin_percent < 0 %}title="Prejuízo: Preço de venda abaixo do custo!"{% endif %}>
                                                         {{ v.margin_percent }}%
+                                                        {% if v.margin_percent < 0 %}⚠️{% endif %}
                                                     </span>
                                                 </td>
                                                 <td class="text-center">

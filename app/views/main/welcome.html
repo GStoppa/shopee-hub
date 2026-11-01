@@ -31,13 +31,13 @@
         <div class="kpi-footer">Sem saldo disponível</div>
     </div>
 
-    <div class="kpi-card kpi-success">
+    <div class="kpi-card {% if margem_negativa %}kpi-danger{% else %}kpi-success{% endif %}">
         <div class="kpi-header">
             <span class="kpi-title">Valor do Estoque</span>
             <span>💰</span>
         </div>
-        <div class="kpi-value text-success">{{ metricas.valor_estoque | currency }}</div>
-        <div class="kpi-footer">Margem Bruta Estimada: <strong>{{ margem_geral }}%</strong></div>
+        <div class="kpi-value {% if margem_negativa %}text-danger{% else %}text-success{% endif %}">{{ metricas.valor_estoque | currency }}</div>
+        <div class="kpi-footer">Margem Bruta Estimada: <strong class="{% if margem_negativa %}text-danger{% endif %}">{{ margem_geral }}%</strong></div>
     </div>
 </div>
 

@@ -50,6 +50,24 @@
         {% endif %}
     </div>
 
+    {% if not variant %}
+        <form method="GET" action="{{ url_for('product.stock_movements') }}" class="catalog-filters mb-3">
+            <input type="text" name="q" value="{{ request.args.get('q', '') }}" class="form-control filter-input" placeholder="Buscar por produto, SKU ou motivo...">
+
+            <select name="tipo" class="form-control filter-select">
+                <option value="">Todas as Operações</option>
+                <option value="entrada" {% if request.args.get('tipo') == 'entrada' %}selected{% endif %}>Entradas (+)</option>
+                <option value="saida" {% if request.args.get('tipo') == 'saida' %}selected{% endif %}>Saídas (-)</option>
+                <option value="ajuste" {% if request.args.get('tipo') == 'ajuste' %}selected{% endif %}>Ajustes de Balanço (=)</option>
+            </select>
+
+            <button type="submit" class="btn-secondary">Filtrar</button>
+            {% if request.args.get('q') or request.args.get('tipo') %}
+                <a href="{{ url_for('product.stock_movements') }}" class="btn-small">Limpar</a>
+            {% endif %}
+        </form>
+    {% endif %}
+
     {% if movements %}
         <div class="table-responsive">
             <table class="data-table">
@@ -102,7 +120,7 @@
 
         {% if total_paginas > 1 %}
             <div class="pagination-bar">
-                <div>Mostrando página <strong>{{ pagina }}</strong> de <strong>{{ total_paginas }}</strong> (Total: {{ total_itens }} registos)</div>
+                <div>Mostrando página <strong>{{ pagina }}</strong> de <strong>{{ total_paginas }}</strong> (Total: {{ total_itens }} registros)</div>
                 <div class="pagination-controls">
                     {% if variant %}
                         <a href="{{ url_for('product.variant_history', variant_id=variant.id, page=pagina-1) }}" class="page-link {% if pagina == 1 %}is-disabled{% endif %}">Anterior</a>
@@ -137,7 +155,7 @@
     {% else %}
         <div class="empty-state">
             <div class="empty-state-icon">📑</div>
-            <p>Nenhuma movimentação de estoque registrada até o momento.</p>
+            <p>Nenhuma movimentação de estoque encontrada com os critérios informados.</p>
         </div>
     {% endif %}
 </div>
