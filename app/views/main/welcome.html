@@ -4,55 +4,96 @@
 
 {% block content %}
 <div class="dashboard-metrics-grid">
+    <!-- Card 1: Volume Físico Real de Peças -->
     <div class="kpi-card kpi-card-primary">
         <div class="kpi-card-header">
-            <span class="kpi-label">Produtos Ativos</span>
+            <span class="kpi-label">Estoque Físico Total</span>
             <div class="kpi-icon-pill icon-pill-blue">📦</div>
         </div>
-        <div class="kpi-metric-number">{{ metricas.total_produtos }}</div>
+        <div class="kpi-metric-number">
+            {{ metricas.total_unidades }} <span class="kpi-unit">un</span>
+        </div>
         <div class="kpi-card-footer">
-            <span class="kpi-subtext">Anúncios no catálogo</span>
+            <span class="kpi-subtext">Em {{ metricas.total_produtos }} {% if metricas.total_produtos == 1 %}anúncio ativo{% else %}anúncios ativos{% endif %}</span>
         </div>
     </div>
 
-    <div class="kpi-card kpi-card-warning">
+    <!-- Card 2: Grade de SKUs / Variações -->
+    <div class="kpi-card kpi-card-primary">
         <div class="kpi-card-header">
-            <span class="kpi-label">Estoque Baixo</span>
-            <div class="kpi-icon-pill icon-pill-amber">⚠️</div>
+            <span class="kpi-label">Catálogo & Grade</span>
+            <div class="kpi-icon-pill icon-pill-blue">🏷️</div>
         </div>
-        <div class="kpi-metric-number text-amber">{{ metricas.baixo_estoque }}</div>
+        <div class="kpi-metric-number">
+            {{ metricas.total_variacoes }} <span class="kpi-unit">SKUs</span>
+        </div>
         <div class="kpi-card-footer">
-            <span class="kpi-subtext">Abaixo do limite mínimo</span>
+            <span class="kpi-subtext">{{ metricas.total_produtos }} {% if metricas.total_produtos == 1 %}anúncio cadastrado{% else %}anúncios cadastrados{% endif %}</span>
         </div>
     </div>
 
-    <div class="kpi-card kpi-card-danger">
-        <div class="kpi-card-header">
-            <span class="kpi-label">Esgotados</span>
-            <div class="kpi-icon-pill icon-pill-rose">🚨</div>
-        </div>
-        <div class="kpi-metric-number text-rose">{{ metricas.esgotados }}</div>
-        <div class="kpi-card-footer">
-            <span class="kpi-subtext">Sem estoque disponível</span>
-        </div>
-    </div>
-
+    <!-- Card 3: Valor Patrimonial & Lucro Projetado -->
     <div class="kpi-card {% if margem_negativa %}kpi-card-danger{% else %}kpi-card-success{% endif %}">
         <div class="kpi-card-header">
-            <span class="kpi-label">Valor do Estoque</span>
+            <span class="kpi-label">Patrimônio em Estoque</span>
             <div class="kpi-icon-pill icon-pill-emerald">💰</div>
         </div>
         <div class="kpi-metric-number {% if margem_negativa %}text-rose{% else %}text-emerald{% endif %}">
             {{ metricas.valor_estoque | currency }}
         </div>
         <div class="kpi-card-footer">
-            <span class="kpi-subtext">Margem Estimada:</span>
-            <strong class="{% if margem_negativa %}text-rose{% else %}text-emerald{% endif %}">{{ margem_geral }}%</strong>
+            <span class="kpi-subtext">Lucro Proj.:</span>
+            <strong class="{% if margem_negativa %}text-rose{% else %}text-emerald{% endif %}">
+                {{ metricas.lucro_projetado | currency }} ({{ margem_geral }}%)
+            </strong>
         </div>
     </div>
+
+    <!-- Card 4: Saúde Operacional (Card Inteligente) -->
+    {% if estoque_100_em_dia %}
+        <div class="kpi-card kpi-card-success">
+            <div class="kpi-card-header">
+                <span class="kpi-label">Saúde do Estoque</span>
+                <div class="kpi-icon-pill icon-pill-emerald">🛡️</div>
+            </div>
+            <div class="kpi-metric-number text-emerald">
+                100% <span class="kpi-unit text-emerald">Em Dia</span>
+            </div>
+            <div class="kpi-card-footer">
+                <span class="kpi-subtext">Nenhum item esgotado ou crítico</span>
+            </div>
+        </div>
+    {% elif metricas.esgotados > 0 %}
+        <div class="kpi-card kpi-card-danger">
+            <div class="kpi-card-header">
+                <span class="kpi-label">Saúde do Estoque</span>
+                <div class="kpi-icon-pill icon-pill-rose">🚨</div>
+            </div>
+            <div class="kpi-metric-number text-rose">
+                {{ metricas.esgotados }} <span class="kpi-unit text-rose">esgotado(s)</span>
+            </div>
+            <div class="kpi-card-footer">
+                <span class="kpi-subtext">{{ metricas.baixo_estoque }} com estoque baixo</span>
+            </div>
+        </div>
+    {% else %}
+        <div class="kpi-card kpi-card-warning">
+            <div class="kpi-card-header">
+                <span class="kpi-label">Saúde do Estoque</span>
+                <div class="kpi-icon-pill icon-pill-amber">⚠️</div>
+            </div>
+            <div class="kpi-metric-number text-amber">
+                {{ metricas.baixo_estoque }} <span class="kpi-unit text-amber">em alerta</span>
+            </div>
+            <div class="kpi-card-footer">
+                <span class="kpi-subtext">Abaixo do estoque mínimo</span>
+            </div>
+        </div>
+    {% endif %}
 </div>
 
 <div class="dashboard-split-layout">
+    <!-- Coluna 1: Alertas de Reposição Urgente -->
     <div class="content-panel">
         <div class="panel-header">
             <div>
@@ -114,6 +155,7 @@
         {% endif %}
     </div>
 
+    <!-- Coluna 2: Atalhos de Ação Rápida -->
     <div class="content-panel">
         <div class="panel-header">
             <div>

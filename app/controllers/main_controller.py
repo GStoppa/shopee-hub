@@ -19,11 +19,13 @@ def welcome():
         )
 
     margem_negativa = margem_geral <= 0
+    estoque_100_em_dia = (metricas["baixo_estoque"] == 0 and metricas["esgotados"] == 0)
 
     return render_template(
         "main/welcome.html",
         metricas=metricas,
         produtos_criticos=produtos_criticos,
         margem_geral=margem_geral,
-        margem_negativa=margem_negativa
+        margem_negativa=margem_negativa,
+        estoque_100_em_dia=estoque_100_em_dia
     )

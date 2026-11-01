@@ -1,175 +1,10 @@
 /* ==========================================================================
-   ESTILOS ESPECÍFICOS DO CATÁLOGO & VARIAÇÕES
-   ========================================================================== */
-.col-chevron {
-    width: 36px;
-    text-align: center;
-    cursor: pointer;
-}
-
-.chevron-icon {
-    display: inline-block;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    transition: transform 0.2s ease;
-}
-
-.chevron-icon.is-expanded {
-    transform: rotate(90deg);
-    color: var(--primary);
-}
-
-.accordion-row {
-    cursor: pointer;
-}
-
-.variant-subrow {
-    display: none;
-    background-color: rgba(0, 0, 0, 0.15);
-}
-
-.variant-subrow.is-open {
-    display: table-row;
-}
-
-.variant-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.825rem;
-}
-
-.variant-table th {
-    background-color: var(--bg-main);
-    color: var(--text-muted);
-    font-weight: 600;
-    padding: 0.6rem 0.85rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.variant-table td {
-    padding: 0.6rem 0.85rem;
-    border-bottom: 1px solid var(--border-color);
-    vertical-align: middle;
-}
-
-.variant-thumb {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm);
-    object-fit: cover;
-    border: 1px solid var(--border-color);
-    display: block;
-}
-
-.quick-stock-form {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-}
-
-.quick-stock-input {
-    width: 68px;
-    padding: 0.25rem 0.4rem;
-    font-size: 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    text-align: center;
-}
-
-/* Colunas otimizadas para acomodar perfeitamente os números e textos sem barra de rolagem excessiva */
-.input-col-name { width: 100%; min-width: 160px; }
-.input-col-sku { width: 100%; min-width: 130px; }
-.input-col-ean { width: 100%; min-width: 130px; }
-.input-col-cost { width: 100%; min-width: 110px; }
-.input-col-sale { width: 100%; min-width: 110px; }
-.input-col-qty { width: 90px; text-align: center; }
-.input-col-min { width: 90px; text-align: center; }
-.input-col-file { width: 100%; max-width: 180px; font-size: 0.75rem; }
-
-/* Garante que a tabela use 100% do espaço e evite quebra de layout */
-.content-box .table-responsive {
-    overflow-x: auto;
-    width: 100%;
-}
-
-.content-box .data-table {
-    min-width: 950px;
-}
-
-.file-preview-cell {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-}
-
-.preview-thumb-box {
-    width: 34px;
-    height: 34px;
-    border-radius: var(--radius-sm);
-    border: 1px dashed var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    background-color: var(--bg-main);
-    flex-shrink: 0;
-}
-
-.preview-thumb-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.preview-placeholder-icon {
-    font-size: 0.9rem;
-    opacity: 0.5;
-}
-
-.simple-preview-container {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 0.35rem;
-}
-
-.simple-preview-thumb {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--radius-sm);
-    border: 1px dashed var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    background-color: var(--bg-main);
-    flex-shrink: 0;
-}
-
-.simple-preview-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.btn-remove-photo-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: 0.75rem;
-    color: var(--danger);
-    margin-top: 0.25rem;
-    cursor: pointer;
-}
-
-/* ==========================================================================
-   MÓDULO 4: CATÁLOGO DE PRODUTOS & AUDITORIA DE ESTOQUE
-   (Adicionado ao final do arquivo sem substituir regras anteriores)
+   CATÁLOGO, GRADE DE PRODUTOS E AJUSTE DE ESTOQUE
    ========================================================================== */
 
-/* 1. Cabeçalho de Ações e Barra de Filtros Unificada */
+/* --------------------------------------------------------------------------
+   1. CABEÇALHO, FILTROS E BUSCA
+   -------------------------------------------------------------------------- */
 .page-header-actions {
     display: flex;
     justify-content: space-between;
@@ -207,7 +42,7 @@
 
 .filter-select {
     flex: 1;
-    min-width: 180px;
+    min-width: 175px;
     padding: 0.65rem 0.9rem;
     background-color: var(--bg-card);
     color: var(--text-main);
@@ -243,20 +78,53 @@
     border-color: var(--border-hover);
 }
 
-/* 2. Acordeão e Subtabela de Variações */
-.accordion-row {
+/* --------------------------------------------------------------------------
+   2. TABELA PRINCIPAL DO CATÁLOGO & ACORDEÃO
+   -------------------------------------------------------------------------- */
+.data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.875rem;
+    min-width: 1050px;
+}
+
+.data-table thead th {
+    background-color: var(--table-header);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1.25rem 1rem 1.1rem;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+}
+
+.data-table tbody tr.accordion-row {
     cursor: pointer;
     transition: background-color 0.15s ease;
 }
 
-.accordion-row:hover td {
+.data-table tbody tr.accordion-row:hover td {
     background-color: var(--bg-surface-hover);
+}
+
+.data-table tbody tr.accordion-row td {
+    padding: 1.15rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    vertical-align: middle;
+}
+
+.data-table tbody tr.accordion-row:first-child td {
+    padding-top: 1.35rem;
 }
 
 .col-chevron {
     width: 44px;
     text-align: center;
-    padding-left: 1rem !important;
+    padding-left: 1.15rem !important;
 }
 
 .chevron-icon {
@@ -280,6 +148,9 @@
     border-color: rgba(238, 77, 45, 0.25);
 }
 
+/* --------------------------------------------------------------------------
+   3. SUBTABELA DE VARIAÇÕES (EXPANSÍVEL)
+   -------------------------------------------------------------------------- */
 .variant-subrow {
     display: none;
 }
@@ -291,7 +162,7 @@
 .variant-subrow td {
     background-color: var(--bg-card-subtle);
     border-bottom: 1px solid var(--border-color);
-    padding: 0 1rem 1.25rem 2.5rem !important;
+    padding: 1rem 1.25rem 1.5rem 2.75rem !important;
 }
 
 .variant-table {
@@ -303,7 +174,6 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     overflow: hidden;
-    margin-top: 0.5rem;
     box-shadow: var(--shadow-sm);
 }
 
@@ -311,7 +181,7 @@
     background-color: var(--table-header);
     color: var(--text-secondary);
     font-weight: 600;
-    padding: 0.65rem 0.9rem;
+    padding: 0.85rem 1rem;
     border-bottom: 1px solid var(--border-color);
     text-align: left;
     font-size: 0.72rem;
@@ -320,10 +190,11 @@
 }
 
 .variant-table td {
-    padding: 0.65rem 0.9rem;
+    padding: 0.85rem 1rem;
     border-bottom: 1px solid var(--border-color);
     vertical-align: middle;
     background-color: var(--bg-card) !important;
+    color: var(--text-main);
 }
 
 .variant-table tr:last-child td {
@@ -331,8 +202,8 @@
 }
 
 .variant-thumb {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border-radius: var(--radius-sm);
     object-fit: cover;
     border: 1px solid var(--border-color);
@@ -340,74 +211,184 @@
     display: block;
 }
 
-/* 3. Ações Inline e Formulário Rápido */
-.inline-actions-right {
+/* --------------------------------------------------------------------------
+   4. CAMPO DE AJUSTE RÁPIDO COM SETINHAS (SPINNERS NATIVOS ESTILIZADOS)
+   -------------------------------------------------------------------------- */
+.quick-stock-form {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     justify-content: flex-end;
 }
 
-.inline-actions {
-    display: inline-block;
-    margin: 0;
+.quick-stock-input {
+    width: 82px !important;
+    min-width: 82px !important;
+    height: 38px !important;
+    padding: 0.2rem 0.3rem 0.2rem 0.65rem !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    border-radius: var(--radius-sm) !important;
+    border: 1px solid var(--border-color) !important;
+    background-color: var(--bg-main) !important;
+    color: var(--text-main) !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+
+    /* Garante setinhas nativas ativas no modo escuro sem quebrar a árvore Shadow DOM */
+    color-scheme: dark !important;
+    appearance: auto !important;
+    -webkit-appearance: auto !important;
+    -moz-appearance: number-input !important;
 }
 
-/* 4. Formulário e Campos de Auditoria (movements.html) */
-.form-grid-2 {
+[data-theme="light"] .quick-stock-input {
+    color-scheme: light !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+.quick-stock-input:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 2px var(--brand-subtle) !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. FORMULÁRIO DE ANÚNCIO (PRODUTO SIMPLES E GRADE DE VARIAÇÕES)
+   -------------------------------------------------------------------------- */
+.form-container-md {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.logistics-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.25rem;
-    margin-bottom: 1rem;
 }
 
 @media (max-width: 768px) {
-    .form-grid-2 {
-        grid-template-columns: 1fr;
+    .logistics-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
-.form-group {
+.radio-group-horizontal {
     display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    margin-bottom: 1rem;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
 }
 
-.form-group label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-main);
-}
-
-.form-control {
-    width: 100%;
-    padding: 0.65rem 0.85rem;
-    font-size: 0.875rem;
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    border: 1px solid var(--border-color);
+.radio-label {
+    flex: 1;
+    min-width: 260px;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1.15rem 1.25rem;
     border-radius: var(--radius-md);
-    outline: none;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    background-color: var(--bg-card-subtle);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-main);
+    transition: all 0.2s ease;
 }
 
-.form-control:focus {
+.radio-label:hover {
+    border-color: var(--border-hover);
+    background-color: var(--bg-surface-hover);
+}
+
+.radio-label input[type="radio"] {
+    accent-color: var(--primary);
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
+.radio-label:has(input[type="radio"]:checked) {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--brand-subtle);
+    background-color: var(--brand-subtle);
 }
 
-/* 5. Destaques de Movimentação e Cores */
-.text-info {
-    color: var(--info);
+/* Colunas do formulário com respiro */
+.input-col-name { min-width: 160px; }
+.input-col-sku  { min-width: 130px; }
+.input-col-ean  { min-width: 130px; }
+.input-col-cost { min-width: 110px; }
+.input-col-sale { min-width: 110px; }
+.input-col-qty  { width: 95px !important; min-width: 95px !important; text-align: center; }
+.input-col-min  { width: 95px !important; min-width: 95px !important; text-align: center; }
+.input-col-file { width: 140px; min-width: 140px; font-size: 0.78rem; }
+
+/* Upload de fotos com prévia clicável */
+.file-preview-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 195px;
 }
 
-.mt-2 { margin-top: 0.75rem !important; }
-.mb-2 { margin-bottom: 0.75rem !important; }
-.mb-3 { margin-bottom: 1.25rem !important; }
-.p-0 { padding: 0 !important; }
+.preview-thumb-box {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: var(--radius-sm);
+    border: 1.5px dashed var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: var(--bg-main);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
 
-/* 6. Barra de Paginação Flutuante */
+.preview-thumb-box:hover {
+    border-color: var(--primary);
+    transform: scale(1.05);
+}
+
+.preview-thumb-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-placeholder-icon {
+    font-size: 1.1rem;
+    opacity: 0.6;
+}
+
+.btn-remove-photo-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--danger);
+    margin-top: 0.35rem;
+    cursor: pointer;
+}
+
+.form-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* --------------------------------------------------------------------------
+   6. PAGINAÇÃO & UTILITÁRIOS
+   -------------------------------------------------------------------------- */
 .pagination-bar {
     display: flex;
     justify-content: space-between;
@@ -463,361 +444,146 @@
     background-color: transparent;
 }
 
-/* ==========================================================================
-   MÓDULO 5: FORMULÁRIOS DE ANÚNCIO (PRODUTO SIMPLES & GRADE DINÂMICA)
-   (Adicionado ao final do arquivo sem substituir regras anteriores)
-   ========================================================================== */
-
-/* 1. Contêiner Centralizado do Formulário */
-.form-container-md {
-    max-width: 1100px;
-    margin: 0 auto;
-}
-
-/* 2. Grade de Dimensões e Logística (4 Colunas) */
-.logistics-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.25rem;
-}
-
-@media (max-width: 768px) {
-    .logistics-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .logistics-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* 3. Seletor de Tipo de Produto em Cartões Interativos */
-.radio-group-horizontal {
-    display: flex;
-    gap: 1.25rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-}
-
-.radio-label {
-    flex: 1;
-    min-width: 260px;
-    display: flex;
+.inline-actions-right {
+    display: inline-flex;
     align-items: center;
-    gap: 0.85rem;
-    padding: 1.15rem 1.25rem;
-    border-radius: var(--radius-md);
-    background-color: var(--bg-card-subtle);
-    border: 1px solid var(--border-color);
-    cursor: pointer;
-    font-size: 0.875rem;
-    color: var(--text-main);
-    transition: all 0.2s ease;
+    gap: 0.5rem;
+    justify-content: flex-end;
 }
 
-.radio-label:hover {
-    border-color: var(--border-hover);
-    background-color: var(--bg-surface-hover);
-}
-
-.radio-label input[type="radio"] {
-    accent-color: var(--primary);
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
+.inline-actions {
+    display: inline-block;
     margin: 0;
 }
 
-.radio-label:has(input[type="radio"]:checked) {
-    border-color: var(--primary);
-    background-color: var(--brand-subtle);
-}
-
-/* 4. Largura e Alinhamento das Colunas da Grade de Variações */
-.input-col-name { min-width: 140px; }
-.input-col-sku { min-width: 120px; }
-.input-col-ean { min-width: 120px; }
-.input-col-cost { min-width: 95px; }
-.input-col-sale { min-width: 95px; }
-.input-col-qty { width: 80px; text-align: center; }
-.input-col-min { width: 75px; text-align: center; }
-.input-col-file { max-width: 140px; font-size: 0.78rem; }
-
-/* 5. Célula de Upload e Miniatura da Foto com Prévia */
-.file-preview-cell {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-}
-
-.preview-thumb-box {
-    width: 36px;
-    height: 36px;
-    border-radius: var(--radius-sm);
-    border: 1px dashed var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    background-color: var(--bg-main);
-    flex-shrink: 0;
-}
-
-.preview-thumb-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.preview-placeholder-icon {
-    font-size: 1rem;
-    opacity: 0.6;
-}
-
-.btn-remove-photo-checkbox {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.75rem;
-    color: var(--danger);
-    margin-top: 0.35rem;
-    cursor: pointer;
-    user-select: none;
-}
-
-.btn-remove-photo-checkbox input[type="checkbox"] {
-    accent-color: var(--danger);
-}
-
-/* 6. Barra de Ações do Rodapé do Formulário */
-.form-footer-actions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-}
-
 /* ==========================================================================
-   AJUSTE DE FOTOS E CAMPOS NUMÉRICOS NA GRADE DE VARIAÇÕES
+   ESTILIZAÇÃO DO STEPPER WIDGET INTEGRADO (AJUSTE RÁPIDO)
    ========================================================================== */
 
-/* 1. Garante largura respirável para a tabela de variações sem espremer colunas */
-.data-table {
-    min-width: 1050px !important;
+/* 1. Alinhamento horizontal do formulário */
+.quick-stock-form {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    vertical-align: middle !important;
 }
 
-/* 2. Coluna e Seleção de Foto: espaço visível e botão clicável */
-.file-preview-cell {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.75rem !important;
-    min-width: 195px !important;
-    width: 195px !important;
-}
-
-.preview-thumb-box {
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px !important;
-    min-height: 44px !important;
-    border-radius: 8px !important;
-    border: 1.5px dashed var(--border-color, rgba(255, 255, 255, 0.2)) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+/* 2. Caixa unificada de contorno do campo + botões */
+.stepper-widget {
+    display: inline-flex !important;
+    align-items: stretch !important;
+    height: 36px !important;
+    width: 90px !important;
+    min-width: 90px !important;
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15)) !important;
+    border-radius: var(--radius-sm, 6px) !important;
+    background-color: var(--bg-card, #121826) !important;
     overflow: hidden !important;
-    background-color: var(--bg-main, #0b0f19) !important;
-    cursor: pointer !important;
-    flex-shrink: 0 !important;
-    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 
-.preview-thumb-box:hover {
+.stepper-widget:focus-within {
     border-color: var(--primary, #ee4d2d) !important;
-    transform: scale(1.06) !important;
+    box-shadow: 0 0 0 2px var(--brand-subtle, rgba(238, 77, 45, 0.2)) !important;
 }
 
-.input-col-file {
-    display: block !important;
-    width: 135px !important;
-    min-width: 135px !important;
-    font-size: 0.75rem !important;
-    color: var(--text-muted, #94a3b8) !important;
-    cursor: pointer !important;
-}
-
-/* 3. Remove os spinners (setinhas ▲▼) que cobrem os números na tabela */
-.data-table input[type="number"]::-webkit-outer-spin-button,
-.data-table input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none !important;
+/* 3. Input numérico limpo e centralizado dentro da caixa */
+.stepper-widget .quick-stock-input {
+    flex: 1 !important;
+    width: calc(100% - 24px) !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--text-main, #f8fafc) !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    padding: 0 !important;
     margin: 0 !important;
-}
-
-.data-table input[type="number"] {
+    outline: none !important;
+    box-shadow: none !important;
     -moz-appearance: textfield !important;
     appearance: textfield !important;
 }
 
-/* 4. Largura confortável e valores 100% visíveis para Estoque e Mínimo */
-.data-table .input-col-qty,
-.data-table .input-col-min,
-.data-table input[name*="stock"],
-.data-table input[name*="min"] {
-    width: 95px !important;
-    min-width: 95px !important;
-    padding: 0.55rem 0.35rem !important;
-    text-align: center !important;
-    font-weight: 700 !important;
-    font-size: 0.95rem !important;
+.stepper-widget .quick-stock-input::-webkit-inner-spin-button,
+.stepper-widget .quick-stock-input::-webkit-outer-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+    display: none !important;
 }
 
-/* 5. Larguras adequadas para as demais colunas */
-.data-table .input-col-name { min-width: 160px !important; }
-.data-table .input-col-sku  { min-width: 120px !important; }
-.data-table .input-col-ean  { min-width: 120px !important; }
-.data-table .input-col-cost,
-.data-table .input-col-sale { min-width: 105px !important; }
-
-/* ==========================================================================
-   AJUSTE DE ESPAÇAMENTO SUPERIOR & SETINHAS ESTILIZADAS DO ESTOQUE
-   ========================================================================== */
-
-/* 1. Mais respiro no topo da tabela e no primeiro item da listagem */
-.data-table thead th {
-    padding-top: 1.25rem !important;
-    padding-bottom: 1.1rem !important;
+/* 4. Coluna lateral com os botões estilizados */
+.stepper-widget .stepper-arrows {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 24px !important;
+    min-width: 24px !important;
+    height: 100% !important;
+    border-left: 1px solid var(--border-color, rgba(255, 255, 255, 0.12)) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-.data-table tbody tr.accordion-row td {
-    padding-top: 1.15rem !important;
-    padding-bottom: 1.15rem !important;
-}
-
-.data-table tbody tr.accordion-row:first-child td {
-    padding-top: 1.35rem !important;
-}
-
-/* 2. Respiro superior da subtabela de variações (afasta do anúncio pai) */
-.variant-subrow td {
-    padding: 0.85rem 1.25rem 1.35rem 2.5rem !important;
-}
-
-.variant-table th {
-    padding: 0.8rem 1rem !important;
-}
-
-.variant-table td {
-    padding: 0.85rem 1rem !important;
-}
-
-/* 3. Retorno das setinhas (spinners) estilizadas no Ajuste Rápido */
-.data-table .quick-stock-input,
-.quick-stock-form .quick-stock-input {
-    width: 86px !important;
-    min-width: 86px !important;
-    height: 38px !important;
-    padding: 0.35rem 0.4rem 0.35rem 0.75rem !important;
-    font-size: 0.95rem !important;
-    font-weight: 700 !important;
-    text-align: center !important;
-    border-radius: var(--radius-sm, 6px) !important;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15)) !important;
-    background-color: var(--bg-main, #0b0f19) !important;
-    color: var(--text-main, #f8fafc) !important;
-    
-    /* Integra as setinhas nativas ao tema escuro/claro automaticamente */
-    color-scheme: dark !important;
-    -moz-appearance: number-input !important;
-    appearance: auto !important;
-}
-
-[data-theme="light"] .data-table .quick-stock-input,
-[data-theme="light"] .quick-stock-form .quick-stock-input {
-    color-scheme: light !important;
-}
-
-/* Estilização e visibilidade suave das setinhas para cima e para baixo */
-.data-table .quick-stock-input::-webkit-outer-spin-button,
-.data-table .quick-stock-input::-webkit-inner-spin-button,
-.quick-stock-form .quick-stock-input::-webkit-outer-spin-button,
-.quick-stock-form .quick-stock-input::-webkit-inner-spin-button {
-    -webkit-appearance: inner-spin-button !important;
-    opacity: 0.8 !important;
-    display: block !important;
+.stepper-widget .stepper-arrow {
+    flex: 1 !important;
+    height: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--text-muted, #94a3b8) !important;
+    font-size: 0.58rem !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    margin: 0 !important;
     cursor: pointer !important;
-    height: 26px !important;
-    margin-right: 2px !important;
-    transition: opacity 0.15s ease !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+    user-select: none !important;
 }
 
-.quick-stock-form .quick-stock-input:hover::-webkit-inner-spin-button {
-    opacity: 1 !important;
+.stepper-widget .stepper-arrow.up {
+    border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
 }
 
-/* ==========================================================================
-   REATIVAÇÃO E ESTILIZAÇÃO DAS SETINHAS (▲▼) NO AJUSTE RÁPIDO
-   ========================================================================== */
-
-/* 1. Reativa as setinhas com especificidade máxima para sobrepor o bloqueio */
-.data-table input[type="number"].quick-stock-input,
-.quick-stock-form input[type="number"].quick-stock-input,
-form.quick-stock-form input.quick-stock-input,
-input.quick-stock-input {
-    -webkit-appearance: auto !important;
-    -moz-appearance: number-input !important;
-    appearance: auto !important;
-    width: 88px !important;
-    min-width: 88px !important;
-    height: 36px !important;
-    padding: 0.25rem 0.35rem 0.25rem 0.65rem !important;
-    font-size: 0.95rem !important;
-    font-weight: 700 !important;
-    text-align: center !important;
-    color: var(--text-main, #f8fafc) !important;
-    background-color: var(--bg-main, #0b0f19) !important;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15)) !important;
-    border-radius: var(--radius-sm, 6px) !important;
-    outline: none !important;
-    box-sizing: border-box !important;
-
-    /* Aplica o esquema de cores escuro às setas nativas do navegador */
-    color-scheme: dark !important;
+.stepper-widget .stepper-arrow:hover {
+    background-color: var(--primary, #ee4d2d) !important;
+    color: #ffffff !important;
 }
 
-/* Modo claro */
-[data-theme="light"] .data-table input[type="number"].quick-stock-input,
-[data-theme="light"] .quick-stock-form input[type="number"].quick-stock-input,
-[data-theme="light"] input.quick-stock-input {
-    color-scheme: light !important;
+.stepper-widget .stepper-arrow:active {
+    transform: scale(0.88) !important;
+}
+
+/* 5. Suporte ao Modo Claro */
+[data-theme="light"] .stepper-widget {
     background-color: #ffffff !important;
-    color: #0f172a !important;
     border-color: #cbd5e1 !important;
 }
 
-/* 2. Força as setinhas a ficarem sempre nítidas, visíveis e clicáveis */
-.data-table input[type="number"].quick-stock-input::-webkit-outer-spin-button,
-.data-table input[type="number"].quick-stock-input::-webkit-inner-spin-button,
-.quick-stock-form input[type="number"].quick-stock-input::-webkit-outer-spin-button,
-.quick-stock-form input[type="number"].quick-stock-input::-webkit-inner-spin-button,
-input.quick-stock-input::-webkit-inner-spin-button,
-input.quick-stock-input::-webkit-outer-spin-button {
-    -webkit-appearance: inner-spin-button !important;
-    opacity: 0.85 !important;
-    display: inline-block !important;
-    cursor: pointer !important;
-    height: 24px !important;
-    margin: 0 1px 0 4px !important;
-    pointer-events: auto !important;
-    transition: opacity 0.15s ease !important;
+[data-theme="light"] .stepper-widget .quick-stock-input {
+    color: #0f172a !important;
 }
 
-.data-table input[type="number"].quick-stock-input:hover::-webkit-inner-spin-button,
-.quick-stock-form input[type="number"].quick-stock-input:hover::-webkit-inner-spin-button,
-input.quick-stock-input:hover::-webkit-inner-spin-button {
-    opacity: 1 !important;
+[data-theme="light"] .stepper-widget .stepper-arrows {
+    border-left-color: #e2e8f0 !important;
+    background: #f8fafc !important;
+}
+
+[data-theme="light"] .stepper-widget .stepper-arrow {
+    color: #64748b !important;
+}
+
+[data-theme="light"] .stepper-widget .stepper-arrow.up {
+    border-bottom-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .stepper-widget .stepper-arrow:hover {
+    background-color: var(--primary, #ee4d2d) !important;
+    color: #ffffff !important;
 }

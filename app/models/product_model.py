@@ -284,27 +284,34 @@ class Product:
     def obter_metricas_dashboard(cls, store_id: int):
         with DatabaseConnection() as conn:
             cursor = conn.cursor()
+
+            # 1. Total de anúncios ativos
             cursor.execute("SELECT COUNT(*) AS total FROM products WHERE store_id = ? AND is_active = 1", (store_id,))
             total_produtos = cursor.fetchone()["total"]
 
+            # 2. Variações em alerta (estoque baixo)
             cursor.execute("""
-                SELECT COUNT(DISTINCT p.id) AS baixo
-                FROM products p
-                JOIN product_variants pv ON pv.product_id = p.id
+                SELECT COUNT(pv.id) AS baixo
+                FROM product_variants pv
+                JOIN products p ON pv.product_id = p.id
                 WHERE p.store_id = ? AND p.is_active = 1 AND pv.stock_quantity > 0 AND pv.stock_quantity <= pv.min_stock
             """, (store_id,))
             baixo_estoque = cursor.fetchone()["baixo"]
 
+            # 3. Variações com estoque zerado
             cursor.execute("""
-                SELECT COUNT(DISTINCT p.id) AS esgotados
-                FROM products p
-                JOIN product_variants pv ON pv.product_id = p.id
+                SELECT COUNT(pv.id) AS esgotados
+                FROM product_variants pv
+                JOIN products p ON pv.product_id = p.id
                 WHERE p.store_id = ? AND p.is_active = 1 AND pv.stock_quantity = 0
             """, (store_id,))
             esgotados = cursor.fetchone()["esgotados"]
 
+            # 4. Agregações físicas e financeiras: Peças totais, SKUs, Valor de Venda e Custo Total
             cursor.execute("""
                 SELECT 
+                    COUNT(pv.id) AS total_variacoes,
+                    COALESCE(SUM(pv.stock_quantity), 0) AS total_unidades,
                     COALESCE(SUM(pv.stock_quantity * pv.price), 0.0) AS valor_estoque,
                     COALESCE(SUM(pv.stock_quantity * pv.cost_price), 0.0) AS custo_estoque
                 FROM products p
@@ -313,12 +320,21 @@ class Product:
             """, (store_id,))
             fin = cursor.fetchone()
 
+            total_unidades = fin["total_unidades"]
+            total_variacoes = fin["total_variacoes"]
+            valor_estoque = fin["valor_estoque"]
+            custo_estoque = fin["custo_estoque"]
+            lucro_projetado = max(0.0, valor_estoque - custo_estoque)
+
             return {
                 "total_produtos": total_produtos,
+                "total_variacoes": total_variacoes,
+                "total_unidades": total_unidades,
                 "baixo_estoque": baixo_estoque,
                 "esgotados": esgotados,
-                "valor_estoque": fin["valor_estoque"],
-                "custo_estoque": fin["custo_estoque"]
+                "valor_estoque": valor_estoque,
+                "custo_estoque": custo_estoque,
+                "lucro_projetado": lucro_projetado
             }
 
     @classmethod
