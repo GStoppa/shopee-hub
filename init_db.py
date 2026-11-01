@@ -5,10 +5,6 @@ from werkzeug.security import generate_password_hash
 from config import Config
 
 def migrar_colunas_tabela(cursor, nome_tabela, colunas_necessarias):
-    """
-    Inspeciona a tabela existente e adiciona colunas ausentes de forma dinâmica,
-    evitando erros em bancos que foram criados antes de atualizações no modelo.
-    """
     cursor.execute(f"PRAGMA table_info({nome_tabela});")
     colunas_existentes = {linha[1] for linha in cursor.fetchall()}
 
@@ -21,10 +17,6 @@ def migrar_colunas_tabela(cursor, nome_tabela, colunas_necessarias):
                 print(f"[AVISO] Não foi possível adicionar '{nome_coluna}' em '{nome_tabela}': {e}")
 
 def inicializar_banco():
-    """
-    Cria as tabelas, executa migrações automáticas de colunas,
-    gera índices de performance e insere registros iniciais padrão.
-    """
     db_path = Config.DATABASE
     pasta_db = os.path.dirname(db_path)
     if pasta_db and not os.path.exists(pasta_db):
@@ -120,7 +112,7 @@ def inicializar_banco():
             );
         """)
 
-        # 2. Migração defensiva: garante a existência de todas as colunas mesmo em bancos legados
+        # 2. Migração defensiva: garante a existência de todas as colunas em bases legadas
         migracoes = {
             "stores": {
                 "document": "TEXT",
@@ -156,7 +148,7 @@ def inicializar_banco():
         for tabela, colunas in migracoes.items():
             migrar_colunas_tabela(cursor, tabela, colunas)
 
-        # 3. Criação de índices para otimização de consultas e relatórios
+        # 3. Criação de índices para otimização de consultas
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_products_store ON products(store_id);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);")
@@ -166,11 +158,14 @@ def inicializar_banco():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_movements_variant ON stock_movements(variant_id);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_movements_created ON stock_movements(created_at);")
 
-        # 4. Registros iniciais padrão (somente se a base estiver vazia)
+        # 4. Assegurar loja padrão
         agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        cursor.execute("SELECT COUNT(*) AS total FROM stores;")
-        if cursor.fetchone()["total"] == 0:
+        cursor.execute("SELECT id FROM stores LIMIT 1;")
+        store_row = cursor.fetchone()
+        if store_row:
+            store_id = store_row["id"]
+        else:
             cursor.execute("""
                 INSERT INTO stores (name, document, phone, address, shopee_shop_id, created_at)
                 VALUES (?, ?, ?, ?, ?, ?);
@@ -178,7 +173,9 @@ def inicializar_banco():
             store_id = cursor.lastrowid
             print(f"[INICIALIZAÇÃO] Loja padrão criada (ID: {store_id}).")
 
-            # Cria o usuário proprietário inicial
+        # 5. Assegurar utilizador administrador
+        cursor.execute("SELECT id FROM users WHERE email = 'admin@shopee.com';")
+        if not cursor.fetchone():
             cursor.execute("""
                 INSERT INTO users (store_id, name, email, password_hash, role, created_at)
                 VALUES (?, ?, ?, ?, ?, ?);
@@ -190,21 +187,23 @@ def inicializar_banco():
                 "owner",
                 agora
             ))
-            print("[INICIALIZAÇÃO] Usuário 'admin@shopee.com' com senha 'admin' configurado.")
+            print("[INICIALIZAÇÃO] Utilizador 'admin@shopee.com' configurado com palavra-passe 'admin'.")
 
-            # Categorias iniciais de conveniência
+        # 6. Assegurar categorias padrão
+        cursor.execute("SELECT COUNT(*) AS total FROM categories WHERE store_id = ?;", (store_id,))
+        if cursor.fetchone()["total"] == 0:
             categorias_iniciais = ["Vestuário", "Calçados", "Acessórios", "Eletrônicos", "Geral"]
             for nome_cat in categorias_iniciais:
                 cursor.execute("""
                     INSERT INTO categories (store_id, name, created_at)
                     VALUES (?, ?, ?);
                 """, (store_id, nome_cat, agora))
-            print(f"[INICIALIZAÇÃO] {len(categorias_iniciais)} categorias padrão cadastradas.")
+            print(f"[INICIALIZAÇÃO] {len(categorias_iniciais)} categorias padrão registadas.")
 
         conn.commit()
     except Exception as e:
         conn.rollback()
-        print(f"[ERRO] Falha ao inicializar banco de dados: {e}")
+        print(f"[ERRO] Falha ao inicializar a base de dados: {e}")
         raise e
     finally:
         conn.close()

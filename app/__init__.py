@@ -82,7 +82,7 @@ def create_app():
 
     @app.errorhandler(413)
     def file_too_large(error):
-        flash("O arquivo enviado excede o limite máximo permitido de 2MB.", "danger")
+        flash("O ficheiro enviado excede o limite máximo permitido de 2MB.", "danger")
         destino = request.referrer or "/"
         return redirect(destino)
 

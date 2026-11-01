@@ -1,3 +1,43 @@
+// Função direta acionada pelo botão (à prova de falhas)
+function fecharAlerta(botao) {
+    const alert = botao.closest('.alert');
+    if (!alert) return;
+    
+    alert.style.transition = 'opacity 0.2s ease, transform 0.2s ease, max-height 0.25s ease, margin 0.25s ease, padding 0.25s ease';
+    alert.style.opacity = '0';
+    alert.style.transform = 'translateY(-4px)';
+    
+    setTimeout(() => {
+        alert.remove();
+        // Remove o container se não houver mais alertas
+        const container = document.querySelector('.alerts-container');
+        if (container && container.querySelectorAll('.alert').length === 0) {
+            container.remove();
+        }
+    }, 200);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Delegação de clique caso o botão receba o evento via listener
+    document.addEventListener('click', (e) => {
+        const closeBtn = e.target.closest('.alert-close');
+        if (closeBtn) {
+            fecharAlerta(closeBtn);
+        }
+    });
+
+    // Auto-remover mensagens após 6 segundos (opcional)
+    const alertas = document.querySelectorAll('.alert');
+    alertas.forEach((alerta) => {
+        setTimeout(() => {
+            if (document.body.contains(alerta)) {
+                const btn = alerta.querySelector('.alert-close');
+                if (btn) fecharAlerta(btn);
+            }
+        }, 6000);
+    });
+});
+
 document.addEventListener("DOMContentLoaded", () => {
     // 1. Acórdão da Tabela de Catálogo (Expansão de Linhas de Variação)
     const accordionRows = document.querySelectorAll(".accordion-row");

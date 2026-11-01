@@ -137,15 +137,16 @@ def create_product():
                     ProductVariant(
                         product_id=None,
                         sku=sku,
-                        barcode=barcode or None,
-                        variant_name="Padrão",
-                        cost_price=cost_price,
-                        price=price,
-                        stock_quantity=stock_quantity,
-                        min_stock=min_stock,
+                        barcode=v_barcode or None,
+                        variant_name=v_name,
+                        cost_price=v_cost,
+                        price=v_price,
+                        stock_quantity=v_stock,   
+                        min_stock=v_min,          
                         image_url=img_url
                     )
                 )
+                
             else:
                 skus_vistos = set()
                 for i in range(len(v_skus)):
@@ -511,40 +512,40 @@ def edit_product(product_id):
     categories = Category.listar_por_loja(store_id)
     return render_template("products/form.html", product=produto, categories=categories)
 
-@product_bp.route("/variant/<int:variant_id>/excluir", methods=["POST"])
-@login_required
-@role_required(["owner", "manager"])
-def delete_variant(variant_id):
-    store_id = session.get("store_id")
-    variant = ProductVariant.buscar_por_id(variant_id, store_id)
+    @product_bp.route("/variant/<int:variant_id>/excluir", methods=["POST"])
+    @login_required
+    @role_required(["owner", "manager"])
+    def delete_variant(variant_id):
+        store_id = session.get("store_id")
+        variant = ProductVariant.buscar_por_id(variant_id, store_id)
 
-    if not variant:
-        flash("Variação não encontrada.", "danger")
-        return redirect(url_for("product.list_products"))
+        if not variant:
+            flash("Variação não encontrada.", "danger")
+            return redirect(url_for("product.list_products"))
 
-    total_variantes = ProductVariant.contar_por_produto(variant.product_id)
-    if total_variantes <= 1:
-        flash("Não é possível excluir esta variação. O anúncio deve manter pelo menos uma variação ativa.", "warning")
+        total_variantes = ProductVariant.contar_por_produto(variant.product_id)
+        if total_variantes <= 1:
+            flash("Não é possível excluir esta variação. O anúncio deve manter pelo menos uma variação ativa.", "warning")
+            return redirect(url_for("product.edit_product", product_id=variant.product_id))
+
+        sucesso = ProductVariant.excluir(variant_id, store_id)
+        if sucesso:
+            flash(f"Variação '{variant.variant_name}' ({variant.sku}) excluída com sucesso.", "info")
+        else:
+            flash("Erro ao excluir variação.", "danger")
+
         return redirect(url_for("product.edit_product", product_id=variant.product_id))
 
-    sucesso = ProductVariant.excluir(variant_id, store_id)
-    if sucesso:
-        flash(f"Variação '{variant.variant_name}' ({variant.sku}) excluída com sucesso.", "info")
-    else:
-        flash("Erro ao excluir variação.", "danger")
+    @product_bp.route("/<int:product_id>/excluir", methods=["POST"])
+    @login_required
+    @role_required(["owner"])
+    def delete_product(product_id):
+        store_id = session.get("store_id")
+        produto = Product.buscar_por_id(product_id, store_id)
 
-    return redirect(url_for("product.edit_product", product_id=variant.product_id))
-
-@product_bp.route("/<int:product_id>/excluir", methods=["POST"])
-@login_required
-@role_required(["owner"])
-def delete_product(product_id):
-    store_id = session.get("store_id")
-    produto = Product.buscar_por_id(product_id, store_id)
-
-    if produto:
-        Product.excluir(product_id, store_id)
-        flash(f"Produto '{produto.name}' excluído com sucesso.", "info")
-    else:
-        flash("Produto não encontrado.", "danger")
-    return redirect(url_for("product.list_products"))
+        if produto:
+            Product.excluir(product_id, store_id)
+            flash(f"Produto '{produto.name}' excluído com sucesso.", "info")
+        else:
+            flash("Produto não encontrado.", "danger")
+        return redirect(url_for("product.list_products"))

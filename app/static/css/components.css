@@ -495,3 +495,41 @@
 .auth-footer a:hover {
     text-decoration: underline;
 }
+
+.alert {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--radius-md, 8px);
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.alert-close {
+    background: transparent;
+    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: inherit;
+    opacity: 0.65;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.alert-close:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.08);
+}
