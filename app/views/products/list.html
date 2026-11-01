@@ -98,7 +98,7 @@
                             </td>
                         </tr>
 
-                        <!-- Subtabela com as variações detalhadas do anúncio -->
+                        <!-- Sub-tabela com as variações detalhadas do anúncio -->
                         <tr class="variant-subrow" id="variants-{{ prod.id }}">
                             <td colspan="7" style="padding: 0 0 1rem 2.5rem;">
                                 <table class="variant-table">
@@ -147,12 +147,12 @@
                                                 </td>
                                                 <td class="text-right">
                                                     <div class="inline-actions-right">
-                                                        <form method="POST" action="{{ url_for('product.update_stock', variant_id=v.id) }}" class="quick-stock-form">
+                                                        <form method="POST" action="{{ url_for('stock.update_stock', variant_id=v.id) }}" class="quick-stock-form">
                                                             <input type="number" name="stock_quantity" value="{{ v.stock_quantity }}" min="0" class="quick-stock-input" required>
                                                             <input type="hidden" name="reason" value="Ajuste rápido pelo catálogo">
                                                             <button type="submit" class="btn-action btn-edit">Salvar</button>
                                                         </form>
-                                                        <a href="{{ url_for('product.variant_history', variant_id=v.id) }}" class="btn-action btn-secondary" title="Histórico de Auditoria">Auditoria</a>
+                                                        <a href="{{ url_for('stock.variant_history', variant_id=v.id) }}" class="btn-action btn-secondary" title="Histórico de Auditoria">Auditoria</a>
                                                     </div>
                                                 </td>
                                             </tr>

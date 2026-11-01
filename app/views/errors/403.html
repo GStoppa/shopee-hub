@@ -1,15 +1,17 @@
 {% extends 'layouts/base.html' %}
-{% block title %}Acesso Negado (403){% endblock %}
+{% block title %}Página Não Encontrada (404){% endblock %}
 
-{% block body %}
-<div class="auth-page">
-    <div class="auth-container text-center">
-        <div class="auth-card">
-            <div class="empty-state-icon text-danger" style="font-size: 3.5rem;">🔒</div>
-            <h1 class="mb-1">Acesso Restrito</h1>
-            <p class="mb-3 text-muted">Seu cargo de usuário não possui permissão para acessar esta área ou executar esta ação.</p>
-            <a href="{{ url_for('main.welcome') }}" class="btn-primary w-100">Voltar ao Início</a>
-        </div>
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card text-center" style="max-width: 500px; margin: 4rem auto; padding: 2.5rem;">
+        <div style="font-size: 3.5rem; margin-bottom: 1rem;">🔍</div>
+        <h1 style="font-size: 1.75rem; margin-bottom: 0.5rem;">Página Não Encontrada</h1>
+        <p class="text-muted" style="margin-bottom: 1.5rem;">
+            O endereço que você tentou acessar não existe ou foi movido.
+        </p>
+        <a href="{{ url_for('main.welcome') }}" class="btn-primary" style="display: inline-block; padding: 0.75rem 1.5rem; text-decoration: none;">
+            Voltar ao Início
+        </a>
     </div>
 </div>
 {% endblock %}

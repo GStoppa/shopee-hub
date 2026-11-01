@@ -1,68 +1,56 @@
-<aside class="sidebar">
+<aside class="admin-sidebar" id="sidebar">
     <div class="sidebar-brand">
-        {% if session.get('store_logo_url') %}
-            <img src="{{ url_for('static', filename=session.get('store_logo_url')) }}" alt="Logo" class="brand-logo-img">
-        {% else %}
-            <div class="brand-dot"></div>
-        {% endif %}
-        <span class="brand-title">{{ session.get('store_name', 'Shopee Hub') }}</span>
+        <a href="{{ url_for('main.welcome') }}" class="brand-link">
+            {% if session.get('store_logo_url') %}
+                <img src="{{ url_for('static', filename=session.get('store_logo_url')) }}" alt="Logo" class="brand-logo-img">
+            {% else %}
+                <span class="brand-icon">🛍️</span>
+            {% endif %}
+            <span class="brand-text">{{ session.get('store_name') or 'Shopee Hub' }}</span>
+        </a>
     </div>
 
-    <nav class="sidebar-nav">
-        <div class="nav-section-title">Principal</div>
-        <a href="{{ url_for('main.welcome') }}" class="nav-link {% if request.endpoint == 'main.welcome' %}active{% endif %}">
-            <span>📊</span>
+    <nav class="sidebar-menu">
+        <div class="menu-section-label">Principal</div>
+        <a href="{{ url_for('main.welcome') }}" class="menu-item {% if request.endpoint == 'main.welcome' %}is-active{% endif %}">
+            <span class="menu-icon">📊</span>
             <span>Dashboard</span>
         </a>
 
-        <div class="nav-section-title">Catálogo & Operação</div>
-        <a href="{{ url_for('product.list_products') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('product.') and request.endpoint != 'product.stock_movements' %}active{% endif %}">
-            <span>📦</span>
+        <div class="menu-section-label">Catálogo & Estoque</div>
+        <a href="{{ url_for('product.list_products') }}" class="menu-item {% if request.endpoint in ['product.list_products', 'product.create_product', 'product.edit_product'] %}is-active{% endif %}">
+            <span class="menu-icon">📦</span>
             <span>Produtos</span>
         </a>
-        <a href="{{ url_for('category.list_categories') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('category.') %}active{% endif %}">
-            <span>🏷️</span>
+        <a href="{{ url_for('category.list_categories') }}" class="menu-item {% if request.endpoint == 'category.list_categories' %}is-active{% endif %}">
+            <span class="menu-icon">🏷️</span>
             <span>Categorias</span>
         </a>
-        <a href="{{ url_for('product.stock_movements') }}" class="nav-link {% if request.endpoint == 'product.stock_movements' %}active{% endif %}">
-            <span>📑</span>
+        <a href="{{ url_for('stock.stock_movements') }}" class="menu-item {% if request.endpoint in ['stock.stock_movements', 'stock.variant_history'] %}is-active{% endif %}">
+            <span class="menu-icon">📑</span>
             <span>Auditoria de Estoque</span>
         </a>
-        <div class="nav-link nav-link-disabled" title="Funcionalidade em desenvolvimento">
-            <span>🛍️</span>
-            <span>Pedidos</span>
-            <span class="badge-soon">Em breve</span>
-        </div>
-        <div class="nav-link nav-link-disabled" title="Funcionalidade em desenvolvimento">
-            <span>🔄</span>
-            <span>Devoluções</span>
-            <span class="badge-soon">Em breve</span>
-        </div>
 
         {% if session.get('user_role') in ['owner', 'manager'] %}
-            <div class="nav-section-title nav-section-with-badge">
-                <span>Administração</span>
-                <span class="nav-section-badge">GESTÃO</span>
-            </div>
-            <a href="{{ url_for('team.list_members') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('team.') %}active{% endif %}">
-                <span>👥</span>
+            <div class="menu-section-label">Administração</div>
+            <a href="{{ url_for('team.list_members') }}" class="menu-item {% if request.endpoint in ['team.list_members', 'team.create_member', 'team.edit_member'] %}is-active{% endif %}">
+                <span class="menu-icon">👥</span>
                 <span>Equipe</span>
             </a>
-            <a href="{{ url_for('store.settings') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('store.') %}active{% endif %}">
-                <span>⚙️</span>
+            <a href="{{ url_for('store.settings') }}" class="menu-item {% if request.endpoint == 'store.settings' %}is-active{% endif %}">
+                <span class="menu-icon">⚙️</span>
                 <span>Configurações da Loja</span>
             </a>
         {% endif %}
-    </nav>
 
-    <div class="sidebar-footer">
-        <a href="{{ url_for('profile.index') }}" class="nav-link mb-1 {% if request.endpoint and request.endpoint.startswith('profile.') %}active{% endif %}">
-            <span>👤</span>
-            <span>Meu Perfil</span>
+        <div class="menu-section-label">Minha Conta</div>
+        <a href="{{ url_for('profile.index') }}" class="menu-item {% if request.endpoint == 'profile.index' %}is-active{% endif %}">
+            <span class="menu-icon">👤</span>
+            <span>Perfil</span>
         </a>
-        <a href="{{ url_for('auth.logout') }}" class="btn-logout">
-            <span>🚪</span>
-            <span>Encerrar Sessão</span>
+        <a href="{{ url_for('auth.logout') }}" class="menu-item text-danger">
+            <span class="menu-icon">🚪</span>
+            <span>Sair do Sistema</span>
         </a>
-    </div>
+    </nav>
 </aside>

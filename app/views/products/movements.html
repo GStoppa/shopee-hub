@@ -13,7 +13,7 @@
             <a href="{{ url_for('product.list_products') }}" class="btn-secondary">← Voltar ao Catálogo</a>
         </div>
 
-        <form method="POST" action="{{ url_for('product.create_movement', variant_id=variant.id) }}" class="mt-2">
+        <form method="POST" action="{{ url_for('stock.create_movement', variant_id=variant.id) }}" class="mt-2">
             <div class="form-grid-2">
                 <div class="form-group">
                     <label for="movement_type">Tipo de Operação *</label>
@@ -51,7 +51,7 @@
     </div>
 
     {% if not variant %}
-        <form method="GET" action="{{ url_for('product.stock_movements') }}" class="catalog-filters mb-3">
+        <form method="GET" action="{{ url_for('stock.stock_movements') }}" class="catalog-filters mb-3">
             <input type="text" name="q" value="{{ request.args.get('q', '') }}" class="form-control filter-input" placeholder="Buscar por produto, SKU ou motivo...">
 
             <select name="tipo" class="form-control filter-select">
@@ -63,7 +63,7 @@
 
             <button type="submit" class="btn-secondary">Filtrar</button>
             {% if request.args.get('q') or request.args.get('tipo') %}
-                <a href="{{ url_for('product.stock_movements') }}" class="btn-small">Limpar</a>
+                <a href="{{ url_for('stock.stock_movements') }}" class="btn-small">Limpar</a>
             {% endif %}
         </form>
     {% endif %}
@@ -123,31 +123,31 @@
                 <div>Mostrando página <strong>{{ pagina }}</strong> de <strong>{{ total_paginas }}</strong> (Total: {{ total_itens }} registros)</div>
                 <div class="pagination-controls">
                     {% if variant %}
-                        <a href="{{ url_for('product.variant_history', variant_id=variant.id, page=pagina-1) }}" class="page-link {% if pagina == 1 %}is-disabled{% endif %}">Anterior</a>
+                        <a href="{{ url_for('stock.variant_history', variant_id=variant.id, page=pagina-1) }}" class="page-link {% if pagina == 1 %}is-disabled{% endif %}">Anterior</a>
                         
                         {% set window = 2 %}
                         {% for p in range(1, total_paginas + 1) %}
                             {% if p == 1 or p == total_paginas or (p >= pagina - window and p <= pagina + window) %}
-                                <a href="{{ url_for('product.variant_history', variant_id=variant.id, page=p) }}" class="page-link {% if p == pagina %}is-active{% endif %}">{{ p }}</a>
+                                <a href="{{ url_for('stock.variant_history', variant_id=variant.id, page=p) }}" class="page-link {% if p == pagina %}is-active{% endif %}">{{ p }}</a>
                             {% elif p == pagina - window - 1 or p == pagina + window + 1 %}
                                 <span class="page-link is-disabled" style="border: none; background: transparent;">...</span>
                             {% endif %}
                         {% endfor %}
 
-                        <a href="{{ url_for('product.variant_history', variant_id=variant.id, page=pagina+1) }}" class="page-link {% if pagina == total_paginas %}is-disabled{% endif %}">Próxima</a>
+                        <a href="{{ url_for('stock.variant_history', variant_id=variant.id, page=pagina+1) }}" class="page-link {% if pagina == total_paginas %}is-disabled{% endif %}">Próxima</a>
                     {% else %}
-                        <a href="{{ url_for('product.stock_movements', page=pagina-1, q=request.args.get('q', ''), tipo=request.args.get('tipo', '')) }}" class="page-link {% if pagina == 1 %}is-disabled{% endif %}">Anterior</a>
+                        <a href="{{ url_for('stock.stock_movements', page=pagina-1, q=request.args.get('q', ''), tipo=request.args.get('tipo', '')) }}" class="page-link {% if pagina == 1 %}is-disabled{% endif %}">Anterior</a>
                         
                         {% set window = 2 %}
                         {% for p in range(1, total_paginas + 1) %}
                             {% if p == 1 or p == total_paginas or (p >= pagina - window and p <= pagina + window) %}
-                                <a href="{{ url_for('product.stock_movements', page=p, q=request.args.get('q', ''), tipo=request.args.get('tipo', '')) }}" class="page-link {% if p == pagina %}is-active{% endif %}">{{ p }}</a>
+                                <a href="{{ url_for('stock.stock_movements', page=p, q=request.args.get('q', ''), tipo=request.args.get('tipo', '')) }}" class="page-link {% if p == pagina %}is-active{% endif %}">{{ p }}</a>
                             {% elif p == pagina - window - 1 or p == pagina + window + 1 %}
                                 <span class="page-link is-disabled" style="border: none; background: transparent;">...</span>
                             {% endif %}
                         {% endfor %}
 
-                        <a href="{{ url_for('product.stock_movements', page=pagina+1, q=request.args.get('q', ''), tipo=request.args.get('tipo', '')) }}" class="page-link {% if pagina == total_paginas %}is-disabled{% endif %}">Próxima</a>
+                        <a href="{{ url_for('stock.stock_movements', page=pagina+1, q=request.args.get('q', ''), tipo=request.args.get('tipo', '')) }}" class="page-link {% if pagina == total_paginas %}is-disabled{% endif %}">Próxima</a>
                     {% endif %}
                 </div>
             </div>

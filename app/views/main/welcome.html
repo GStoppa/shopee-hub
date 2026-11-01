@@ -72,7 +72,7 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-right">
-                                    <form method="POST" action="{{ url_for('product.update_stock', variant_id=item.id) }}" class="quick-stock-form">
+                                    <form method="POST" action="{{ url_for('stock.update_stock', variant_id=item.id) }}" class="quick-stock-form">
                                         <input type="number" name="stock_quantity" value="{{ item.stock_quantity }}" min="0" class="quick-stock-input" required>
                                         <input type="hidden" name="reason" value="Reposição rápida pelo painel inicial">
                                         <button type="submit" class="btn-action btn-edit">Salvar</button>
@@ -104,7 +104,7 @@
                 <span>+ Gerenciar Categorias</span>
                 <span>➔</span>
             </a>
-            <a href="{{ url_for('product.stock_movements') }}" class="quick-action-item">
+            <a href="{{ url_for('stock.stock_movements') }}" class="quick-action-item">
                 <span>📑 Ver Auditoria de Movimentações</span>
                 <span>➔</span>
             </a>
