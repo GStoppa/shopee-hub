@@ -11,7 +11,9 @@
                 <p class="m-0">Variação: <strong>{{ variant.display_name }}</strong> (SKU: <code>{{ variant.sku }}</code>) | Saldo Atual: <strong>{{ variant.stock_quantity }} un</strong></p>
             </div>
             <div class="inline-actions-right">
-                <a href="{{ url_for('stock.stock_movements') }}" class="btn-secondary">Auditoria Geral</a>
+                {% if session.get('user_role') in ['owner', 'manager'] %}
+                    <a href="{{ url_for('stock.stock_movements') }}" class="btn-secondary">Auditoria Geral</a>
+                {% endif %}
                 <a href="{{ url_for('product.list_products') }}" class="btn-secondary">← Catálogo</a>
             </div>
         </div>
@@ -140,18 +142,18 @@
 
                         <a href="{{ url_for('stock.variant_history', variant_id=variant.id, page=pagina+1) }}" class="page-link {% if pagina == total_paginas %}is-disabled{% endif %}">Próxima</a>
                     {% else %}
-                        <a href="{{ url_for('stock.stock_movements', page=pagina-1, q=request.args.get('q', ''), tipo=request.args.get('tipo', '')) }}" class="page-link {% if pagina == 1 %}is-disabled{% endif %}">Anterior</a>
+                        <a href="{{ url_for('stock.stock_movements', page=pagina-1, q=request.args.get('q') or None, tipo=request.args.get('tipo') or None) }}" class="page-link {% if pagina == 1 %}is-disabled{% endif %}">Anterior</a>
                         
                         {% set window = 2 %}
                         {% for p in range(1, total_paginas + 1) %}
                             {% if p == 1 or p == total_paginas or (p >= pagina - window and p <= pagina + window) %}
-                                <a href="{{ url_for('stock.stock_movements', page=p, q=request.args.get('q', ''), tipo=request.args.get('tipo', '')) }}" class="page-link {% if p == pagina %}is-active{% endif %}">{{ p }}</a>
+                                <a href="{{ url_for('stock.stock_movements', page=p, q=request.args.get('q') or None, tipo=request.args.get('tipo') or None) }}" class="page-link {% if p == pagina %}is-active{% endif %}">{{ p }}</a>
                             {% elif p == pagina - window - 1 or p == pagina + window + 1 %}
                                 <span class="page-link is-disabled" style="border: none; background: transparent;">...</span>
                             {% endif %}
                         {% endfor %}
 
-                        <a href="{{ url_for('stock.stock_movements', page=pagina+1, q=request.args.get('q', ''), tipo=request.args.get('tipo', '')) }}" class="page-link {% if pagina == total_paginas %}is-disabled{% endif %}">Próxima</a>
+                        <a href="{{ url_for('stock.stock_movements', page=pagina+1, q=request.args.get('q') or None, tipo=request.args.get('tipo') or None) }}" class="page-link {% if pagina == total_paginas %}is-disabled{% endif %}">Próxima</a>
                     {% endif %}
                 </div>
             </div>

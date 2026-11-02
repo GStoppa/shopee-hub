@@ -379,6 +379,11 @@ def edit_product(product_id):
                 flash(f"O preço de venda da nova variação '{n_sku}' deve ser superior a zero.", "danger")
                 return redirect(url_for("product.edit_product", product_id=product_id))
 
+        total_previsto = len(produto.variants) + len([s for s in new_skus if s.strip()])
+        if total_previsto == 0:
+            flash("O anúncio deve conter pelo menos uma variação válida preenchida.", "danger")
+            return redirect(url_for("product.edit_product", product_id=product_id))
+
         fotos_novas_criadas = []
         fotos_antigas_para_remover = []
         movimentacoes_pendentes = []
@@ -528,11 +533,24 @@ def delete_variant(variant_id):
         flash("Variação não encontrada.", "danger")
         return redirect(url_for("product.list_products"))
 
+    # 1. Impede deixar o anúncio sem variações
     total_variantes = ProductVariant.contar_por_produto(variant.product_id)
     if total_variantes <= 1:
         flash("Não é possível excluir esta variação. O anúncio deve manter pelo menos uma variação ativa.", "warning")
         return redirect(url_for("product.edit_product", product_id=variant.product_id))
 
+    # 2. Impede exclusão se houver histórico de movimentações de estoque
+    total_movimentos = StockMovement.contar_por_variante(variant.id, store_id)
+    if total_movimentos > 0:
+        flash(
+            f"Não é possível excluir a variação '{variant.variant_name}' ({variant.sku}) pois existem "
+            f"{total_movimentos} movimentação(ões) registadas no histórico de auditoria. "
+            "Para retirar o item de circulação, ajuste o saldo de estoque para 0.",
+            "danger"
+        )
+        return redirect(url_for("product.edit_product", product_id=variant.product_id))
+
+    # 3. Executa a exclusão segura
     sucesso = ProductVariant.excluir(variant_id, store_id)
     if sucesso:
         flash(f"Variação '{variant.variant_name}' ({variant.sku}) excluída com sucesso.", "info")

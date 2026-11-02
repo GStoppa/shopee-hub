@@ -1,6 +1,6 @@
 import math
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from app.middlewares.auth_middleware import login_required
+from app.middlewares.auth_middleware import login_required, role_required
 from app.models.variant_model import ProductVariant
 from app.models.stock_movement_model import StockMovement
 from app.utils.helpers import converter_numero
@@ -35,6 +35,7 @@ def update_stock(variant_id):
 
 @stock_bp.route("/movements")
 @login_required
+@role_required(["owner", "manager"])
 def stock_movements():
     store_id = session.get("store_id")
     busca = request.args.get("q", "").strip()

@@ -1016,3 +1016,21 @@ textarea.form-control {
 .categories-grid.is-single-col {
     grid-template-columns: 1fr !important;
 }
+
+.action-card-chevron {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    transition: transform 0.2s ease, color 0.2s ease;
+    margin-left: auto;
+    flex-shrink: 0; /* Garante que a seta nunca seja deformada em ecrãs menores */
+}
+
+@media (max-width: 768px) {
+    .action-card {
+        padding: 0.85rem 1rem;
+    }
+    .action-card-desc {
+        white-space: normal;
+        word-break: break-word;
+    }
+}

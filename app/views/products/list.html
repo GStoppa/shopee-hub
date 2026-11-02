@@ -170,18 +170,18 @@
             <div class="pagination-bar" style="padding: 1rem 1.5rem;">
                 <div>Mostrando página <strong>{{ pagina }}</strong> de <strong>{{ total_paginas }}</strong> (Total: {{ total_itens }} produtos)</div>
                 <div class="pagination-controls">
-                    <a href="{{ url_for('product.list_products', page=pagina-1, q=request.args.get('q', ''), category_id=request.args.get('category_id', ''), status=request.args.get('status', '')) }}" class="page-link {% if pagina == 1 %}is-disabled{% endif %}">Anterior</a>
+                    <a href="{{ url_for('product.list_products', page=pagina-1, q=request.args.get('q') or None, category_id=request.args.get('category_id') or None, status=request.args.get('status') or None) }}" class="page-link {% if pagina == 1 %}is-disabled{% endif %}">Anterior</a>
                     
                     {% set window = 2 %}
                     {% for p in range(1, total_paginas + 1) %}
                         {% if p == 1 or p == total_paginas or (p >= pagina - window and p <= pagina + window) %}
-                            <a href="{{ url_for('product.list_products', page=p, q=request.args.get('q', ''), category_id=request.args.get('category_id', ''), status=request.args.get('status', '')) }}" class="page-link {% if p == pagina %}is-active{% endif %}">{{ p }}</a>
+                            <a href="{{ url_for('product.list_products', page=p, q=request.args.get('q') or None, category_id=request.args.get('category_id') or None, status=request.args.get('status') or None) }}" class="page-link {% if p == pagina %}is-active{% endif %}">{{ p }}</a>
                         {% elif p == pagina - window - 1 or p == pagina + window + 1 %}
                             <span class="page-link is-disabled" style="border: none; background: transparent;">...</span>
                         {% endif %}
                     {% endfor %}
 
-                    <a href="{{ url_for('product.list_products', page=pagina+1, q=request.args.get('q', ''), category_id=request.args.get('category_id', ''), status=request.args.get('status', '')) }}" class="page-link {% if pagina == total_paginas %}is-disabled{% endif %}">Próxima</a>
+                    <a href="{{ url_for('product.list_products', page=pagina+1, q=request.args.get('q') or None, category_id=request.args.get('category_id') or None, status=request.args.get('status') or None) }}" class="page-link {% if pagina == total_paginas %}is-disabled{% endif %}">Próxima</a>
                 </div>
             </div>
         {% endif %}

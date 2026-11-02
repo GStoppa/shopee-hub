@@ -31,10 +31,12 @@
             <span class="menu-icon">🏷️</span>
             <span class="menu-title">Categorias</span>
         </a>
-        <a href="{{ url_for('stock.stock_movements') }}" class="menu-item {% if request.endpoint in ['stock.stock_movements', 'stock.variant_history'] %}is-active{% endif %}">
-            <span class="menu-icon">📑</span>
-            <span class="menu-title">Auditoria de Estoque</span>
-        </a>
+        {% if session.get('user_role') in ['owner', 'manager'] %}
+            <a href="{{ url_for('stock.stock_movements') }}" class="menu-item {% if request.endpoint in ['stock.stock_movements', 'stock.variant_history'] %}is-active{% endif %}">
+                <span class="menu-icon">📑</span>
+                <span class="menu-title">Auditoria de Estoque</span>
+            </a>
+        {% endif %}
 
         {% if session.get('user_role') in ['owner', 'manager'] %}
             <div class="menu-section-label">Administração</div>
