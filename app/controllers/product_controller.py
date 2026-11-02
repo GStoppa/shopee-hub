@@ -544,7 +544,7 @@ def delete_variant(variant_id):
     if total_movimentos > 0:
         flash(
             f"Não é possível excluir a variação '{variant.variant_name}' ({variant.sku}) pois existem "
-            f"{total_movimentos} movimentação(ões) registadas no histórico de auditoria. "
+            f"{total_movimentos} movimentação(ões) registradas no histórico de auditoria. "
             "Para retirar o item de circulação, ajuste o saldo de estoque para 0.",
             "danger"
         )

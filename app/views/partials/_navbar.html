@@ -1,6 +1,27 @@
 <div class="navbar-right">
-    <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar Tema" aria-label="Alternar Tema">
-        <span class="theme-icon-indicator">☀️</span>
+    <!-- Botão de Tema Segmentado de Alto Padrão -->
+    <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar Modo Claro/Escuro" aria-label="Alternar Tema">
+        <span class="theme-toggle-track">
+            <span class="theme-toggle-thumb"></span>
+            <span class="theme-option sun-option" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2"></path>
+                    <path d="M12 20v2"></path>
+                    <path d="m4.93 4.93 1.41 1.41"></path>
+                    <path d="m17.66 17.66 1.41 1.41"></path>
+                    <path d="M2 12h2"></path>
+                    <path d="M20 12h2"></path>
+                    <path d="m6.34 17.66-1.41 1.41"></path>
+                    <path d="m19.07 4.93-1.41 1.41"></path>
+                </svg>
+            </span>
+            <span class="theme-option moon-option" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+            </span>
+        </span>
     </button>
 
     <a href="{{ url_for('profile.index') }}" class="user-profile-badge" title="Ver Perfil">

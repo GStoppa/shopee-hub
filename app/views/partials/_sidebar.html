@@ -5,7 +5,13 @@
                 {% if session.get('store_logo_url') %}
                     <img src="{{ url_for('static', filename=session.get('store_logo_url')) }}" alt="Logo" class="brand-logo-img">
                 {% else %}
-                    <span class="brand-icon">🛍️</span>
+                    <span class="brand-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                            <path d="M3 6h18"></path>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                    </span>
                 {% endif %}
             </div>
             <div class="brand-info">
@@ -18,22 +24,47 @@
     <nav class="sidebar-menu">
         <div class="menu-section-label">Principal</div>
         <a href="{{ url_for('main.welcome') }}" class="menu-item {% if request.endpoint == 'main.welcome' %}is-active{% endif %}">
-            <span class="menu-icon">📊</span>
+            <span class="menu-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="7" height="9" x="3" y="3" rx="1"></rect>
+                    <rect width="7" height="5" x="14" y="3" rx="1"></rect>
+                    <rect width="7" height="9" x="14" y="12" rx="1"></rect>
+                    <rect width="7" height="5" x="3" y="16" rx="1"></rect>
+                </svg>
+            </span>
             <span class="menu-title">Dashboard</span>
         </a>
 
         <div class="menu-section-label">Catálogo & Estoque</div>
         <a href="{{ url_for('product.list_products') }}" class="menu-item {% if request.endpoint in ['product.list_products', 'product.create_product', 'product.edit_product'] %}is-active{% endif %}">
-            <span class="menu-icon">📦</span>
+            <span class="menu-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m7.5 4.27 9 5.15"></path>
+                    <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+                    <path d="m3.3 7 8.7 5 8.7-5"></path>
+                    <path d="M12 22V12"></path>
+                </svg>
+            </span>
             <span class="menu-title">Produtos</span>
         </a>
         <a href="{{ url_for('category.list_categories') }}" class="menu-item {% if request.endpoint == 'category.list_categories' %}is-active{% endif %}">
-            <span class="menu-icon">🏷️</span>
+            <span class="menu-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"></path>
+                    <circle cx="7.5" cy="7.5" r=".5" fill="currentColor"></circle>
+                </svg>
+            </span>
             <span class="menu-title">Categorias</span>
         </a>
         {% if session.get('user_role') in ['owner', 'manager'] %}
             <a href="{{ url_for('stock.stock_movements') }}" class="menu-item {% if request.endpoint in ['stock.stock_movements', 'stock.variant_history'] %}is-active{% endif %}">
-                <span class="menu-icon">📑</span>
+                <span class="menu-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                        <path d="m9 14 2 2 4-4"></path>
+                    </svg>
+                </span>
                 <span class="menu-title">Auditoria de Estoque</span>
             </a>
         {% endif %}
@@ -41,22 +72,45 @@
         {% if session.get('user_role') in ['owner', 'manager'] %}
             <div class="menu-section-label">Administração</div>
             <a href="{{ url_for('team.list_members') }}" class="menu-item {% if request.endpoint in ['team.list_members', 'team.create_member', 'team.edit_member'] %}is-active{% endif %}">
-                <span class="menu-icon">👥</span>
+                <span class="menu-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </span>
                 <span class="menu-title">Equipe</span>
             </a>
             <a href="{{ url_for('store.settings') }}" class="menu-item {% if request.endpoint == 'store.settings' %}is-active{% endif %}">
-                <span class="menu-icon">⚙️</span>
+                <span class="menu-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </span>
                 <span class="menu-title">Configurações da Loja</span>
             </a>
         {% endif %}
 
         <div class="menu-section-label">Minha Conta</div>
         <a href="{{ url_for('profile.index') }}" class="menu-item {% if request.endpoint == 'profile.index' %}is-active{% endif %}">
-            <span class="menu-icon">👤</span>
+            <span class="menu-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </span>
             <span class="menu-title">Perfil</span>
         </a>
         <a href="{{ url_for('auth.logout') }}" class="menu-item menu-item-logout">
-            <span class="menu-icon">🚪</span>
+            <span class="menu-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" x2="9" y1="12" y2="12"></line>
+                </svg>
+            </span>
             <span class="menu-title">Sair do Sistema</span>
         </a>
     </nav>

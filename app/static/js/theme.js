@@ -7,17 +7,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const toggleBtns = document.querySelectorAll("#theme-toggle-btn, #theme-toggle, .theme-toggle-btn");
     if (!toggleBtns.length) return;
 
-    function atualizarIcones(tema) {
+    function atualizarAcessibilidade(tema) {
         toggleBtns.forEach((btn) => {
-            const indicador = btn.querySelector(".theme-icon-indicator") || btn;
-            indicador.textContent = tema === "light" ? "🌙" : "☀️";
-            btn.setAttribute("title", tema === "light" ? "Mudar para Modo Escuro" : "Mudar para Modo Claro");
-            btn.setAttribute("aria-label", tema === "light" ? "Mudar para Modo Escuro" : "Mudar para Modo Claro");
+            const rotulo = tema === "light" ? "Alternar para Modo Escuro" : "Alternar para Modo Claro";
+            btn.setAttribute("title", rotulo);
+            btn.setAttribute("aria-label", rotulo);
         });
     }
 
     const temaAtual = document.documentElement.getAttribute("data-theme") || "dark";
-    atualizarIcones(temaAtual);
+    atualizarAcessibilidade(temaAtual);
 
     toggleBtns.forEach((btn) => {
         btn.addEventListener("click", () => {
@@ -28,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             document.documentElement.setAttribute("data-theme", proximo);
             localStorage.setItem("shopee_hub_theme", proximo);
-            atualizarIcones(proximo);
+            atualizarAcessibilidade(proximo);
 
             setTimeout(() => {
                 document.documentElement.classList.remove("theme-transition");
