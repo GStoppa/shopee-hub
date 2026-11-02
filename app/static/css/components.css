@@ -1263,3 +1263,81 @@ textarea.form-control {
     align-items: center;
     justify-content: center;
 }
+
+/* ==========================================================================
+   ESTILIZAÇÃO MODERNA DE CAMPOS DE UPLOAD (INPUT TYPE FILE)
+   ========================================================================== */
+
+/* 1. Container do campo de arquivo */
+input[type="file"].form-control,
+input[type="file"].input-col-file {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+input[type="file"].form-control:hover,
+input[type="file"].input-col-file:hover {
+    border-color: var(--border-hover);
+}
+
+/* 2. O botão de ação ("Escolher arquivo / Procurar") */
+input[type="file"]::file-selector-button,
+input[type="file"]::-webkit-file-upload-button {
+    background: var(--bg-surface-hover);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 0.4rem 0.85rem;
+    margin-right: 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+/* 3. Efeito hover e active no botão */
+input[type="file"]::file-selector-button:hover,
+input[type="file"]::-webkit-file-upload-button:hover {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 2px 8px var(--brand-glow);
+    transform: translateY(-1px);
+}
+
+input[type="file"]::file-selector-button:active,
+input[type="file"]::-webkit-file-upload-button:active {
+    transform: scale(0.96);
+}
+
+/* 4. Suporte dedicado ao Modo Claro */
+[data-theme="light"] input[type="file"].form-control,
+[data-theme="light"] input[type="file"].input-col-file {
+    background-color: #ffffff;
+    border-color: #cbd5e1;
+    color: #64748b;
+}
+
+[data-theme="light"] input[type="file"]::file-selector-button,
+[data-theme="light"] input[type="file"]::-webkit-file-upload-button {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #334155;
+}
+
+[data-theme="light"] input[type="file"]::file-selector-button:hover,
+[data-theme="light"] input[type="file"]::-webkit-file-upload-button:hover {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+}

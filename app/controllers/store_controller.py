@@ -7,7 +7,7 @@ store_bp = Blueprint("store", __name__, url_prefix="/store")
 
 @store_bp.route("/settings", methods=["GET", "POST"])
 @login_required
-@role_required(["owner", "manager"])
+@role_required(["owner"])
 def settings():
     store_id = session.get("store_id")
     store = Store.buscar_por_id(store_id)
