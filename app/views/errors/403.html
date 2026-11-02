@@ -4,8 +4,13 @@
 {% block body %}
 <div class="auth-page">
     <div class="auth-container" style="max-width: 520px;">
-        <div class="auth-card text-center" style="padding: 2.5rem 2rem;">
-            <div style="font-size: 3.5rem; margin-bottom: 1rem;">🚫</div>
+        <div class="auth-card text-center" style="padding: 2.75rem 2rem;">
+            <div class="error-icon-badge error-badge-danger">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
             <h1 style="font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--text-main);">Acesso Não Autorizado</h1>
             <p class="text-muted" style="margin-bottom: 1.75rem; line-height: 1.5; font-size: 0.95rem;">
                 Você não possui permissão para acessar esta página ou realizar esta operação. 

@@ -1196,3 +1196,70 @@ textarea.form-control {
     height: 20px;
     stroke-width: 2;
 }
+
+/* ==========================================================================
+   MINIATURAS E BADGES DE ERRO MODERNOS
+   ========================================================================== */
+.variant-thumb-placeholder {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    border: 1.5px dashed var(--border-color);
+    background-color: var(--bg-card-subtle);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.variant-thumb-placeholder:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.preview-placeholder-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+.error-icon-badge {
+    width: 76px;
+    height: 76px;
+    border-radius: 9999px;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+}
+
+.error-badge-danger {
+    background-color: rgba(244, 63, 94, 0.12);
+    color: var(--danger);
+    border-color: rgba(244, 63, 94, 0.25);
+    box-shadow: 0 4px 16px rgba(244, 63, 94, 0.18);
+}
+
+.error-badge-warning {
+    background-color: rgba(245, 158, 11, 0.12);
+    color: var(--warning);
+    border-color: rgba(245, 158, 11, 0.25);
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.18);
+}
+
+.empty-state-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 9999px;
+    background-color: var(--brand-subtle);
+    color: var(--primary);
+    border: 1px solid rgba(238, 77, 45, 0.2);
+    margin: 0 auto 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
