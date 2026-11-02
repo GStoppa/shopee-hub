@@ -27,7 +27,12 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def role_required(allowed_roles):
+def role_required(*allowed_roles):
+    if len(allowed_roles) == 1 and isinstance(allowed_roles[0], (list, tuple, set)):
+        roles_set = set(allowed_roles[0])
+    else:
+        roles_set = set(allowed_roles)
+
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
@@ -44,7 +49,7 @@ def role_required(allowed_roles):
             session["user_role"] = user.role
             session["store_id"] = user.store_id
 
-            if user.role not in allowed_roles:
+            if user.role not in roles_set:
                 abort(403)
 
             return f(*args, **kwargs)

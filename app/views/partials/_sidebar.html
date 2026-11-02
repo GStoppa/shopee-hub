@@ -40,7 +40,7 @@
             <div class="menu-section-label">Administração</div>
             <a href="{{ url_for('team.list_members') }}" class="menu-item {% if request.endpoint in ['team.list_members', 'team.create_member', 'team.edit_member'] %}is-active{% endif %}">
                 <span class="menu-icon">👥</span>
-                <span class="menu-title">Equipa</span>
+                <span class="menu-title">Equipe</span>
             </a>
             <a href="{{ url_for('store.settings') }}" class="menu-item {% if request.endpoint == 'store.settings' %}is-active{% endif %}">
                 <span class="menu-icon">⚙️</span>

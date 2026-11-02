@@ -10,7 +10,10 @@
                 <h2>Movimentar Estoque Manualmente</h2>
                 <p class="m-0">Variação: <strong>{{ variant.display_name }}</strong> (SKU: <code>{{ variant.sku }}</code>) | Saldo Atual: <strong>{{ variant.stock_quantity }} un</strong></p>
             </div>
-            <a href="{{ url_for('product.list_products') }}" class="btn-secondary">← Voltar ao Catálogo</a>
+            <div class="inline-actions-right">
+                <a href="{{ url_for('stock.stock_movements') }}" class="btn-secondary">Auditoria Geral</a>
+                <a href="{{ url_for('product.list_products') }}" class="btn-secondary">← Catálogo</a>
+            </div>
         </div>
 
         <form method="POST" action="{{ url_for('stock.create_movement', variant_id=variant.id) }}" class="mt-2">
@@ -25,7 +28,8 @@
                 </div>
                 <div class="form-group">
                     <label for="quantity">Quantidade *</label>
-                    <input type="number" id="quantity" name="quantity" class="form-control" placeholder="Ex: 10" min="0" required>
+                    <input type="number" id="quantity" name="quantity" class="form-control" placeholder="Ex: 10" min="0" data-current-stock="{{ variant.stock_quantity }}" required>
+                    <span class="text-muted mt-1" id="stock-operation-hint" style="font-size: 0.8rem; display: block;"></span>
                 </div>
             </div>
 

@@ -696,30 +696,6 @@
     color: var(--text-muted);
 }
 
-.quick-stock-form {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    justify-content: flex-end;
-}
-
-.quick-stock-input {
-    width: 68px;
-    padding: 0.35rem 0.5rem;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    font-size: 0.875rem;
-    text-align: center;
-    outline: none;
-    transition: border-color 0.15s ease;
-}
-
-.quick-stock-input:focus {
-    border-color: var(--primary);
-}
-
 /* 7. Utilitários de Alinhamento e Cores */
 .text-center { text-align: center; }
 .text-right { text-align: right; }

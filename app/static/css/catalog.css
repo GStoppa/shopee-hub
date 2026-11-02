@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CATÁLOGO, GRADE DE PRODUTOS E AJUSTE DE ESTOQUE
+   CATÁLOGO, GRADE DE PRODUTOS E AJUSTE DE ESTOQUE (SHOPEE HUB)
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -79,14 +79,38 @@
 }
 
 /* --------------------------------------------------------------------------
-   2. TABELA PRINCIPAL DO CATÁLOGO & ACORDEÃO
+   2. TABELA PRINCIPAL DO CATÁLOGO & SCROLLBAR
    -------------------------------------------------------------------------- */
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color, rgba(255, 255, 255, 0.15)) transparent;
+}
+
+.table-responsive::-webkit-scrollbar {
+    height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background-color: var(--border-color, rgba(255, 255, 255, 0.15));
+    border-radius: 9999px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background-color: var(--primary, #ee4d2d);
+}
+
 .data-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     font-size: 0.875rem;
-    min-width: 1050px;
+    min-width: 980px;
 }
 
 .data-table thead th {
@@ -212,47 +236,129 @@
 }
 
 /* --------------------------------------------------------------------------
-   4. CAMPO DE AJUSTE RÁPIDO COM SETINHAS (SPINNERS NATIVOS ESTILIZADOS)
+   4. STEPPER WIDGET INTEGRADO (AJUSTE RÁPIDO DE ESTOQUE)
    -------------------------------------------------------------------------- */
 .quick-stock-form {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    justify-content: flex-end;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    vertical-align: middle !important;
 }
 
-.quick-stock-input {
-    width: 82px !important;
-    min-width: 82px !important;
-    height: 38px !important;
-    padding: 0.2rem 0.3rem 0.2rem 0.65rem !important;
+.stepper-widget {
+    display: inline-flex !important;
+    align-items: stretch !important;
+    height: 36px !important;
+    width: 90px !important;
+    min-width: 90px !important;
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15)) !important;
+    border-radius: var(--radius-sm, 6px) !important;
+    background-color: var(--bg-card, #121826) !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.stepper-widget:focus-within {
+    border-color: var(--primary, #ee4d2d) !important;
+    box-shadow: 0 0 0 2px var(--brand-subtle, rgba(238, 77, 45, 0.2)) !important;
+}
+
+.stepper-widget .quick-stock-input {
+    flex: 1 !important;
+    width: calc(100% - 24px) !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--text-main, #f8fafc) !important;
     font-size: 0.95rem !important;
     font-weight: 700 !important;
     text-align: center !important;
-    border-radius: var(--radius-sm) !important;
-    border: 1px solid var(--border-color) !important;
-    background-color: var(--bg-main) !important;
-    color: var(--text-main) !important;
+    padding: 0 !important;
+    margin: 0 !important;
     outline: none !important;
-    box-sizing: border-box !important;
-
-    /* Garante setinhas nativas ativas no modo escuro sem quebrar a árvore Shadow DOM */
-    color-scheme: dark !important;
-    appearance: auto !important;
-    -webkit-appearance: auto !important;
-    -moz-appearance: number-input !important;
+    box-shadow: none !important;
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
 }
 
-[data-theme="light"] .quick-stock-input {
-    color-scheme: light !important;
+.stepper-widget .quick-stock-input::-webkit-inner-spin-button,
+.stepper-widget .quick-stock-input::-webkit-outer-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+    display: none !important;
+}
+
+.stepper-widget .stepper-arrows {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 24px !important;
+    min-width: 24px !important;
+    height: 100% !important;
+    border-left: 1px solid var(--border-color, rgba(255, 255, 255, 0.12)) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.stepper-arrow {
+    flex: 1 !important;
+    height: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--text-muted, #94a3b8) !important;
+    font-size: 0.58rem !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+    user-select: none !important;
+}
+
+.stepper-arrow.up {
+    border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+}
+
+.stepper-arrow:hover {
+    background-color: var(--primary, #ee4d2d) !important;
+    color: #ffffff !important;
+}
+
+.stepper-arrow:active {
+    transform: scale(0.88) !important;
+}
+
+[data-theme="light"] .stepper-widget {
     background-color: #ffffff !important;
-    color: #0f172a !important;
     border-color: #cbd5e1 !important;
 }
 
-.quick-stock-input:focus {
-    border-color: var(--primary) !important;
-    box-shadow: 0 0 0 2px var(--brand-subtle) !important;
+[data-theme="light"] .stepper-widget .quick-stock-input {
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .stepper-widget .stepper-arrows {
+    border-left-color: #e2e8f0 !important;
+    background: #f8fafc !important;
+}
+
+[data-theme="light"] .stepper-widget .stepper-arrow {
+    color: #64748b !important;
+}
+
+[data-theme="light"] .stepper-widget .stepper-arrow.up {
+    border-bottom-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .stepper-widget .stepper-arrow:hover {
+    background-color: var(--primary, #ee4d2d) !important;
+    color: #ffffff !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -315,7 +421,6 @@
     background-color: var(--brand-subtle);
 }
 
-/* Colunas do formulário com respiro */
 .input-col-name { min-width: 160px; }
 .input-col-sku  { min-width: 130px; }
 .input-col-ean  { min-width: 130px; }
@@ -325,7 +430,6 @@
 .input-col-min  { width: 95px !important; min-width: 95px !important; text-align: center; }
 .input-col-file { width: 140px; min-width: 140px; font-size: 0.78rem; }
 
-/* Upload de fotos com prévia clicável */
 .file-preview-cell {
     display: flex;
     align-items: center;
@@ -454,136 +558,4 @@
 .inline-actions {
     display: inline-block;
     margin: 0;
-}
-
-/* ==========================================================================
-   ESTILIZAÇÃO DO STEPPER WIDGET INTEGRADO (AJUSTE RÁPIDO)
-   ========================================================================== */
-
-/* 1. Alinhamento horizontal do formulário */
-.quick-stock-form {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
-    vertical-align: middle !important;
-}
-
-/* 2. Caixa unificada de contorno do campo + botões */
-.stepper-widget {
-    display: inline-flex !important;
-    align-items: stretch !important;
-    height: 36px !important;
-    width: 90px !important;
-    min-width: 90px !important;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15)) !important;
-    border-radius: var(--radius-sm, 6px) !important;
-    background-color: var(--bg-card, #121826) !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-    position: relative !important;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
-}
-
-.stepper-widget:focus-within {
-    border-color: var(--primary, #ee4d2d) !important;
-    box-shadow: 0 0 0 2px var(--brand-subtle, rgba(238, 77, 45, 0.2)) !important;
-}
-
-/* 3. Input numérico limpo e centralizado dentro da caixa */
-.stepper-widget .quick-stock-input {
-    flex: 1 !important;
-    width: calc(100% - 24px) !important;
-    min-width: 0 !important;
-    height: 100% !important;
-    border: none !important;
-    background: transparent !important;
-    color: var(--text-main, #f8fafc) !important;
-    font-size: 0.95rem !important;
-    font-weight: 700 !important;
-    text-align: center !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    outline: none !important;
-    box-shadow: none !important;
-    -moz-appearance: textfield !important;
-    appearance: textfield !important;
-}
-
-.stepper-widget .quick-stock-input::-webkit-inner-spin-button,
-.stepper-widget .quick-stock-input::-webkit-outer-spin-button {
-    -webkit-appearance: none !important;
-    margin: 0 !important;
-    display: none !important;
-}
-
-/* 4. Coluna lateral com os botões estilizados */
-.stepper-widget .stepper-arrows {
-    display: flex !important;
-    flex-direction: column !important;
-    width: 24px !important;
-    min-width: 24px !important;
-    height: 100% !important;
-    border-left: 1px solid var(--border-color, rgba(255, 255, 255, 0.12)) !important;
-    background: rgba(255, 255, 255, 0.03) !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-.stepper-widget .stepper-arrow {
-    flex: 1 !important;
-    height: 50% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border: none !important;
-    background: transparent !important;
-    color: var(--text-muted, #94a3b8) !important;
-    font-size: 0.58rem !important;
-    line-height: 1 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    cursor: pointer !important;
-    transition: background-color 0.15s ease, color 0.15s ease !important;
-    user-select: none !important;
-}
-
-.stepper-widget .stepper-arrow.up {
-    border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
-}
-
-.stepper-widget .stepper-arrow:hover {
-    background-color: var(--primary, #ee4d2d) !important;
-    color: #ffffff !important;
-}
-
-.stepper-widget .stepper-arrow:active {
-    transform: scale(0.88) !important;
-}
-
-/* 5. Suporte ao Modo Claro */
-[data-theme="light"] .stepper-widget {
-    background-color: #ffffff !important;
-    border-color: #cbd5e1 !important;
-}
-
-[data-theme="light"] .stepper-widget .quick-stock-input {
-    color: #0f172a !important;
-}
-
-[data-theme="light"] .stepper-widget .stepper-arrows {
-    border-left-color: #e2e8f0 !important;
-    background: #f8fafc !important;
-}
-
-[data-theme="light"] .stepper-widget .stepper-arrow {
-    color: #64748b !important;
-}
-
-[data-theme="light"] .stepper-widget .stepper-arrow.up {
-    border-bottom-color: #e2e8f0 !important;
-}
-
-[data-theme="light"] .stepper-widget .stepper-arrow:hover {
-    background-color: var(--primary, #ee4d2d) !important;
-    color: #ffffff !important;
 }

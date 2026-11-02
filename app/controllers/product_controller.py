@@ -169,7 +169,7 @@ def create_product():
                     skus_vistos.add(sku)
 
                     if ProductVariant.sku_existe(sku, store_id=store_id):
-                        flash(f"O SKU '{sku}' já está registado noutro produto desta loja.", "danger")
+                        flash(f"O SKU '{sku}' já está cadastrado em outro produto desta loja.", "danger")
                         for fc in fotos_criadas:
                             remover_imagem_produto(fc)
                         categories = Category.listar_por_loja(store_id)
@@ -473,6 +473,8 @@ def edit_product(product_id):
         try:
             with DatabaseConnection() as conn:
                 cursor = conn.cursor()
+                
+                # Salva alterações do produto principal e variações existentes
                 produto.salvar(cursor=cursor)
 
                 for mov in movimentacoes_pendentes:
@@ -486,8 +488,11 @@ def edit_product(product_id):
                         reason=mov["reason"]
                     ).salvar(cursor=cursor)
 
+                # Salva e anexa novas variações pendentes ao produto
                 for nv in novas_variantes_pendentes:
                     nv.salvar(cursor=cursor)
+                    produto.variants.append(nv)  # <--- Sincronização em memória
+                    
                     if nv.stock_quantity > 0:
                         StockMovement(
                             variant_id=nv.id,
@@ -499,15 +504,15 @@ def edit_product(product_id):
                             reason="Estoque inicial da nova variação"
                         ).salvar(cursor=cursor)
 
-            for fa in fotos_antigas_para_remover:
-                remover_imagem_produto(fa)
+                flash("Produto atualizado com sucesso!", "success")
+                return redirect(url_for("product.list_products"))
 
-            flash(f"Produto '{produto.name}' atualizado com sucesso!", "success")
-            return redirect(url_for("product.list_products"))
         except Exception as e:
+            # Rollback físico de segurança: remove imagens novas caso o SQLite falhe
             for fn in fotos_novas_criadas:
                 remover_imagem_produto(fn)
-            flash(f"Erro ao atualizar: {e}", "danger")
+            flash(f"Erro interno ao atualizar produto: {str(e)}", "danger")
+            return redirect(url_for("product.edit_product", product_id=product_id))
 
     categories = Category.listar_por_loja(store_id)
     return render_template("products/form.html", product=produto, categories=categories)

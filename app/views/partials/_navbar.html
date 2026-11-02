@@ -8,7 +8,7 @@
             {{ (session.get('user_name') or 'U')[0] | upper }}
         </div>
         <div class="user-meta-info">
-            <span class="user-meta-name">{{ session.get('user_name') or 'Utilizador' }}</span>
+            <span class="user-meta-name">{{ session.get('user_name') or 'Usuário' }}</span>
             <span class="role-badge role-{{ session.get('user_role') or 'operator' }}">
                 {{ (session.get('user_role') or 'operator') | upper }}
             </span>

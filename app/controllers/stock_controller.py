@@ -105,22 +105,41 @@ def create_movement(variant_id):
     store_id = session.get("store_id")
     user_id = session.get("user_id")
 
+    # 1. Validação defensiva de existência da variação
+    variant = ProductVariant.buscar_por_id(variant_id, store_id)
+    if not variant:
+        flash("Variação não encontrada nesta loja.", "danger")
+        return redirect(url_for("product.list_products"))
+
     tipo = request.form.get("movement_type", "entrada").strip()
     raw_reason = request.form.get("reason", "").strip()
     motivo = raw_reason if raw_reason else ("Entrada manual" if tipo == "entrada" else "Ajuste manual")
 
+    # 2. Validação de quantidade e saldo disponível
     try:
         quantidade = converter_numero(request.form.get("quantity"), int, 0)
+        
         if quantidade <= 0 and tipo != "ajuste":
             flash("A quantidade deve ser superior a zero para entradas ou saídas.", "danger")
             return redirect(url_for("stock.variant_history", variant_id=variant_id))
+            
         if quantidade < 0 and tipo == "ajuste":
             flash("O saldo do ajuste não pode ser negativo.", "danger")
             return redirect(url_for("stock.variant_history", variant_id=variant_id))
+
+        if tipo == "saida" and quantidade > variant.stock_quantity:
+            flash(
+                f"Saldo insuficiente para saída! A variação possui apenas {variant.stock_quantity} un em estoque, "
+                f"mas foi solicitada uma saída de {quantidade} un.",
+                "danger"
+            )
+            return redirect(url_for("stock.variant_history", variant_id=variant_id))
+
     except ValueError:
         flash("Insira uma quantidade numérica válida.", "danger")
         return redirect(url_for("stock.variant_history", variant_id=variant_id))
 
+    # 3. Execução da movimentação
     sucesso = ProductVariant.registrar_movimento(
         variant_id=variant_id,
         store_id=store_id,
@@ -131,8 +150,8 @@ def create_movement(variant_id):
     )
 
     if sucesso:
-        flash("Movimentação de estoque cadastrada com sucesso!", "success")
+        flash("Movimentação de estoque registrada com sucesso!", "success")
     else:
-        flash("Não foi possível processar a movimentação (verifique se há saldo disponível para a saída).", "danger")
+        flash("Não foi possível processar a movimentação no banco de dados.", "danger")
 
     return redirect(url_for("stock.variant_history", variant_id=variant_id))

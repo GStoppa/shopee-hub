@@ -66,9 +66,19 @@ def edit_category(category_id):
 @role_required(["owner", "manager"])
 def delete_category(category_id):
     store_id = session.get("store_id")
+    
+    # Verifica se existem produtos vinculados antes de apagar
+    from app.models.product_model import Product
+    produtos_vinculados = Product.listar_por_loja(store_id, category_id=category_id)
+    
+    if produtos_vinculados:
+        flash("Não é possível excluir esta categoria pois existem produtos vinculados a ela.", "danger")
+        return redirect(url_for("category.list_categories"))
+
     sucesso = Category.excluir(category_id, store_id)
     if sucesso:
-        flash("Categoria excluída com sucesso.", "info")
+        flash("Categoria excluída com sucesso.", "success")
     else:
         flash("Categoria não encontrada.", "danger")
+        
     return redirect(url_for("category.list_categories"))
