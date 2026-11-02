@@ -1011,3 +1011,8 @@ textarea.form-control {
     margin-left: 0.2rem !important;
     opacity: 0.85 !important;
 }
+
+/* Permite que a grade de categorias ocupe largura total quando o formulário estiver oculto para operador */
+.categories-grid.is-single-col {
+    grid-template-columns: 1fr !important;
+}

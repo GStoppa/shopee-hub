@@ -165,44 +165,34 @@
         </div>
 
         <div class="quick-action-grid">
-            <a href="{{ url_for('product.create_product') }}" class="action-card">
-                <div class="action-card-icon">📦</div>
-                <div class="action-card-text">
-                    <span class="action-card-title">Novo Produto</span>
-                    <span class="action-card-desc">Cadastre anúncios simples ou com grade</span>
-                </div>
-                <span class="action-card-chevron">➔</span>
-            </a>
+            {% if session.get('user_role') in ['owner', 'manager'] %}
+                <a href="{{ url_for('product.create_product') }}" class="action-card">
+                    <div class="action-card-icon">📦</div>
+                    <div class="action-card-text">
+                        <span class="action-card-title">Novo Produto</span>
+                        <span class="action-card-desc">Cadastre anúncios simples ou com grade</span>
+                    </div>
+                    <span class="action-card-chevron">➔</span>
+                </a>
+            {% else %}
+                <a href="{{ url_for('product.list_products') }}" class="action-card">
+                    <div class="action-card-icon">📦</div>
+                    <div class="action-card-text">
+                        <span class="action-card-title">Ver Catálogo</span>
+                        <span class="action-card-desc">Consulte produtos e faça ajustes rápidos</span>
+                    </div>
+                    <span class="action-card-chevron">➔</span>
+                </a>
+            {% endif %}
 
             <a href="{{ url_for('category.list_categories') }}" class="action-card">
                 <div class="action-card-icon">🏷️</div>
                 <div class="action-card-text">
                     <span class="action-card-title">Categorias</span>
-                    <span class="action-card-desc">Crie e edite seções da sua loja</span>
+                    <span class="action-card-desc">Consulte as seções da sua loja</span>
                 </div>
                 <span class="action-card-chevron">➔</span>
             </a>
-
-            <a href="{{ url_for('stock.stock_movements') }}" class="action-card">
-                <div class="action-card-icon">📑</div>
-                <div class="action-card-text">
-                    <span class="action-card-title">Auditoria de Estoque</span>
-                    <span class="action-card-desc">Histórico completo de entradas e saídas</span>
-                </div>
-                <span class="action-card-chevron">➔</span>
-            </a>
-
-            {% if session.get('user_role') in ['owner', 'manager'] %}
-                <a href="{{ url_for('team.create_member') }}" class="action-card">
-                    <div class="action-card-icon">👥</div>
-                    <div class="action-card-text">
-                        <span class="action-card-title">Novo Membro</span>
-                        <span class="action-card-desc">Adicione operadores ou gerentes</span>
-                    </div>
-                    <span class="action-card-chevron">➔</span>
-                </a>
-            {% endif %}
-        </div>
     </div>
 </div>
 {% endblock %}
