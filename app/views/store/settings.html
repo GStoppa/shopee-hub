@@ -4,14 +4,16 @@
 
 {% block content %}
 <div class="form-container-sm">
-    <div class="content-box">
-        <h2>Dados da Empresa</h2>
-        <p class="mb-2">Identificação fiscal e integrações da loja.</p>
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('store.settings') }}">
+        
+        <!-- Bloco 1: Dados Cadastrais da Empresa -->
+        <div class="content-box mb-3">
+            <h2>Dados da Empresa</h2>
+            <p class="text-muted mb-2">Identificação fiscal, contato e identidade visual da loja.</p>
 
-        <form method="POST" enctype="multipart/form-data" action="{{ url_for('store.settings') }}">
             <div class="form-group">
                 <label for="name">Nome Fantasia da Loja *</label>
-                <input type="text" id="name" name="name" value="{{ store.name if store else '' }}" class="form-control" required>
+                <input type="text" id="name" name="name" value="{{ store.name if store else '' }}" class="form-control" placeholder="Ex: Minha Loja Matriz" required>
             </div>
 
             <div class="form-grid-2">
@@ -30,54 +32,7 @@
                 <input type="text" id="address" name="address" value="{{ store.address if store else '' }}" class="form-control" placeholder="Rua, Número, Bairro, Cidade - UF">
             </div>
 
-            <div class="form-group">
-                <label>Canais de Venda & Integrações de API</label>
-                <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 0.5rem;">
-                    Identificadores dos barramentos de sincronização em tempo real de pedidos e estoques.
-                </p>
-
-                <div class="channels-grid mb-3">
-                    <!-- Shopee -->
-                    <div class="channel-card">
-                        <div class="channel-info">
-                            <span class="channel-name">Shopee</span>
-                            <span class="channel-id">
-                                {% if store and store.shopee_shop_id %}
-                                    ID: {{ store.shopee_shop_id }}
-                                {% else %}
-                                    Não configurado
-                                {% endif %}
-                            </span>
-                        </div>
-                        <span class="badge-status {% if store and store.shopee_shop_id %}sync{% else %}warning{% endif %}">
-                            {% if store and store.shopee_shop_id %}Ativo{% else %}Pendente{% endif %}
-                        </span>
-                    </div>
-
-                    <!-- Mercado Livre (Multicanal) -->
-                    <div class="channel-card">
-                        <div class="channel-info">
-                            <span class="channel-name">Mercado Livre</span>
-                            <span class="channel-id">API v2 Gateway</span>
-                        </div>
-                        <span class="badge-status sync">Ativo</span>
-                    </div>
-
-                    <!-- TikTok Shop / AliExpress (Multicanal) -->
-                    <div class="channel-card">
-                        <div class="channel-info">
-                            <span class="channel-name">TikTok Shop</span>
-                            <span class="channel-id">Global Seller API</span>
-                        </div>
-                        <span class="badge-status sync">Ativo</span>
-                    </div>
-                </div>
-
-                <label for="shopee_shop_id">ID Primário de Loja / Shop ID</label>
-                <input type="text" id="shopee_shop_id" name="shopee_shop_id" value="{{ store.shopee_shop_id if store else '' }}" class="form-control" placeholder="Ex: 123456789">
-            </div>
-
-            <div class="form-group mb-3">
+            <div class="form-group mb-1">
                 <label for="logo">Logotipo da Loja (Máx 2MB)</label>
                 
                 <div class="store-logo-upload-wrapper mt-1">
@@ -103,9 +58,136 @@
                     <input type="file" id="logo" name="logo" accept=".png, .jpg, .jpeg, .webp" class="form-control file-preview-input" data-preview-target="logo-preview-box">
                 </div>
             </div>
+        </div>
 
-            <button type="submit" class="btn-primary">Salvar Configurações</button>
-        </form>
-    </div>
+        <!-- Bloco 2: Canais de Venda e Integrações de API -->
+        <div class="content-box mb-3">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+                <div>
+                    <h2>Canais de Venda Conectados (APIs)</h2>
+                    <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.25rem;">
+                        Identificadores dos barramentos de sincronização em tempo real de produtos, estoque e pedidos.
+                    </p>
+                </div>
+                <div>
+                    {% set canais_ativos = 0 %}
+                    {% if store and store.shopee_shop_id %}{% set canais_ativos = canais_ativos + 1 %}{% endif %}
+                    {% if store and store.ml_user_id %}{% set canais_ativos = canais_ativos + 1 %}{% endif %}
+                    {% if store and store.tiktok_shop_id %}{% set canais_ativos = canais_ativos + 1 %}{% endif %}
+                    {% if store and store.aliexpress_seller_id %}{% set canais_ativos = canais_ativos + 1 %}{% endif %}
+                    <span class="badge-status {% if canais_ativos > 0 %}sync{% else %}warning{% endif %}">
+                        {{ canais_ativos }}/4 Canais Ativos
+                    </span>
+                </div>
+            </div>
+
+            <div class="channels-integration-list">
+                <!-- Canal 1: Shopee -->
+                <div class="channel-integration-item">
+                    <div class="channel-header-row">
+                        <div class="channel-title-box">
+                            <span class="channel-avatar">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                                    <path d="M3 6h18"></path>
+                                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                                </svg>
+                            </span>
+                            <div>
+                                <strong class="channel-name">Shopee</strong>
+                                <span class="channel-desc">Shopee Open Platform API</span>
+                            </div>
+                        </div>
+                        <span class="badge-status {% if store and store.shopee_shop_id %}sync{% else %}warning{% endif %}">
+                            {% if store and store.shopee_shop_id %}Conectado{% else %}Pendente{% endif %}
+                        </span>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="shopee_shop_id" style="font-size: 0.78rem;">Shop ID da Shopee</label>
+                        <input type="text" id="shopee_shop_id" name="shopee_shop_id" value="{{ store.shopee_shop_id if store else '' }}" class="form-control" placeholder="Ex: 123456789">
+                    </div>
+                </div>
+
+                <!-- Canal 2: Mercado Livre -->
+                <div class="channel-integration-item">
+                    <div class="channel-header-row">
+                        <div class="channel-title-box">
+                            <span class="channel-avatar">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m11 17 2 2a1 1 0 0 0 1.4 0l4.6-4.6a1 1 0 0 0 0-1.4l-2-2"></path>
+                                    <path d="m13 7-2-2a1 1 0 0 0-1.4 0L5 9.6a1 1 0 0 0 0 1.4l2 2"></path>
+                                    <path d="m15 11 2 2"></path>
+                                    <path d="m9 13 2 2"></path>
+                                </svg>
+                            </span>
+                            <div>
+                                <strong class="channel-name">Mercado Livre</strong>
+                                <span class="channel-desc">Mercado Pago & Envios API v2</span>
+                            </div>
+                        </div>
+                        <span class="badge-status {% if store and store.ml_user_id %}sync{% else %}warning{% endif %}">
+                            {% if store and store.ml_user_id %}Conectado{% else %}Pendente{% endif %}
+                        </span>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="ml_user_id" style="font-size: 0.78rem;">User ID / Seller ID (Mercado Livre)</label>
+                        <input type="text" id="ml_user_id" name="ml_user_id" value="{{ store.ml_user_id if store and store.ml_user_id else '' }}" class="form-control" placeholder="Ex: 987654321">
+                    </div>
+                </div>
+
+                <!-- Canal 3: TikTok Shop -->
+                <div class="channel-integration-item">
+                    <div class="channel-header-row">
+                        <div class="channel-title-box">
+                            <span class="channel-avatar">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path>
+                                </svg>
+                            </span>
+                            <div>
+                                <strong class="channel-name">TikTok Shop</strong>
+                                <span class="channel-desc">TikTok Shop Partner API</span>
+                            </div>
+                        </div>
+                        <span class="badge-status {% if store and store.tiktok_shop_id %}sync{% else %}warning{% endif %}">
+                            {% if store and store.tiktok_shop_id %}Conectado{% else %}Pendente{% endif %}
+                        </span>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="tiktok_shop_id" style="font-size: 0.78rem;">Shop Code / ID (TikTok Shop)</label>
+                        <input type="text" id="tiktok_shop_id" name="tiktok_shop_id" value="{{ store.tiktok_shop_id if store and store.tiktok_shop_id else '' }}" class="form-control" placeholder="Ex: TTS_BR_45892">
+                    </div>
+                </div>
+
+                <!-- Canal 4: AliExpress -->
+                <div class="channel-integration-item">
+                    <div class="channel-header-row">
+                        <div class="channel-title-box">
+                            <span class="channel-avatar">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                                    <path d="M2 12h20"></path>
+                                </svg>
+                            </span>
+                            <div>
+                                <strong class="channel-name">AliExpress</strong>
+                                <span class="channel-desc">AliExpress Open Platform API</span>
+                            </div>
+                        </div>
+                        <span class="badge-status {% if store and store.aliexpress_seller_id %}sync{% else %}warning{% endif %}">
+                            {% if store and store.aliexpress_seller_id %}Conectado{% else %}Pendente{% endif %}
+                        </span>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="aliexpress_seller_id" style="font-size: 0.78rem;">Seller ID / Store ID (AliExpress)</label>
+                        <input type="text" id="aliexpress_seller_id" name="aliexpress_seller_id" value="{{ store.aliexpress_seller_id if store and store.aliexpress_seller_id else '' }}" class="form-control" placeholder="Ex: AE_STORE_88320">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-primary w-100" style="padding: 0.85rem; font-size: 1rem;">Salvar Todas as Configurações</button>
+    </form>
 </div>
 {% endblock %}

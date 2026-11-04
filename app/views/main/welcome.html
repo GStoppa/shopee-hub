@@ -3,18 +3,21 @@
 {% block page_title %}Visão Geral da Operação{% endblock %}
 
 {% block content %}
-<div class="dashboard-metrics-grid">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-        <div>
-            <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main);">Visão Geral do Hub</h2>
-            <span class="text-muted" style="font-size: 0.8rem;">Monitorização integrada de produtos, saídas e faturamento.</span>
-        </div>
-        <div>
-            <span class="badge-status sync" title="Barramento de integração multicanal operacional">
-                Hub Multicanal Sincronizado
-            </span>
-        </div>
+<!-- Cabeçalho Executivo da Operação (Fora da Grelha) -->
+<div class="dashboard-overview-header">
+    <div class="overview-title-group">
+        <h2 class="overview-heading">Visão Geral do Hub</h2>
+        <span class="overview-subheading">Monitorização integrada de produtos, saídas e faturação multicanal.</span>
     </div>
+    <div class="overview-badge-group">
+        <span class="badge-status sync" title="Barramento de integração multicanal operacional">
+            Hub Multicanal Sincronizado
+        </span>
+    </div>
+</div>
+
+<!-- Grelha Oficial com os 4 Cartões de KPI Alinhados Lado a Lado -->
+<div class="dashboard-metrics-grid">
     <!-- Card 1: Volume Físico Real de Peças -->
     <div class="kpi-card kpi-card-primary">
         <div class="kpi-card-header">

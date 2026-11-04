@@ -17,7 +17,12 @@ def settings():
         document = request.form.get("document", "").strip()
         phone = request.form.get("phone", "").strip()
         address = request.form.get("address", "").strip()
+        
+        # Canais de Venda Multicanal
         shopee_shop_id = request.form.get("shopee_shop_id", "").strip()
+        ml_user_id = request.form.get("ml_user_id", "").strip()
+        tiktok_shop_id = request.form.get("tiktok_shop_id", "").strip()
+        aliexpress_seller_id = request.form.get("aliexpress_seller_id", "").strip()
 
         if not name:
             flash("O nome da loja é obrigatório.", "danger")
@@ -46,6 +51,9 @@ def settings():
                 store.phone = phone
                 store.address = address
                 store.shopee_shop_id = shopee_shop_id
+                store.ml_user_id = ml_user_id
+                store.tiktok_shop_id = tiktok_shop_id
+                store.aliexpress_seller_id = aliexpress_seller_id
                 store.logo_url = logo_url
                 store.salvar()
             else:
@@ -55,6 +63,9 @@ def settings():
                     phone=phone,
                     address=address,
                     shopee_shop_id=shopee_shop_id,
+                    ml_user_id=ml_user_id,
+                    tiktok_shop_id=tiktok_shop_id,
+                    aliexpress_seller_id=aliexpress_seller_id,
                     logo_url=logo_url
                 ).salvar()
 
@@ -64,11 +75,11 @@ def settings():
             session["store_name"] = store.name
             session["store_logo_url"] = store.logo_url if store.logo_url else None
 
-            flash("Configurações da loja guardadas com sucesso!", "success")
+            flash("Configurações da loja salvas com sucesso!", "success")
             return redirect(url_for("store.settings"))
         except Exception as e:
             if novo_logo_salvo:
                 remover_imagem_produto(novo_logo_salvo)
-            flash(f"Erro ao guardar configurações da loja: {e}", "danger")
+            flash(f"Erro ao salvar configurações da loja: {e}", "danger")
 
     return render_template("store/settings.html", store=store)

@@ -40,6 +40,9 @@ def inicializar_banco():
                 phone TEXT,
                 address TEXT,
                 shopee_shop_id TEXT,
+                ml_user_id TEXT,
+                tiktok_shop_id TEXT,
+                aliexpress_seller_id TEXT,
                 logo_url TEXT,
                 created_at TEXT NOT NULL
             );
@@ -119,6 +122,9 @@ def inicializar_banco():
                 "phone": "TEXT",
                 "address": "TEXT",
                 "shopee_shop_id": "TEXT",
+                "ml_user_id": "TEXT",
+                "tiktok_shop_id": "TEXT",
+                "aliexpress_seller_id": "TEXT",
                 "logo_url": "TEXT"
             },
             "products": {
