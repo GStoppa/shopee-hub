@@ -1,19 +1,122 @@
 /* ==========================================================================
-   STOPPA CORE - IDENTIDADE VISUAL E LOGÓTIPOS
+   STOPPA CORE - CABEÇALHO DA SIDEBAR (SÍMBOLO LG + H1 TIPOGRÁFICO)
    ========================================================================== */
 
-/* 1. Logótipo Horizontal na Barra Lateral */
-.brand-sidebar-logo {
-    height: 38px;
-    width: auto;
-    max-width: 195px;
+.sidebar-brand {
+    padding: 1.25rem 1.15rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: transparent !important; /* Elimina qualquer caixa escura residual */
+    transition: border-color 0.2s ease;
+}
+
+[data-theme="light"] .sidebar-brand {
+    background-color: #ffffff !important;
+    border-bottom-color: #e2e8f0;
+}
+
+[data-theme="dark"] .sidebar-brand {
+    background-color: var(--sidebar-bg) !important;
+    border-bottom-color: var(--border-color);
+}
+
+.brand-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
+}
+
+.brand-header-lockup {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+/* Símbolo Isolado (LG) */
+.brand-symbol-box {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.brand-symbol-img {
+    width: 100%;
+    height: 100%;
     object-fit: contain;
     display: block;
     transition: transform 0.2s ease;
 }
 
-.brand-sidebar-logo:hover {
-    transform: scale(1.02);
+.brand-link:hover .brand-symbol-img {
+    transform: scale(1.06);
+}
+
+/* Tipografia Oficial Stoppa Core em H1 */
+.brand-text-block {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+
+.brand-heading {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+    font-size: 1.25rem; /* 20px - Destaque nítido e equilibrado */
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    white-space: nowrap;
+}
+
+/* "STOPPA": Grafite escuro (#0F172A) no tema claro e Branco Puro (#FFFFFF) no tema escuro */
+.brand-heading .brand-name-stoppa {
+    font-weight: 900;
+    transition: color 0.2s ease;
+}
+
+[data-theme="light"] .brand-heading .brand-name-stoppa {
+    color: #0f172a !important;
+}
+
+[data-theme="dark"] .brand-heading .brand-name-stoppa {
+    color: #ffffff !important;
+}
+
+/* "CORE": Laranja Núcleo (#F97316) */
+.brand-heading .brand-name-core {
+    color: #f97316 !important;
+    font-weight: 900;
+}
+
+/* Subtítulo: E-COMMERCE MANAGEMENT com tracking expandido */
+.brand-tagline {
+    display: block;
+    font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+    font-size: 0.52rem; /* ~8.5px */
+    font-weight: 600;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+}
+
+[data-theme="light"] .brand-tagline {
+    color: #64748b;
+}
+
+[data-theme="dark"] .brand-tagline {
+    color: #94a3b8;
 }
 
 /* 2. Logótipo Vertical nas Telas de Acesso (Login / Registo) */
@@ -52,7 +155,7 @@
 
 /* 1. Marca & Identidade na Sidebar */
 .sidebar-brand {
-    padding: 1.25rem 1.25rem 1.25rem 1.5rem;
+    padding: 1.25rem 1.25rem;
     border-bottom: 1px solid var(--border-color);
     background-color: var(--sidebar-bg);
 }
@@ -972,6 +1075,65 @@ textarea.form-control {
 }
 
 /* ==========================================================================
+   CALIBRAÇÃO DE CONTRASTE DA SIDEBAR (MODO CLARO)
+   ========================================================================== */
+[data-theme="light"] .admin-sidebar,
+[data-theme="light"] .sidebar {
+    background-color: #ffffff;
+    border-right: 1px solid #e2e8f0;
+}
+
+/* Rótulos de Seção: Grafite escuro bem visível */
+[data-theme="light"] .menu-section-label {
+    color: #475569;
+    font-weight: 800;
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+}
+
+/* Itens de Menu: Leitura firme em Grafite Profundo */
+[data-theme="light"] .menu-item {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+[data-theme="light"] .menu-item .menu-icon {
+    color: #475569;
+}
+
+/* Efeito ao passar o mouse */
+[data-theme="light"] .menu-item:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+}
+
+[data-theme="light"] .menu-item:hover .menu-icon {
+    color: var(--brand-primary);
+}
+
+/* Item Ativo (Página Atual): Fundo pêssego sutil com Laranja Núcleo em destaque */
+[data-theme="light"] .menu-item.is-active {
+    background-color: #ffedd5;
+    color: #c2410c;
+    border-color: rgba(249, 115, 22, 0.35);
+    font-weight: 700;
+}
+
+[data-theme="light"] .menu-item.is-active .menu-icon {
+    color: var(--brand-primary);
+}
+
+/* Botão de Sair do Sistema */
+[data-theme="light"] .menu-item-logout:hover {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+[data-theme="light"] .menu-item-logout:hover .menu-icon {
+    color: #dc2626;
+}
+
+/* ==========================================================================
    CORREÇÃO DEFINITIVA: FORMULÁRIOS, LABELS E INPUTS (LOGIN & CADASTRO)
    ========================================================================== */
 
@@ -1494,4 +1656,23 @@ input[type="file"]::-webkit-file-upload-button:active {
     font-size: 0.72rem;
     color: var(--text-muted);
     font-family: monospace;
+}
+
+/* ==========================================================================
+   BOTÃO DE TEMA FLUTUANTE (TELAS EXTERNAS E ERROS)
+   ========================================================================== */
+.auth-theme-toggle-wrapper {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width: 640px) {
+    .auth-theme-toggle-wrapper {
+        top: 1rem;
+        right: 1rem;
+    }
 }

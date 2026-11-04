@@ -3,14 +3,33 @@
         <a href="{{ url_for('main.welcome') }}" class="brand-link" title="Ir para o Dashboard">
             {% if session.get('store_logo_url') %}
                 <div class="brand-logo-box">
-                    <img src="{{ url_for('static', filename=session.get('store_logo_url')) }}" alt="Logótipo" class="brand-logo-img">
+                    <img src="{{ url_for('static', filename=session.get('store_logo_url')) }}" alt="Logotipo da Loja" class="brand-logo-img">
                 </div>
                 <div class="brand-info">
                     <span class="brand-text">{{ session.get('store_name') }}</span>
-                    <span class="brand-subtext">Painel de Controlo</span>
+                    <span class="brand-subtext">Painel de Controle</span>
                 </div>
             {% else %}
-                <img src="{{ url_for('static', filename='img/brand/stoppacore-dark-H.png') }}" alt="Stoppa Core - E-commerce Management" class="brand-sidebar-logo">
+                <div class="brand-header-lockup">
+                    <div class="brand-symbol-box">
+                        <!-- Símbolo no Modo Escuro (Nós Brancos) -->
+                        <img src="{{ url_for('static', filename='img/brand/stoppacore-dark-lg.png') }}" 
+                             alt="Stoppa Core" 
+                             class="brand-symbol-img brand-dark-only">
+                        <!-- Símbolo no Modo Claro (Nós Grafite) -->
+                        <img src="{{ url_for('static', filename='img/brand/stoppacore-light-lg.png') }}" 
+                             alt="Stoppa Core" 
+                             class="brand-symbol-img brand-light-only">
+                    </div>
+                    
+                    <div class="brand-text-block">
+                        <h1 class="brand-heading">
+                            <span class="brand-name-stoppa">STOPPA</span>
+                            <span class="brand-name-core">CORE</span>
+                        </h1>
+                        <span class="brand-tagline">E-COMMERCE MANAGEMENT</span>
+                    </div>
+                </div>
             {% endif %}
         </a>
     </div>
