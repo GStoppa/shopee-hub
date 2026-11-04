@@ -1,0 +1,121 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Stoppa Core — Hub Multicanal de E-commerce{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="landing-wrapper">
+
+    <!-- Navegação Superior Simplificada -->
+    <header class="landing-header">
+        <div class="landing-nav-container">
+            <a href="{{ url_for('main.landing') }}" class="landing-brand">
+                <img src="{{ url_for('static', filename='img/brand/stoppacore-light-H.png') }}" 
+                     alt="Stoppa Core" class="landing-logo logo-light">
+                <img src="{{ url_for('static', filename='img/brand/stoppacore-dark-H.png') }}" 
+                     alt="Stoppa Core" class="landing-logo logo-dark">
+            </a>
+
+            <div class="landing-nav-actions">
+                <a href="{{ url_for('auth.login') }}" class="btn-nav-login">Entrar</a>
+                <a href="{{ url_for('auth.register') }}" class="btn-nav-register">Cadastre-se</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section: Apresentação & Conversão -->
+        <section class="landing-hero">
+            <div class="hero-badge">
+                <span class="badge-pulse"></span>
+                <span>Hub Multicanal Integrado</span>
+            </div>
+
+            <h1 class="hero-title">
+                Sua operação de e-commerce centralizada em um <span class="highlight">único núcleo</span>.
+            </h1>
+
+            <p class="hero-subtitle">
+                Elimine o retrabalho manual. Conecte seus marketplaces, sincronize estoque em tempo real e controle produtos e equipes em uma plataforma única e veloz.
+            </p>
+
+            <!-- Ações Principais -->
+            <div class="hero-actions">
+                <a href="{{ url_for('auth.register') }}" class="btn-hero-primary">
+                    <span>Criar Minha Conta</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn-hero-secondary">
+                    <span>Já sou cliente (Acessar Hub)</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Barra de Marketplaces Suportados -->
+        <section class="landing-channels">
+            <span class="channels-label">Canais e Marketplaces Prontos para Conectar</span>
+            <div class="channels-grid">
+                <div class="channel-card">
+                    <span class="channel-dot"></span>
+                    <strong>Shopee</strong>
+                </div>
+                <div class="channel-card">
+                    <span class="channel-dot"></span>
+                    <strong>Mercado Livre</strong>
+                </div>
+                <div class="channel-card">
+                    <span class="channel-dot"></span>
+                    <strong>TikTok Shop</strong>
+                </div>
+                <div class="channel-card">
+                    <span class="channel-dot"></span>
+                    <strong>AliExpress</strong>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3 Pilares Fundamentais -->
+        <section class="landing-pillars">
+            <div class="pillar-card">
+                <div class="pillar-icon">⚡</div>
+                <h3>Sincronização em Tempo Real</h3>
+                <p>Vendeu em um canal? O estoque é atualizado em todos os outros automaticamente, prevenindo rupturas e cancelamentos.</p>
+            </div>
+
+            <div class="pillar-card">
+                <div class="pillar-icon">📦</div>
+                <h3>Catálogo Unificado</h3>
+                <p>Cadastre produtos, variantes, códigos de barra e fotos uma única vez e envie para múltiplos marketplaces com um clique.</p>
+            </div>
+
+            <div class="pillar-card">
+                <div class="pillar-icon">🛡️</div>
+                <h3>Controle de Acessos</h3>
+                <p>Separe tarefas com segurança concedendo acessos customizados para administradores e gerentes de operação.</p>
+            </div>
+        </section>
+
+        <!-- Chamada de Ação Final (Bottom CTA) -->
+        <section class="landing-cta-bottom">
+            <h2>Pronto para otimizar suas vendas?</h2>
+            <p>Junte-se à operação do Stoppa Core e controle seus marketplaces sem dor de cabeça.</p>
+            <div class="cta-bottom-actions">
+                <a href="{{ url_for('auth.register') }}" class="btn-hero-primary">Começar Gratuitamente</a>
+                <a href="{{ url_for('auth.login') }}" class="btn-link-login">Acessar minha conta &rarr;</a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="landing-footer">
+        <p>&copy; Stoppa Core. Todos os direitos reservados.</p>
+    </footer>
+
+</div>
+{% endblock %}

@@ -4,7 +4,11 @@ from app.models.product_model import Product
 
 main_bp = Blueprint("main", __name__)
 
-@main_bp.route("/")
+@main_bp.route('/')
+def landing():
+    return render_template('main/landing.html')
+
+@main_bp.route("/welcome")
 @login_required
 def welcome():
     store_id = session.get("store_id")
