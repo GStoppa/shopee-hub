@@ -1,5 +1,5 @@
 (function () {
-    const temaSalvo = localStorage.getItem("shopee_hub_theme") || "dark";
+    const temaSalvo = localStorage.getItem("stoppa_core_theme") || "dark";
     document.documentElement.setAttribute("data-theme", temaSalvo);
 })();
 
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const proximo = atual === "light" ? "dark" : "light";
 
             document.documentElement.setAttribute("data-theme", proximo);
-            localStorage.setItem("shopee_hub_theme", proximo);
+            localStorage.setItem("stoppa_core_theme", proximo);
             atualizarAcessibilidade(proximo);
 
             setTimeout(() => {

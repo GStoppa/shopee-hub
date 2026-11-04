@@ -1,23 +1,17 @@
 <aside class="admin-sidebar" id="sidebar">
     <div class="sidebar-brand">
-        <a href="{{ url_for('main.welcome') }}" class="brand-link">
-            <div class="brand-logo-box">
-                {% if session.get('store_logo_url') %}
-                    <img src="{{ url_for('static', filename=session.get('store_logo_url')) }}" alt="Logo" class="brand-logo-img">
-                {% else %}
-                    <span class="brand-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                            <path d="M3 6h18"></path>
-                            <path d="M16 10a4 4 0 0 1-8 0"></path>
-                        </svg>
-                    </span>
-                {% endif %}
-            </div>
-            <div class="brand-info">
-                <span class="brand-text">{{ session.get('store_name') or 'Shopee Hub' }}</span>
-                <span class="brand-subtext">Painel de Controle</span>
-            </div>
+        <a href="{{ url_for('main.welcome') }}" class="brand-link" title="Ir para o Dashboard">
+            {% if session.get('store_logo_url') %}
+                <div class="brand-logo-box">
+                    <img src="{{ url_for('static', filename=session.get('store_logo_url')) }}" alt="Logótipo" class="brand-logo-img">
+                </div>
+                <div class="brand-info">
+                    <span class="brand-text">{{ session.get('store_name') }}</span>
+                    <span class="brand-subtext">Painel de Controlo</span>
+                </div>
+            {% else %}
+                <img src="{{ url_for('static', filename='img/brand/stoppacore-dark-H.png') }}" alt="Stoppa Core - E-commerce Management" class="brand-sidebar-logo">
+            {% endif %}
         </a>
     </div>
 

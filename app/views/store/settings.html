@@ -31,7 +31,49 @@
             </div>
 
             <div class="form-group">
-                <label for="shopee_shop_id">ID da Loja na Shopee (Shop ID)</label>
+                <label>Canais de Venda & Integrações de API</label>
+                <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 0.5rem;">
+                    Identificadores dos barramentos de sincronização em tempo real de pedidos e estoques.
+                </p>
+
+                <div class="channels-grid mb-3">
+                    <!-- Shopee -->
+                    <div class="channel-card">
+                        <div class="channel-info">
+                            <span class="channel-name">Shopee</span>
+                            <span class="channel-id">
+                                {% if store and store.shopee_shop_id %}
+                                    ID: {{ store.shopee_shop_id }}
+                                {% else %}
+                                    Não configurado
+                                {% endif %}
+                            </span>
+                        </div>
+                        <span class="badge-status {% if store and store.shopee_shop_id %}sync{% else %}warning{% endif %}">
+                            {% if store and store.shopee_shop_id %}Ativo{% else %}Pendente{% endif %}
+                        </span>
+                    </div>
+
+                    <!-- Mercado Livre (Multicanal) -->
+                    <div class="channel-card">
+                        <div class="channel-info">
+                            <span class="channel-name">Mercado Livre</span>
+                            <span class="channel-id">API v2 Gateway</span>
+                        </div>
+                        <span class="badge-status sync">Ativo</span>
+                    </div>
+
+                    <!-- TikTok Shop / AliExpress (Multicanal) -->
+                    <div class="channel-card">
+                        <div class="channel-info">
+                            <span class="channel-name">TikTok Shop</span>
+                            <span class="channel-id">Global Seller API</span>
+                        </div>
+                        <span class="badge-status sync">Ativo</span>
+                    </div>
+                </div>
+
+                <label for="shopee_shop_id">ID Primário de Loja / Shop ID</label>
                 <input type="text" id="shopee_shop_id" name="shopee_shop_id" value="{{ store.shopee_shop_id if store else '' }}" class="form-control" placeholder="Ex: 123456789">
             </div>
 

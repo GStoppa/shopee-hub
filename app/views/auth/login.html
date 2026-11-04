@@ -1,17 +1,17 @@
 {% extends 'layouts/base.html' %}
-{% block title %}Acessar Conta - Shopee Hub{% endblock %}
+{% block title %}Acessar Conta - Stoppa Core{% endblock %}
 
 {% block body %}
 <div class="auth-page">
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
-                <div class="auth-brand-logo">
-                    <div class="brand-dot"></div>
-                    <span class="brand-title">Shopee Hub</span>
+                <div class="auth-brand-logo-box">
+                    <img src="{{ url_for('static', filename='img/brand/stoppacore-dark-V.png') }}" alt="Stoppa Core" class="auth-brand-img brand-dark-only">
+                    <img src="{{ url_for('static', filename='img/brand/stoppacore-light-V.png') }}" alt="Stoppa Core" class="auth-brand-img brand-light-only">
                 </div>
-                <h1>Acessar Plataforma</h1>
-                <p>Gerencie o estoque e o catálogo da sua loja</p>
+                <h1 class="auth-title">Acessar Conta - Stoppa Core</h1>
+                <p class="auth-subtitle">Introduza as suas credenciais para gerir os seus canais de venda.</p>
             </div>
 
             {% include 'partials/_alerts.html' %}

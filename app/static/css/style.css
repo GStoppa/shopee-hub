@@ -1,27 +1,46 @@
 /* ==========================================================================
-   1. VARIÁVEIS UNIVERSAIS & SISTEMA DE TEMAS
+   1. STOPPA CORE - DESIGN SYSTEM & COLOR TOKENS
    ========================================================================== */
 
 :root {
-    /* Cores de Marca Shopee */
-    --primary: #ee4d2d;
-    --primary-hover: #d73c1d;
-    --brand-primary: var(--primary);
-    --brand-hover: var(--primary-hover);
-    --brand-glow: rgba(238, 77, 45, 0.25);
-    --brand-subtle: rgba(238, 77, 45, 0.12);
+    /* Identidade Oficial Stoppa Core */
+    --brand-primary: #F97316;
+    --brand-primary-hover: #EA580C;
+    --brand-primary-light: #FFEDD5;
+    --brand-primary-glow: rgba(249, 115, 22, 0.25);
+    --brand-dark: #0F172A;
+    --brand-dark-surface: #1E293B;
 
-    /* Cores de Estado e Feedback */
-    --success: #10b981;
+    /* Aliases para compatibilidade de regras existentes */
+    --primary: var(--brand-primary);
+    --primary-hover: var(--brand-primary-hover);
+    --brand-glow: var(--brand-primary-glow);
+    --brand-subtle: rgba(249, 115, 22, 0.12);
+
+    /* Cores de Estado e Sincronização Multicanal */
+    --success: #10B981;
     --success-bg: rgba(16, 185, 129, 0.15);
-    --danger: #ef4444;
+    --danger: #EF4444;
     --danger-bg: rgba(239, 68, 68, 0.15);
-    --warning: #f59e0b;
+    --warning: #F59E0B;
     --warning-bg: rgba(245, 158, 11, 0.15);
-    --info: #3b82f6;
+    --info: #3B82F6;
     --info-bg: rgba(59, 130, 246, 0.15);
 
-    /* Dimensões do Layout */
+    /* Badges de Status de Conexão */
+    --status-sync-bg: #ECFDF5;
+    --status-sync-text: #065F46;
+    --status-sync-dot: #10B981;
+
+    --status-warn-bg: #FFFBEB;
+    --status-warn-text: #92400E;
+    --status-warn-dot: #F59E0B;
+
+    --status-danger-bg: #FEF2F2;
+    --status-danger-text: #991B1B;
+    --status-danger-dot: #EF4444;
+
+    /* Dimensões Estruturais */
     --sidebar-width: 260px;
     --navbar-height: 64px;
 
@@ -36,63 +55,51 @@
 :root[data-theme="dark"],
 html[data-theme="dark"],
 :root {
-    --bg-main: #0b0f19;
-    --bg-body: #0b0f19;
-    --bg-card: #121826;
-    --bg-surface: #121826;
-    --bg-surface-hover: #1b2438;
-    --bg-card-subtle: #162034;
-    --sidebar-bg: #0d1322;
-    --navbar-bg: #121826;
+    --bg-main: #0F172A;
+    --bg-body: #0F172A;
+    --bg-surface: #1E293B;
+    --bg-card: #1E293B;
+    --bg-card-subtle: #162032;
+    --bg-surface-hover: #27354A;
+    --sidebar-bg: #0B1120;
+    --table-header: #162032;
 
-    --text-main: #f8fafc;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --border-color: #334155;
+    --border-hover: #475569;
+    --border-subtle: #334155;
 
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-hover: rgba(255, 255, 255, 0.18);
-    --table-header: #162034;
-    --table-hover: #18233a;
+    --text-main: #F8FAFC;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #94A3B8;
 
-    --secondary: #1e293b;
-    --secondary-hover: #334155;
-
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.55);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.45);
 }
 
 /* TEMA CLARO */
-:root[data-theme="light"],
-html[data-theme="light"] {
-    --bg-main: #f8fafc;
-    --bg-body: #f8fafc;
-    --bg-card: #ffffff;
-    --bg-surface: #ffffff;
-    --bg-surface-hover: #f1f5f9;
-    --bg-card-subtle: #f8fafc;
-    --sidebar-bg: #ffffff;
-    --navbar-bg: #ffffff;
+[data-theme="light"] {
+    --bg-main: #F8FAFC;
+    --bg-body: #F8FAFC;
+    --bg-surface: #FFFFFF;
+    --bg-card: #FFFFFF;
+    --bg-card-subtle: #F1F5F9;
+    --bg-surface-hover: #E2E8F0;
+    --sidebar-bg: #0F172A;
+    --table-header: #F1F5F9;
 
-    --text-main: #0f172a;
-    --text-primary: #0f172a;
+    --border-color: #E2E8F0;
+    --border-hover: #CBD5E1;
+    --border-subtle: #E2E8F0;
+
+    --text-main: #0F172A;
+    --text-primary: #0F172A;
     --text-secondary: #475569;
-    --text-muted: #94a3b8;
+    --text-muted: #64748B;
 
-    --border-color: #e2e8f0;
-    --border-hover: #cbd5e1;
-    --table-header: #f8fafc;
-    --table-hover: #f1f5f9;
-
-    --secondary: #e2e8f0;
-    --secondary-hover: #cbd5e1;
-
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 12px 20px -3px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08);
 }
-
 /* ==========================================================================
    2. REINICIALIZAÇÃO & TIPOGRAFIA
    ========================================================================== */

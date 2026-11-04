@@ -1,6 +1,54 @@
 /* ==========================================================================
-   COMPONENTES DE CASCA & ESTRUTURA (SHOPEE HUB)
+   STOPPA CORE - IDENTIDADE VISUAL E LOGÓTIPOS
    ========================================================================== */
+
+/* 1. Logótipo Horizontal na Barra Lateral */
+.brand-sidebar-logo {
+    height: 38px;
+    width: auto;
+    max-width: 195px;
+    object-fit: contain;
+    display: block;
+    transition: transform 0.2s ease;
+}
+
+.brand-sidebar-logo:hover {
+    transform: scale(1.02);
+}
+
+/* 2. Logótipo Vertical nas Telas de Acesso (Login / Registo) */
+.auth-brand-logo-box {
+    margin-bottom: 1.25rem;
+    display: flex;
+    justify-content: center;
+}
+
+.auth-brand-img {
+    height: 90px;
+    width: auto;
+    max-width: 220px;
+    object-fit: contain;
+    display: block;
+}
+
+/* 3. Alternância Automática de Recursos (Light / Dark) */
+[data-theme="dark"] .brand-light-only,
+:root:not([data-theme="light"]) .brand-light-only {
+    display: none !important;
+}
+
+[data-theme="dark"] .brand-dark-only,
+:root:not([data-theme="light"]) .brand-dark-only {
+    display: block !important;
+}
+
+[data-theme="light"] .brand-dark-only {
+    display: none !important;
+}
+
+[data-theme="light"] .brand-light-only {
+    display: block !important;
+}
 
 /* 1. Marca & Identidade na Sidebar */
 .sidebar-brand {
@@ -1340,4 +1388,110 @@ input[type="file"]::-webkit-file-upload-button:active {
     background-color: var(--primary);
     border-color: var(--primary);
     color: #ffffff;
+}
+
+/* ==========================================================================
+   STOPPA CORE - COMPONENTES DE ESTADO MULTICANAL
+   ========================================================================== */
+
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.01em;
+}
+
+.badge-status::before {
+    content: "";
+    width: 6.5px;
+    height: 6.5px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* Sincronizado / Conexão Ativa */
+.badge-status.sync {
+    background-color: var(--status-sync-bg);
+    color: var(--status-sync-text);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+.badge-status.sync::before {
+    background-color: var(--status-sync-dot);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: statusPulse 2s infinite;
+}
+
+/* Alerta / Sincronização Pendente */
+.badge-status.warning {
+    background-color: var(--status-warn-bg);
+    color: var(--status-warn-text);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+.badge-status.warning::before {
+    background-color: var(--status-warn-dot);
+}
+
+/* Erro / Falha de API */
+.badge-status.danger {
+    background-color: var(--status-danger-bg);
+    color: var(--status-danger-text);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+.badge-status.danger::before {
+    background-color: var(--status-danger-dot);
+}
+
+@keyframes statusPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+    }
+    70% {
+        box-shadow: 0 0 0 5px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+/* Grelha de Canais Conectados */
+.channels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.85rem;
+    margin-top: 0.75rem;
+}
+
+.channel-card {
+    padding: 0.85rem 1rem;
+    background-color: var(--bg-card-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.channel-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.channel-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.channel-id {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-family: monospace;
 }

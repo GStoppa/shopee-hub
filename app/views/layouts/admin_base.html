@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Painel{% endblock %} - Shopee Hub</title>
+    <title>{% block title %}Painel{% endblock %} - Stoppa Core</title>
 
     <!-- Execução síncrona antecipada para impedir piscar de tema -->
     <script>
         (function() {
-            var salvo = localStorage.getItem("shopee_hub_theme") || "dark";
+            var salvo = localStorage.getItem("stoppa_core_theme") || "dark";
             document.documentElement.setAttribute("data-theme", salvo);
         })();
     </script>
 
+    <!-- Favicon Oficial Stoppa Core -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/brand/stoppacore-dark-lg.png') }}">
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
